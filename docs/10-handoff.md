@@ -19,10 +19,11 @@ Last updated: 5 November 2026. Current milestone: **T00 complete — blueprint a
 | `npm run contracts:check` | Pass |
 | `npm run typecheck` | Pass |
 | `npm run build` | Pass |
+| GitHub Actions on implementation commit `0f37b2a` | [Passed on Ubuntu/Python 3.11/Node 24](https://github.com/sohxmm/LapDNA/actions/runs/41938476921) |
 | Local browser | Empty-data page renders; refresh works; API shutdown produces clear failure; retry restores the empty-data view after restart |
 | Layout | Desktop and narrow/mobile layouts inspected; no horizontal overflow in measured DOM |
 
-One non-fatal upstream Starlette warning recommends a future httpx2 transition for TestClient. No real FastF1 authentication, event retrieval, timing reconciliation, observation accuracy or exports have been verified. The optional data dependency set is declared but not installed/locked yet; T01 owns that work. The core lock was tested locally on Windows/Python 3.11; the CI workflow provides the Linux check.
+One non-fatal upstream Starlette warning recommends a future httpx2 transition for TestClient. No real FastF1 authentication, event retrieval, timing reconciliation, observation accuracy or exports have been verified. The optional data dependency set is declared but not installed/locked yet; T01 owns that work. The core lock was verified both locally on Windows/Python 3.11 and by the successful Linux CI run.
 
 ## Important decisions to preserve
 
