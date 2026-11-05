@@ -8,6 +8,14 @@
           "title": "Comparison Id",
           "type": "string"
         },
+        "detail_level": {
+          "enum": [
+            "telemetry",
+            "sector_only"
+          ],
+          "title": "Detail Level",
+          "type": "string"
+        },
         "lap_a": {
           "$ref": "#/$defs/LapMetadata"
         },
@@ -29,6 +37,7 @@
       },
       "required": [
         "comparison_id",
+        "detail_level",
         "session",
         "lap_a",
         "lap_b",
@@ -75,20 +84,29 @@
           "title": "Lap Time Ms",
           "type": "number"
         },
+        "phase": {
+          "enum": [
+            "Q1",
+            "Q2",
+            "Q3"
+          ],
+          "title": "Phase",
+          "type": "string"
+        },
         "sector_times_ms": {
           "maxItems": 3,
           "minItems": 3,
           "prefixItems": [
             {
-              "minimum": 0,
+              "exclusiveMinimum": 0,
               "type": "number"
             },
             {
-              "minimum": 0,
+              "exclusiveMinimum": 0,
               "type": "number"
             },
             {
-              "minimum": 0,
+              "exclusiveMinimum": 0,
               "type": "number"
             }
           ],
@@ -114,6 +132,7 @@
       },
       "required": [
         "lap_id",
+        "phase",
         "driver_code",
         "driver_name",
         "driver_number",
@@ -145,20 +164,16 @@
           "title": "Event Name",
           "type": "string"
         },
-        "phase": {
-          "enum": [
-            "Q1",
-            "Q2",
-            "Q3"
-          ],
-          "title": "Phase",
-          "type": "string"
-        },
         "round": {
           "maximum": 30,
           "minimum": 1,
           "title": "Round",
           "type": "integer"
+        },
+        "session_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,100}$",
+          "title": "Session Id",
+          "type": "string"
         },
         "session_type": {
           "const": "Q",
@@ -174,9 +189,9 @@
         }
       },
       "required": [
+        "session_id",
         "year",
         "round",
-        "phase",
         "circuit_id",
         "event_name"
       ],
@@ -194,8 +209,8 @@
       "type": "array"
     },
     "schema_version": {
-      "const": "1.0.0",
-      "default": "1.0.0",
+      "const": "1.1.0",
+      "default": "1.1.0",
       "title": "Schema Version",
       "type": "string"
     }

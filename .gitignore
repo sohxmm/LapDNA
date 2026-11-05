@@ -17,6 +17,7 @@ data/processed/
 data/artifacts/*
 !data/artifacts/.gitkeep
 data/reports/
+data/sessions/
 work/
 *.log
 .DS_Store

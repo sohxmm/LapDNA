@@ -10,8 +10,14 @@ Identifier = Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]{1,100}$")]
 Sha256 = Annotated[str, Field(pattern=r"^[a-f0-9]{64}$")]
 Finite = Annotated[float, Field(allow_inf_nan=False)]
 Nonnegative = Annotated[Finite, Field(ge=0)]
+Duration = Annotated[Finite, Field(gt=0)]
 QualityStatus = Literal["pass", "warn", "block"]
 DriverSlot = Literal["A", "B"]
+Phase = Literal["Q1", "Q2", "Q3"]
+SpeedClass = Literal["low", "medium", "high"]
+SchemaVersion = Literal["1.1.0"]
+Count = Annotated[int, Field(ge=0)]
+ShortText = Annotated[str, Field(min_length=1, max_length=600)]
 
 
 class Contract(BaseModel):
@@ -34,43 +40,75 @@ class ErrorResponse(Contract):
 
 
 class SessionIdentity(Contract):
+    session_id: Identifier
     year: Annotated[int, Field(strict=True, ge=2018, le=2100)]
     round: Annotated[int, Field(strict=True, ge=1, le=30)]
     session_type: Literal["Q"] = "Q"
-    phase: Literal["Q1", "Q2", "Q3"]
     circuit_id: Literal["monza", "silverstone", "suzuka"]
     event_name: Annotated[str, Field(min_length=1, max_length=150)]
 
 
-class LapMetadata(Contract):
+class LapIdentity(Contract):
     lap_id: Identifier
+    phase: Phase
     driver_code: Annotated[str, Field(pattern=r"^[A-Z0-9]{2,4}$")]
     driver_name: Annotated[str, Field(min_length=1, max_length=100)]
     driver_number: Annotated[str, Field(pattern=r"^[0-9]{1,3}$")]
     lap_number: Annotated[int, Field(strict=True, ge=1)]
-    lap_time_ms: Annotated[Finite, Field(gt=0)]
-    sector_times_ms: tuple[Nonnegative, Nonnegative, Nonnegative]
+
+
+class LapMetadata(LapIdentity):
+    lap_time_ms: Duration
+    sector_times_ms: tuple[Duration, Duration, Duration]
     compound: str
     tyre_life_laps: Annotated[Finite, Field(ge=0)] | None
     track_status: str
 
 
-class Provenance(Contract):
+class TimingProvenance(Contract):
     source: Literal["fastf1"] = "fastf1"
     fastf1_version: str
     pipeline_version: str
     methodology_version: str
-    reference_sha256: Sha256
     source_snapshot_sha256: Sha256
     generated_at: datetime
     source_session: str
-    circuit_revision: str
-    reference_lap_id: Identifier
 
     @model_validator(mode="after")
     def require_timezone(self) -> Self:
         if self.generated_at.tzinfo is None:
             raise ValueError("generated_at must include a timezone")
+        return self
+
+
+class Provenance(TimingProvenance):
+    reference_sha256: Sha256
+    circuit_revision: str
+    reference_lap_id: Identifier
+
+
+class PairingContext(Contract):
+    mode: Literal["same_phase", "cross_phase"]
+    warnings: list[ShortText]
+
+
+class ArtifactHeader(Contract):
+    schema_version: SchemaVersion = "1.1.0"
+    comparison_id: Identifier
+    session: SessionIdentity
+    lap_a: LapMetadata
+    lap_b: LapMetadata
+    pairing: PairingContext
+
+    @model_validator(mode="after")
+    def validate_pair(self) -> Self:
+        if self.lap_a.driver_number == self.lap_b.driver_number or self.lap_a.lap_id == self.lap_b.lap_id:
+            raise ValueError("comparison requires distinct drivers and laps")
+        cross_phase = self.lap_a.phase != self.lap_b.phase
+        if cross_phase != (self.pairing.mode == "cross_phase"):
+            raise ValueError("pairing mode must agree with individual lap phases")
+        if cross_phase and not self.pairing.warnings:
+            raise ValueError("cross-phase comparison requires a visible conditions warning")
         return self
 
 
@@ -214,6 +252,7 @@ class Segment(Contract):
     segment_id: Identifier
     kind: Literal["corner", "complex", "straight"]
     group_id: Identifier | None = None
+    speed_class: Literal["low", "medium", "high", "mixed", "unknown"] | None
     label: str
     start_m: Nonnegative
     end_m: Nonnegative
@@ -221,6 +260,83 @@ class Segment(Contract):
     gain_sensitivity_ms: GainSensitivity | None
     quality_status: QualityStatus
     evidence_ids: list[Identifier]
+
+    @model_validator(mode="after")
+    def require_class_for_corner(self) -> Self:
+        if (self.kind == "straight") != (self.speed_class is None):
+            raise ValueError("only corner and complex segments carry a speed class")
+        return self
+
+
+class CornerMarker(Contract):
+    marker_id: Identifier
+    number: Annotated[int, Field(ge=1)]
+    label: ShortText
+    distance_m: Nonnegative
+    segment_id: Identifier
+    reference_speed_kph: Nonnegative | None
+    speed_class: Literal["low", "medium", "high", "unknown"]
+
+    @model_validator(mode="after")
+    def require_reference(self) -> Self:
+        if self.speed_class != "unknown" and self.reference_speed_kph is None:
+            raise ValueError("a classified marker requires its frozen reference speed")
+        return self
+
+
+class EstimatedMiniSector(Contract):
+    source: Literal["derived_telemetry"]
+    start_m: Nonnegative
+    end_m: Nonnegative
+    gain_ms: Finite | None
+
+
+class CornerClassSummary(Contract):
+    speed_class: SpeedClass
+    included_segment_ids: list[Identifier]
+    excluded_segment_ids: list[Identifier]
+    independent_units: Count
+    distance_coverage: Annotated[Finite, Field(ge=0, le=1)]
+    gains_a_ms: Nonnegative | None
+    gains_b_ms: Nonnegative | None
+    net_gain_ms: Finite | None
+    a_wins: Count
+    b_wins: Count
+    neutral_units: Count
+    sensitivity: GainSensitivity | None
+    assessment: Literal["insufficient", "mixed", "balanced", "a_advantage", "b_advantage"]
+    evidence_ids: list[Identifier]
+
+
+class AnalysisSummary(Contract):
+    categories: Annotated[list[CornerClassSummary], Field(min_length=3, max_length=3)]
+    classification_rule: Literal["reference_apex_minimum_v1"]
+    medium_from_kph: Nonnegative
+    high_from_kph: Nonnegative
+    pattern: Literal["high_medium_gain_low_loss", "mixed", "insufficient"]
+    pattern_driver: DriverSlot | None
+    text: ShortText
+    evidence_ids: list[Identifier]
+    limitations: list[ShortText]
+
+    @model_validator(mode="after")
+    def validate_pattern(self) -> Self:
+        if self.medium_from_kph >= self.high_from_kph:
+            raise ValueError("speed class thresholds must be increasing")
+        if {item.speed_class for item in self.categories} != {"low", "medium", "high"}:
+            raise ValueError("include one summary for each speed class")
+        if self.pattern == "high_medium_gain_low_loss":
+            if self.pattern_driver is None or not self.evidence_ids:
+                raise ValueError("a category pattern requires a driver and evidence")
+            for item in self.categories:
+                favour_a = (self.pattern_driver == "A") == (item.speed_class != "low")
+                expected = "a_advantage" if favour_a else "b_advantage"
+                opposing = item.b_wins if favour_a else item.a_wins
+                if item.assessment != expected or item.distance_coverage != 1 or opposing:
+                    raise ValueError("category pattern requires consistent, fully supported classes")
+        elif self.pattern_driver is not None:
+            raise ValueError("only a directional category pattern names a driver")
+        return self
 
 
 class Observation(Contract):
@@ -231,13 +347,9 @@ class Observation(Contract):
     evidence_ids: Annotated[list[Identifier], Field(min_length=1)]
 
 
-class ComparisonArtifact(Contract):
-    schema_version: Literal["1.0.0"] = "1.0.0"
-    comparison_id: Identifier
+class ComparisonArtifact(ArtifactHeader):
+    detail_level: Literal["telemetry"]
     provenance: Provenance
-    session: SessionIdentity
-    lap_a: LapMetadata
-    lap_b: LapMetadata
     distance_m: Annotated[list[Nonnegative], Field(min_length=2, max_length=5000)]
     channels_a: DriverChannels
     channels_b: DriverChannels
@@ -247,6 +359,9 @@ class ComparisonArtifact(Contract):
     sector_boundaries_m: tuple[Nonnegative, Nonnegative]
     quality: QualityReport
     segments: list[Segment]
+    corners: list[CornerMarker]
+    estimated_minisectors: list[EstimatedMiniSector]
+    analysis: AnalysisSummary
     evidence: list[MetricEvidence]
     observations: Annotated[list[Observation], Field(max_length=3)]
     insufficient_evidence_reason: str | None
@@ -331,11 +446,160 @@ class ComparisonArtifact(Contract):
             raise ValueError("fewer than three observations require an insufficient-evidence reason")
         if len(self.observations) == 3 and self.insufficient_evidence_reason is not None:
             raise ValueError("three observations must not carry an insufficient-evidence reason")
+        self.validate_track_details(grid_indices)
         return self
+
+    def validate_track_details(self, grid_indices: dict[float, int]) -> None:
+        segments = {segment.segment_id: segment for segment in self.segments}
+        ids = [marker.marker_id for marker in self.corners]
+        if len(set(ids)) != len(ids):
+            raise ValueError("duplicate turn marker")
+        if any(b.distance_m < a.distance_m for a, b in zip(self.corners, self.corners[1:])):
+            raise ValueError("turn markers must follow track distance order")
+        marker_classes: dict[str, set[str]] = {}
+        for marker in self.corners:
+            segment = segments.get(marker.segment_id)
+            if segment is None or segment.kind == "straight" or not segment.start_m <= marker.distance_m <= segment.end_m:
+                raise ValueError("turn marker must belong to its corner segment")
+            marker_classes.setdefault(segment.group_id or segment.segment_id, set()).add(marker.speed_class)
+            if marker.speed_class != "unknown":
+                speed = marker.reference_speed_kph
+                expected = "low" if speed < self.analysis.medium_from_kph else "medium" if speed < self.analysis.high_from_kph else "high"
+                if marker.speed_class != expected:
+                    raise ValueError("marker class must match the configured reference-speed bands")
+        for segment in self.segments:
+            if segment.kind == "straight" or segment.speed_class == "unknown":
+                continue
+            classes = marker_classes.get(segment.group_id or segment.segment_id, set())
+            if not classes or "unknown" in classes:
+                raise ValueError("classified corner segments require reviewed reference markers")
+            expected = "mixed" if len(classes) > 1 else next(iter(classes))
+            if segment.speed_class != expected:
+                raise ValueError("corner segment class disagrees with its constituent markers")
+        previous = 0.0
+        for section in self.estimated_minisectors:
+            expected_end = min(previous + 100.0, self.distance_m[-1])
+            if section.start_m != previous or section.end_m != expected_end or section.end_m <= previous:
+                raise ValueError("estimated minisectors must partition the lap into consecutive 100 m bins")
+            if section.start_m not in grid_indices or section.end_m not in grid_indices:
+                raise ValueError("minisector bounds must be present on the shared grid")
+            i, j = grid_indices[section.start_m], grid_indices[section.end_m]
+            if section.gain_ms is not None:
+                if not all(self.valid[i:j + 1]) or not isclose(section.gain_ms, self.delta_ms[j] - self.delta_ms[i], abs_tol=1e-6):
+                    raise ValueError("minisector gain requires supported endpoint delta arithmetic")
+            previous = section.end_m
+        if self.quality.status != "block" and previous != self.distance_m[-1]:
+            raise ValueError("minisectors must reach the finish")
+        evidence_ids = {item.evidence_id for item in self.evidence}
+        if not set(self.analysis.evidence_ids).issubset(evidence_ids):
+            raise ValueError("analysis references unknown evidence")
+        for row in self.analysis.categories:
+            self.validate_class_summary(row, segments, evidence_ids)
+
+    def validate_class_summary(self, row: CornerClassSummary, segments: dict[str, Segment], evidence_ids: set[str]) -> None:
+        classified = {key for key, segment in segments.items() if segment.speed_class == row.speed_class}
+        ids = row.included_segment_ids + row.excluded_segment_ids
+        if len(set(ids)) != len(ids) or set(ids) != classified:
+            raise ValueError("category coverage must account for every classified segment once")
+        selected = [segments[key] for key in row.included_segment_ids]
+        if any(item.gain_ms is None or item.gain_sensitivity_ms is None or item.quality_status == "block" for item in selected):
+            raise ValueError("included class segment requires supported gain and sensitivity")
+        units = {item.group_id or item.segment_id for item in selected}
+        if any((segments[key].group_id or key) in units for key in row.excluded_segment_ids):
+            raise ValueError("all pieces of a linked unit must share coverage")
+        if row.independent_units != len(units) or row.a_wins + row.b_wins + row.neutral_units != len(units):
+            raise ValueError("category counts must match independent units")
+        if not set(row.evidence_ids).issubset(evidence_ids):
+            raise ValueError("category references unknown evidence")
+        expected_length = sum(segments[key].end_m - segments[key].start_m for key in classified)
+        covered = sum(item.end_m - item.start_m for item in selected)
+        coverage = covered / expected_length if expected_length else 0.0
+        if not isclose(coverage, row.distance_coverage, abs_tol=1e-6):
+            raise ValueError("category coverage must be distance weighted")
+        totals = (row.gains_a_ms, row.gains_b_ms, row.net_gain_ms)
+        if not selected:
+            if totals != (None, None, None) or row.assessment != "insufficient" or row.sensitivity is not None:
+                raise ValueError("missing category support requires unavailable totals")
+            return
+        group_gains: dict[str, float] = {}
+        bounds: dict[str, tuple[float, float]] = {}
+        for item in selected:
+            key = item.group_id or item.segment_id
+            group_gains[key] = group_gains.get(key, 0.0) + item.gain_ms
+            lower, upper = bounds.get(key, (0.0, 0.0))
+            bounds[key] = (lower + item.gain_sensitivity_ms.minimum_ms, upper + item.gain_sensitivity_ms.maximum_ms)
+        gains_a = sum(max(value, 0.0) for value in group_gains.values())
+        gains_b = sum(max(-value, 0.0) for value in group_gains.values())
+        expected = (gains_a, gains_b, gains_a - gains_b)
+        if any(actual is None or not isclose(actual, value, abs_tol=1e-6) for actual, value in zip(totals, expected)):
+            raise ValueError("gross and net class gains must agree with the included units")
+        lower = sum(interval[0] for interval in bounds.values())
+        upper = sum(interval[1] for interval in bounds.values())
+        if (row.sensitivity is None or not isclose(lower, row.sensitivity.minimum_ms, abs_tol=1e-6)
+                or not isclose(upper, row.sensitivity.maximum_ms, abs_tol=1e-6)):
+            raise ValueError("aggregate sensitivity must account for all included segments")
+        a_wins = b_wins = 0
+        for key, (unit_lower, unit_upper) in bounds.items():
+            material = abs(group_gains[key]) >= max(30.0, 2 * (unit_upper - unit_lower))
+            a_wins += int(material and unit_lower > 0)
+            b_wins += int(material and unit_upper < 0)
+        if row.a_wins != a_wins or row.b_wins != b_wins:
+            raise ValueError("material win counts must match unit gains and sensitivity")
+        if row.assessment.endswith("_advantage"):
+            wins = row.a_wins if row.assessment == "a_advantage" else row.b_wins
+            sign = 1 if row.assessment == "a_advantage" else -1
+            if row.independent_units < 2 or coverage < 0.8 or row.sensitivity is None or not row.evidence_ids:
+                raise ValueError("directional class analysis requires coverage, sensitivity and evidence")
+            spread = row.sensitivity.maximum_ms - row.sensitivity.minimum_ms
+            if (lower * upper <= 0 or row.net_gain_ms * sign < max(30, 2 * spread) or wins < 2
+                    or wins * 3 < (row.a_wins + row.b_wins) * 2):
+                raise ValueError("directional class analysis requires consistent material gains")
+
+
+class SectorQuality(Contract):
+    status: QualityStatus
+    warnings: list[ShortText]
+    checks: tuple[ReconciliationCheck, ReconciliationCheck]
+
+
+class SectorComparisonArtifact(ArtifactHeader):
+    detail_level: Literal["sector_only"]
+    provenance: TimingProvenance
+    quality: SectorQuality
+    fallback_reason: ShortText
+    sector_delta_ms: tuple[Finite, Finite, Finite]
+    cumulative_delta_ms: tuple[Finite, Finite, Finite]
+
+    @model_validator(mode="after")
+    def validate_sectors(self) -> Self:
+        by_driver = {check.driver: check for check in self.quality.checks}
+        if set(by_driver) != {"A", "B"}:
+            raise ValueError("sector-only quality requires one sector-sum check per lap")
+        severity = {"pass": 0, "warn": 1, "block": 2}
+        for driver, lap in (("A", self.lap_a), ("B", self.lap_b)):
+            check = by_driver[driver]
+            if check.metric != "sector_sum" or check.basis != "timing_record_consistency":
+                raise ValueError("sector-only checks reconcile sector durations to recorded lap time")
+            if (not isclose(check.official_ms, lap.lap_time_ms, abs_tol=1e-6) or check.observed_ms is None
+                    or not isclose(check.observed_ms, sum(lap.sector_times_ms), abs_tol=1e-6)):
+                raise ValueError("sector-sum check must use the selected lap and sector timings")
+            if severity[check.status] > severity[self.quality.status]:
+                raise ValueError("sector-only quality cannot understate a timing check")
+        running = 0.0
+        for a, b, delta, cumulative in zip(self.lap_a.sector_times_ms, self.lap_b.sector_times_ms,
+                                           self.sector_delta_ms, self.cumulative_delta_ms):
+            running += b - a
+            if not isclose(b - a, delta, abs_tol=1e-6) or not isclose(running, cumulative, abs_tol=1e-6):
+                raise ValueError("sector-only deltas must follow recorded sector durations")
+        return self
+
+
+Artifact = Annotated[ComparisonArtifact | SectorComparisonArtifact, Field(discriminator="detail_level")]
 
 
 class ComparisonSummary(Contract):
     comparison_id: Identifier
+    detail_level: Literal["telemetry", "sector_only"]
     session: SessionIdentity
     lap_a: LapMetadata
     lap_b: LapMetadata
@@ -343,5 +607,5 @@ class ComparisonSummary(Contract):
 
 
 class Catalog(Contract):
-    schema_version: Literal["1.0.0"] = "1.0.0"
+    schema_version: SchemaVersion = "1.1.0"
     comparisons: list[ComparisonSummary]

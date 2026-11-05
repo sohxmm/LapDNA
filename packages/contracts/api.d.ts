@@ -17,6 +17,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/compare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Compare */
+        post: operations["compare_api_v1_compare_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/comparisons/{comparison_id}": {
         parameters: {
             query?: never;
@@ -51,31 +68,129 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Session Inventory */
+        get: operations["session_inventory_api_v1_sessions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sessions/{session_id}/laps": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Session Laps */
+        get: operations["session_laps_api_v1_sessions__session_id__laps_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AnalysisSummary */
+        AnalysisSummary: {
+            /** Categories */
+            categories: components["schemas"]["CornerClassSummary"][];
+            /**
+             * Classification Rule
+             * @constant
+             */
+            classification_rule: "reference_apex_minimum_v1";
+            /** Evidence Ids */
+            evidence_ids: string[];
+            /** High From Kph */
+            high_from_kph: number;
+            /** Limitations */
+            limitations: string[];
+            /** Medium From Kph */
+            medium_from_kph: number;
+            /**
+             * Pattern
+             * @enum {string}
+             */
+            pattern: "high_medium_gain_low_loss" | "mixed" | "insufficient";
+            /** Pattern Driver */
+            pattern_driver: ("A" | "B") | null;
+            /** Text */
+            text: string;
+        };
         /** Catalog */
         Catalog: {
             /** Comparisons */
             comparisons: components["schemas"]["ComparisonSummary"][];
             /**
              * Schema Version
-             * @default 1.0.0
+             * @default 1.1.0
              * @constant
              */
-            schema_version: "1.0.0";
+            schema_version: "1.1.0";
+        };
+        /** CompareRequest */
+        CompareRequest: {
+            /**
+             * Allow Cross Phase
+             * @default false
+             */
+            allow_cross_phase: boolean;
+            /**
+             * Detail Level
+             * @default auto
+             * @enum {string}
+             */
+            detail_level: "auto" | "telemetry" | "sector_only";
+            /** Lap A Id */
+            lap_a_id: string;
+            /** Lap B Id */
+            lap_b_id: string;
+            /** Session Id */
+            session_id: string;
+        };
+        /** CompareResponse */
+        CompareResponse: {
+            /** Artifact */
+            artifact: components["schemas"]["ComparisonArtifact"] | components["schemas"]["SectorComparisonArtifact"];
+            /** Swapped */
+            swapped: boolean;
         };
         /** ComparisonArtifact */
         ComparisonArtifact: {
+            analysis: components["schemas"]["AnalysisSummary"];
             channels_a: components["schemas"]["DriverChannels"];
             channels_b: components["schemas"]["DriverChannels"];
             /** Comparison Id */
             comparison_id: string;
+            /** Corners */
+            corners: components["schemas"]["CornerMarker"][];
             /** Delta Ms */
             delta_ms: (number | null)[];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            detail_level: "telemetry";
             /** Distance M */
             distance_m: number[];
+            /** Estimated Minisectors */
+            estimated_minisectors: components["schemas"]["EstimatedMiniSector"][];
             /** Evidence */
             evidence: components["schemas"]["MetricEvidence"][];
             geometry: components["schemas"]["TrackGeometry"];
@@ -85,14 +200,15 @@ export interface components {
             lap_b: components["schemas"]["LapMetadata"];
             /** Observations */
             observations: components["schemas"]["Observation"][];
+            pairing: components["schemas"]["PairingContext"];
             provenance: components["schemas"]["Provenance"];
             quality: components["schemas"]["QualityReport"];
             /**
              * Schema Version
-             * @default 1.0.0
+             * @default 1.1.0
              * @constant
              */
-            schema_version: "1.0.0";
+            schema_version: "1.1.0";
             /** Sector Boundaries M */
             sector_boundaries_m: [
                 number,
@@ -108,6 +224,11 @@ export interface components {
         ComparisonSummary: {
             /** Comparison Id */
             comparison_id: string;
+            /**
+             * Detail Level
+             * @enum {string}
+             */
+            detail_level: "telemetry" | "sector_only";
             lap_a: components["schemas"]["LapMetadata"];
             lap_b: components["schemas"]["LapMetadata"];
             /**
@@ -116,6 +237,62 @@ export interface components {
              */
             quality_status: "pass" | "warn" | "block";
             session: components["schemas"]["SessionIdentity"];
+        };
+        /** CornerClassSummary */
+        CornerClassSummary: {
+            /** A Wins */
+            a_wins: number;
+            /**
+             * Assessment
+             * @enum {string}
+             */
+            assessment: "insufficient" | "mixed" | "balanced" | "a_advantage" | "b_advantage";
+            /** B Wins */
+            b_wins: number;
+            /** Distance Coverage */
+            distance_coverage: number;
+            /** Evidence Ids */
+            evidence_ids: string[];
+            /** Excluded Segment Ids */
+            excluded_segment_ids: string[];
+            /** Gains A Ms */
+            gains_a_ms: number | null;
+            /** Gains B Ms */
+            gains_b_ms: number | null;
+            /** Included Segment Ids */
+            included_segment_ids: string[];
+            /** Independent Units */
+            independent_units: number;
+            /** Net Gain Ms */
+            net_gain_ms: number | null;
+            /** Neutral Units */
+            neutral_units: number;
+            sensitivity: components["schemas"]["GainSensitivity"] | null;
+            /**
+             * Speed Class
+             * @enum {string}
+             */
+            speed_class: "low" | "medium" | "high";
+        };
+        /** CornerMarker */
+        CornerMarker: {
+            /** Distance M */
+            distance_m: number;
+            /** Label */
+            label: string;
+            /** Marker Id */
+            marker_id: string;
+            /** Number */
+            number: number;
+            /** Reference Speed Kph */
+            reference_speed_kph: number | null;
+            /** Segment Id */
+            segment_id: string;
+            /**
+             * Speed Class
+             * @enum {string}
+             */
+            speed_class: "low" | "medium" | "high" | "unknown";
         };
         /** DistanceScale */
         DistanceScale: {
@@ -140,6 +317,15 @@ export interface components {
             /** Time Raw Ms */
             time_raw_ms: (number | null)[];
         };
+        /** DriverEntry */
+        DriverEntry: {
+            /** Driver Code */
+            driver_code: string;
+            /** Driver Name */
+            driver_name: string;
+            /** Driver Number */
+            driver_number: string;
+        };
         /** ErrorDetail */
         ErrorDetail: {
             /** Code */
@@ -150,6 +336,20 @@ export interface components {
         /** ErrorResponse */
         ErrorResponse: {
             error: components["schemas"]["ErrorDetail"];
+        };
+        /** EstimatedMiniSector */
+        EstimatedMiniSector: {
+            /** End M */
+            end_m: number;
+            /** Gain Ms */
+            gain_ms: number | null;
+            /**
+             * Source
+             * @constant
+             */
+            source: "derived_telemetry";
+            /** Start M */
+            start_m: number;
         };
         /** GainSensitivity */
         GainSensitivity: {
@@ -191,6 +391,11 @@ export interface components {
             lap_number: number;
             /** Lap Time Ms */
             lap_time_ms: number;
+            /**
+             * Phase
+             * @enum {string}
+             */
+            phase: "Q1" | "Q2" | "Q3";
             /** Sector Times Ms */
             sector_times_ms: [
                 number,
@@ -201,6 +406,39 @@ export interface components {
             track_status: string;
             /** Tyre Life Laps */
             tyre_life_laps: number | null;
+        };
+        /** LapOption */
+        LapOption: {
+            /**
+             * Capability
+             * @enum {string}
+             */
+            capability: "telemetry" | "sector_only" | "unavailable";
+            /** Driver Code */
+            driver_code: string;
+            /** Driver Name */
+            driver_name: string;
+            /** Driver Number */
+            driver_number: string;
+            /** Lap Id */
+            lap_id: string;
+            /** Lap Number */
+            lap_number: number;
+            /** Lap Time Ms */
+            lap_time_ms: number | null;
+            /**
+             * Phase
+             * @enum {string}
+             */
+            phase: "Q1" | "Q2" | "Q3";
+            /** Reasons */
+            reasons: string[];
+            /** Sector Times Ms */
+            sector_times_ms: [
+                number | null,
+                number | null,
+                number | null
+            ];
         };
         /** MetricEvidence */
         MetricEvidence: {
@@ -265,6 +503,16 @@ export interface components {
             template_id: "segment_gain" | "speed_pattern" | "control_pattern";
             /** Text */
             text: string;
+        };
+        /** PairingContext */
+        PairingContext: {
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "same_phase" | "cross_phase";
+            /** Warnings */
+            warnings: string[];
         };
         /** Provenance */
         Provenance: {
@@ -347,6 +595,57 @@ export interface components {
              */
             status: "pass" | "warn" | "block";
         };
+        /** SectorComparisonArtifact */
+        SectorComparisonArtifact: {
+            /** Comparison Id */
+            comparison_id: string;
+            /** Cumulative Delta Ms */
+            cumulative_delta_ms: [
+                number,
+                number,
+                number
+            ];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            detail_level: "sector_only";
+            /** Fallback Reason */
+            fallback_reason: string;
+            lap_a: components["schemas"]["LapMetadata"];
+            lap_b: components["schemas"]["LapMetadata"];
+            pairing: components["schemas"]["PairingContext"];
+            provenance: components["schemas"]["TimingProvenance"];
+            quality: components["schemas"]["SectorQuality"];
+            /**
+             * Schema Version
+             * @default 1.1.0
+             * @constant
+             */
+            schema_version: "1.1.0";
+            /** Sector Delta Ms */
+            sector_delta_ms: [
+                number,
+                number,
+                number
+            ];
+            session: components["schemas"]["SessionIdentity"];
+        };
+        /** SectorQuality */
+        SectorQuality: {
+            /** Checks */
+            checks: [
+                components["schemas"]["ReconciliationCheck"],
+                components["schemas"]["ReconciliationCheck"]
+            ];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pass" | "warn" | "block";
+            /** Warnings */
+            warnings: string[];
+        };
         /** Segment */
         Segment: {
             /** End M */
@@ -372,6 +671,8 @@ export interface components {
             quality_status: "pass" | "warn" | "block";
             /** Segment Id */
             segment_id: string;
+            /** Speed Class */
+            speed_class: ("low" | "medium" | "high" | "mixed" | "unknown") | null;
             /** Start M */
             start_m: number;
         };
@@ -384,13 +685,10 @@ export interface components {
             circuit_id: "monza" | "silverstone" | "suzuka";
             /** Event Name */
             event_name: string;
-            /**
-             * Phase
-             * @enum {string}
-             */
-            phase: "Q1" | "Q2" | "Q3";
             /** Round */
             round: number;
+            /** Session Id */
+            session_id: string;
             /**
              * Session Type
              * @default Q
@@ -399,6 +697,65 @@ export interface components {
             session_type: "Q";
             /** Year */
             year: number;
+        };
+        /** SessionInventory */
+        SessionInventory: {
+            /**
+             * Schema Version
+             * @default 1.1.0
+             * @constant
+             */
+            schema_version: "1.1.0";
+            /** Sessions */
+            sessions: components["schemas"]["SessionSummary"][];
+        };
+        /** SessionLapIndex */
+        SessionLapIndex: {
+            /** Drivers */
+            drivers: components["schemas"]["DriverEntry"][];
+            /** Laps */
+            laps: components["schemas"]["LapOption"][];
+            /**
+             * Schema Version
+             * @default 1.1.0
+             * @constant
+             */
+            schema_version: "1.1.0";
+            session: components["schemas"]["SessionIdentity"];
+            /** Source Snapshot Sha256 */
+            source_snapshot_sha256: string;
+        };
+        /** SessionSummary */
+        SessionSummary: {
+            /** Driver Count */
+            driver_count: number;
+            /** Selectable Lap Count */
+            selectable_lap_count: number;
+            session: components["schemas"]["SessionIdentity"];
+        };
+        /** TimingProvenance */
+        TimingProvenance: {
+            /** Fastf1 Version */
+            fastf1_version: string;
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Methodology Version */
+            methodology_version: string;
+            /** Pipeline Version */
+            pipeline_version: string;
+            /**
+             * Source
+             * @default fastf1
+             * @constant
+             */
+            source: "fastf1";
+            /** Source Session */
+            source_session: string;
+            /** Source Snapshot Sha256 */
+            source_snapshot_sha256: string;
         };
         /**
          * TrackGeometry
@@ -448,6 +805,66 @@ export interface operations {
             };
         };
     };
+    compare_api_v1_compare_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompareRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompareResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     comparison_api_v1_comparisons__comparison_id__get: {
         parameters: {
             query?: never;
@@ -465,7 +882,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ComparisonArtifact"];
+                    "application/json": components["schemas"]["ComparisonArtifact"] | components["schemas"]["SectorComparisonArtifact"];
                 };
             };
             /** @description Not Found */
@@ -513,6 +930,84 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    session_inventory_api_v1_sessions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionInventory"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    session_laps_api_v1_sessions__session_id__laps_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionLapIndex"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };

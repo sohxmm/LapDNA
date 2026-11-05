@@ -9,7 +9,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "services" / "api" / "src"))
 
 from lapdna.main import create_app
-from lapdna.models import Catalog, ComparisonArtifact
+from lapdna.models import Catalog
+from lapdna.store import ARTIFACT_ADAPTER
 
 
 def main() -> int:
@@ -19,7 +20,7 @@ def main() -> int:
     destination = REPO_ROOT / "packages" / "contracts"
     documents = {
         "openapi.json": create_app().openapi(),
-        "comparison.schema.json": ComparisonArtifact.model_json_schema(),
+        "comparison.schema.json": ARTIFACT_ADAPTER.json_schema(),
         "catalog.schema.json": Catalog.model_json_schema(),
     }
     stale = []

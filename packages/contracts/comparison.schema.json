@@ -1,5 +1,467 @@
 {
   "$defs": {
+    "AnalysisSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "categories": {
+          "items": {
+            "$ref": "#/$defs/CornerClassSummary"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "title": "Categories",
+          "type": "array"
+        },
+        "classification_rule": {
+          "const": "reference_apex_minimum_v1",
+          "title": "Classification Rule",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "high_from_kph": {
+          "minimum": 0,
+          "title": "High From Kph",
+          "type": "number"
+        },
+        "limitations": {
+          "items": {
+            "maxLength": 600,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "medium_from_kph": {
+          "minimum": 0,
+          "title": "Medium From Kph",
+          "type": "number"
+        },
+        "pattern": {
+          "enum": [
+            "high_medium_gain_low_loss",
+            "mixed",
+            "insufficient"
+          ],
+          "title": "Pattern",
+          "type": "string"
+        },
+        "pattern_driver": {
+          "anyOf": [
+            {
+              "enum": [
+                "A",
+                "B"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pattern Driver"
+        },
+        "text": {
+          "maxLength": 600,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "categories",
+        "classification_rule",
+        "medium_from_kph",
+        "high_from_kph",
+        "pattern",
+        "pattern_driver",
+        "text",
+        "evidence_ids",
+        "limitations"
+      ],
+      "title": "AnalysisSummary",
+      "type": "object"
+    },
+    "ComparisonArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis": {
+          "$ref": "#/$defs/AnalysisSummary"
+        },
+        "channels_a": {
+          "$ref": "#/$defs/DriverChannels"
+        },
+        "channels_b": {
+          "$ref": "#/$defs/DriverChannels"
+        },
+        "comparison_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,100}$",
+          "title": "Comparison Id",
+          "type": "string"
+        },
+        "corners": {
+          "items": {
+            "$ref": "#/$defs/CornerMarker"
+          },
+          "title": "Corners",
+          "type": "array"
+        },
+        "delta_ms": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Delta Ms",
+          "type": "array"
+        },
+        "detail_level": {
+          "const": "telemetry",
+          "title": "Detail Level",
+          "type": "string"
+        },
+        "distance_m": {
+          "items": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "maxItems": 5000,
+          "minItems": 2,
+          "title": "Distance M",
+          "type": "array"
+        },
+        "estimated_minisectors": {
+          "items": {
+            "$ref": "#/$defs/EstimatedMiniSector"
+          },
+          "title": "Estimated Minisectors",
+          "type": "array"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/MetricEvidence"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "geometry": {
+          "$ref": "#/$defs/TrackGeometry"
+        },
+        "insufficient_evidence_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Insufficient Evidence Reason"
+        },
+        "lap_a": {
+          "$ref": "#/$defs/LapMetadata"
+        },
+        "lap_b": {
+          "$ref": "#/$defs/LapMetadata"
+        },
+        "observations": {
+          "items": {
+            "$ref": "#/$defs/Observation"
+          },
+          "maxItems": 3,
+          "title": "Observations",
+          "type": "array"
+        },
+        "pairing": {
+          "$ref": "#/$defs/PairingContext"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "quality": {
+          "$ref": "#/$defs/QualityReport"
+        },
+        "schema_version": {
+          "const": "1.1.0",
+          "default": "1.1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sector_boundaries_m": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "minimum": 0,
+              "type": "number"
+            }
+          ],
+          "title": "Sector Boundaries M",
+          "type": "array"
+        },
+        "segments": {
+          "items": {
+            "$ref": "#/$defs/Segment"
+          },
+          "title": "Segments",
+          "type": "array"
+        },
+        "session": {
+          "$ref": "#/$defs/SessionIdentity"
+        },
+        "valid": {
+          "items": {
+            "type": "boolean"
+          },
+          "title": "Valid",
+          "type": "array"
+        }
+      },
+      "required": [
+        "comparison_id",
+        "session",
+        "lap_a",
+        "lap_b",
+        "pairing",
+        "detail_level",
+        "provenance",
+        "distance_m",
+        "channels_a",
+        "channels_b",
+        "geometry",
+        "delta_ms",
+        "valid",
+        "sector_boundaries_m",
+        "quality",
+        "segments",
+        "corners",
+        "estimated_minisectors",
+        "analysis",
+        "evidence",
+        "observations",
+        "insufficient_evidence_reason"
+      ],
+      "title": "ComparisonArtifact",
+      "type": "object"
+    },
+    "CornerClassSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "a_wins": {
+          "minimum": 0,
+          "title": "A Wins",
+          "type": "integer"
+        },
+        "assessment": {
+          "enum": [
+            "insufficient",
+            "mixed",
+            "balanced",
+            "a_advantage",
+            "b_advantage"
+          ],
+          "title": "Assessment",
+          "type": "string"
+        },
+        "b_wins": {
+          "minimum": 0,
+          "title": "B Wins",
+          "type": "integer"
+        },
+        "distance_coverage": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Distance Coverage",
+          "type": "number"
+        },
+        "evidence_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "excluded_segment_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "type": "string"
+          },
+          "title": "Excluded Segment Ids",
+          "type": "array"
+        },
+        "gains_a_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gains A Ms"
+        },
+        "gains_b_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gains B Ms"
+        },
+        "included_segment_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "type": "string"
+          },
+          "title": "Included Segment Ids",
+          "type": "array"
+        },
+        "independent_units": {
+          "minimum": 0,
+          "title": "Independent Units",
+          "type": "integer"
+        },
+        "net_gain_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Net Gain Ms"
+        },
+        "neutral_units": {
+          "minimum": 0,
+          "title": "Neutral Units",
+          "type": "integer"
+        },
+        "sensitivity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GainSensitivity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "speed_class": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "title": "Speed Class",
+          "type": "string"
+        }
+      },
+      "required": [
+        "speed_class",
+        "included_segment_ids",
+        "excluded_segment_ids",
+        "independent_units",
+        "distance_coverage",
+        "gains_a_ms",
+        "gains_b_ms",
+        "net_gain_ms",
+        "a_wins",
+        "b_wins",
+        "neutral_units",
+        "sensitivity",
+        "assessment",
+        "evidence_ids"
+      ],
+      "title": "CornerClassSummary",
+      "type": "object"
+    },
+    "CornerMarker": {
+      "additionalProperties": false,
+      "properties": {
+        "distance_m": {
+          "minimum": 0,
+          "title": "Distance M",
+          "type": "number"
+        },
+        "label": {
+          "maxLength": 600,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "marker_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,100}$",
+          "title": "Marker Id",
+          "type": "string"
+        },
+        "number": {
+          "minimum": 1,
+          "title": "Number",
+          "type": "integer"
+        },
+        "reference_speed_kph": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reference Speed Kph"
+        },
+        "segment_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,100}$",
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "speed_class": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "unknown"
+          ],
+          "title": "Speed Class",
+          "type": "string"
+        }
+      },
+      "required": [
+        "marker_id",
+        "number",
+        "label",
+        "distance_m",
+        "segment_id",
+        "reference_speed_kph",
+        "speed_class"
+      ],
+      "title": "CornerMarker",
+      "type": "object"
+    },
     "DistanceScale": {
       "additionalProperties": false,
       "properties": {
@@ -112,6 +574,45 @@
       "title": "DriverChannels",
       "type": "object"
     },
+    "EstimatedMiniSector": {
+      "additionalProperties": false,
+      "properties": {
+        "end_m": {
+          "minimum": 0,
+          "title": "End M",
+          "type": "number"
+        },
+        "gain_ms": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Gain Ms"
+        },
+        "source": {
+          "const": "derived_telemetry",
+          "title": "Source",
+          "type": "string"
+        },
+        "start_m": {
+          "minimum": 0,
+          "title": "Start M",
+          "type": "number"
+        }
+      },
+      "required": [
+        "source",
+        "start_m",
+        "end_m",
+        "gain_ms"
+      ],
+      "title": "EstimatedMiniSector",
+      "type": "object"
+    },
     "GainSensitivity": {
       "additionalProperties": false,
       "properties": {
@@ -169,20 +670,29 @@
           "title": "Lap Time Ms",
           "type": "number"
         },
+        "phase": {
+          "enum": [
+            "Q1",
+            "Q2",
+            "Q3"
+          ],
+          "title": "Phase",
+          "type": "string"
+        },
         "sector_times_ms": {
           "maxItems": 3,
           "minItems": 3,
           "prefixItems": [
             {
-              "minimum": 0,
+              "exclusiveMinimum": 0,
               "type": "number"
             },
             {
-              "minimum": 0,
+              "exclusiveMinimum": 0,
               "type": "number"
             },
             {
-              "minimum": 0,
+              "exclusiveMinimum": 0,
               "type": "number"
             }
           ],
@@ -208,6 +718,7 @@
       },
       "required": [
         "lap_id",
+        "phase",
         "driver_code",
         "driver_name",
         "driver_number",
@@ -449,6 +960,34 @@
       "title": "Observation",
       "type": "object"
     },
+    "PairingContext": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "same_phase",
+            "cross_phase"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "maxLength": 600,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "mode",
+        "warnings"
+      ],
+      "title": "PairingContext",
+      "type": "object"
+    },
     "Provenance": {
       "additionalProperties": false,
       "properties": {
@@ -503,10 +1042,10 @@
         "fastf1_version",
         "pipeline_version",
         "methodology_version",
-        "reference_sha256",
         "source_snapshot_sha256",
         "generated_at",
         "source_session",
+        "reference_sha256",
         "circuit_revision",
         "reference_lap_id"
       ],
@@ -661,6 +1200,144 @@
       "title": "ReconciliationCheck",
       "type": "object"
     },
+    "SectorComparisonArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "comparison_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,100}$",
+          "title": "Comparison Id",
+          "type": "string"
+        },
+        "cumulative_delta_ms": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Cumulative Delta Ms",
+          "type": "array"
+        },
+        "detail_level": {
+          "const": "sector_only",
+          "title": "Detail Level",
+          "type": "string"
+        },
+        "fallback_reason": {
+          "maxLength": 600,
+          "minLength": 1,
+          "title": "Fallback Reason",
+          "type": "string"
+        },
+        "lap_a": {
+          "$ref": "#/$defs/LapMetadata"
+        },
+        "lap_b": {
+          "$ref": "#/$defs/LapMetadata"
+        },
+        "pairing": {
+          "$ref": "#/$defs/PairingContext"
+        },
+        "provenance": {
+          "$ref": "#/$defs/TimingProvenance"
+        },
+        "quality": {
+          "$ref": "#/$defs/SectorQuality"
+        },
+        "schema_version": {
+          "const": "1.1.0",
+          "default": "1.1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sector_delta_ms": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Sector Delta Ms",
+          "type": "array"
+        },
+        "session": {
+          "$ref": "#/$defs/SessionIdentity"
+        }
+      },
+      "required": [
+        "comparison_id",
+        "session",
+        "lap_a",
+        "lap_b",
+        "pairing",
+        "detail_level",
+        "provenance",
+        "quality",
+        "fallback_reason",
+        "sector_delta_ms",
+        "cumulative_delta_ms"
+      ],
+      "title": "SectorComparisonArtifact",
+      "type": "object"
+    },
+    "SectorQuality": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/ReconciliationCheck"
+            },
+            {
+              "$ref": "#/$defs/ReconciliationCheck"
+            }
+          ],
+          "title": "Checks",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "pass",
+            "warn",
+            "block"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "warnings": {
+          "items": {
+            "maxLength": 600,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "warnings",
+        "checks"
+      ],
+      "title": "SectorQuality",
+      "type": "object"
+    },
     "Segment": {
       "additionalProperties": false,
       "properties": {
@@ -738,6 +1415,24 @@
           "title": "Segment Id",
           "type": "string"
         },
+        "speed_class": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "mixed",
+                "unknown"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Speed Class"
+        },
         "start_m": {
           "minimum": 0,
           "title": "Start M",
@@ -747,6 +1442,7 @@
       "required": [
         "segment_id",
         "kind",
+        "speed_class",
         "label",
         "start_m",
         "end_m",
@@ -776,20 +1472,16 @@
           "title": "Event Name",
           "type": "string"
         },
-        "phase": {
-          "enum": [
-            "Q1",
-            "Q2",
-            "Q3"
-          ],
-          "title": "Phase",
-          "type": "string"
-        },
         "round": {
           "maximum": 30,
           "minimum": 1,
           "title": "Round",
           "type": "integer"
+        },
+        "session_id": {
+          "pattern": "^[A-Za-z0-9_-]{1,100}$",
+          "title": "Session Id",
+          "type": "string"
         },
         "session_type": {
           "const": "Q",
@@ -805,13 +1497,60 @@
         }
       },
       "required": [
+        "session_id",
         "year",
         "round",
-        "phase",
         "circuit_id",
         "event_name"
       ],
       "title": "SessionIdentity",
+      "type": "object"
+    },
+    "TimingProvenance": {
+      "additionalProperties": false,
+      "properties": {
+        "fastf1_version": {
+          "title": "Fastf1 Version",
+          "type": "string"
+        },
+        "generated_at": {
+          "format": "date-time",
+          "title": "Generated At",
+          "type": "string"
+        },
+        "methodology_version": {
+          "title": "Methodology Version",
+          "type": "string"
+        },
+        "pipeline_version": {
+          "title": "Pipeline Version",
+          "type": "string"
+        },
+        "source": {
+          "const": "fastf1",
+          "default": "fastf1",
+          "title": "Source",
+          "type": "string"
+        },
+        "source_session": {
+          "title": "Source Session",
+          "type": "string"
+        },
+        "source_snapshot_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Source Snapshot Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fastf1_version",
+        "pipeline_version",
+        "methodology_version",
+        "source_snapshot_sha256",
+        "generated_at",
+        "source_session"
+      ],
+      "title": "TimingProvenance",
       "type": "object"
     },
     "TrackGeometry": {
@@ -855,143 +1594,19 @@
       "type": "object"
     }
   },
-  "additionalProperties": false,
-  "properties": {
-    "channels_a": {
-      "$ref": "#/$defs/DriverChannels"
+  "discriminator": {
+    "mapping": {
+      "sector_only": "#/$defs/SectorComparisonArtifact",
+      "telemetry": "#/$defs/ComparisonArtifact"
     },
-    "channels_b": {
-      "$ref": "#/$defs/DriverChannels"
-    },
-    "comparison_id": {
-      "pattern": "^[A-Za-z0-9_-]{1,100}$",
-      "title": "Comparison Id",
-      "type": "string"
-    },
-    "delta_ms": {
-      "items": {
-        "anyOf": [
-          {
-            "type": "number"
-          },
-          {
-            "type": "null"
-          }
-        ]
-      },
-      "title": "Delta Ms",
-      "type": "array"
-    },
-    "distance_m": {
-      "items": {
-        "minimum": 0,
-        "type": "number"
-      },
-      "maxItems": 5000,
-      "minItems": 2,
-      "title": "Distance M",
-      "type": "array"
-    },
-    "evidence": {
-      "items": {
-        "$ref": "#/$defs/MetricEvidence"
-      },
-      "title": "Evidence",
-      "type": "array"
-    },
-    "geometry": {
-      "$ref": "#/$defs/TrackGeometry"
-    },
-    "insufficient_evidence_reason": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "title": "Insufficient Evidence Reason"
-    },
-    "lap_a": {
-      "$ref": "#/$defs/LapMetadata"
-    },
-    "lap_b": {
-      "$ref": "#/$defs/LapMetadata"
-    },
-    "observations": {
-      "items": {
-        "$ref": "#/$defs/Observation"
-      },
-      "maxItems": 3,
-      "title": "Observations",
-      "type": "array"
-    },
-    "provenance": {
-      "$ref": "#/$defs/Provenance"
-    },
-    "quality": {
-      "$ref": "#/$defs/QualityReport"
-    },
-    "schema_version": {
-      "const": "1.0.0",
-      "default": "1.0.0",
-      "title": "Schema Version",
-      "type": "string"
-    },
-    "sector_boundaries_m": {
-      "maxItems": 2,
-      "minItems": 2,
-      "prefixItems": [
-        {
-          "minimum": 0,
-          "type": "number"
-        },
-        {
-          "minimum": 0,
-          "type": "number"
-        }
-      ],
-      "title": "Sector Boundaries M",
-      "type": "array"
-    },
-    "segments": {
-      "items": {
-        "$ref": "#/$defs/Segment"
-      },
-      "title": "Segments",
-      "type": "array"
-    },
-    "session": {
-      "$ref": "#/$defs/SessionIdentity"
-    },
-    "valid": {
-      "items": {
-        "type": "boolean"
-      },
-      "title": "Valid",
-      "type": "array"
-    }
+    "propertyName": "detail_level"
   },
-  "required": [
-    "comparison_id",
-    "provenance",
-    "session",
-    "lap_a",
-    "lap_b",
-    "distance_m",
-    "channels_a",
-    "channels_b",
-    "geometry",
-    "delta_ms",
-    "valid",
-    "sector_boundaries_m",
-    "quality",
-    "segments",
-    "evidence",
-    "observations",
-    "insufficient_evidence_reason"
-  ],
-  "title": "ComparisonArtifact",
-  "type": "object"
+  "oneOf": [
+    {
+      "$ref": "#/$defs/ComparisonArtifact"
+    },
+    {
+      "$ref": "#/$defs/SectorComparisonArtifact"
+    }
+  ]
 }

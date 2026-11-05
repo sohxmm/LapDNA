@@ -1,6 +1,95 @@
 {
   "components": {
     "schemas": {
+      "AnalysisSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/CornerClassSummary"
+            },
+            "maxItems": 3,
+            "minItems": 3,
+            "title": "Categories",
+            "type": "array"
+          },
+          "classification_rule": {
+            "const": "reference_apex_minimum_v1",
+            "title": "Classification Rule",
+            "type": "string"
+          },
+          "evidence_ids": {
+            "items": {
+              "pattern": "^[A-Za-z0-9_-]{1,100}$",
+              "type": "string"
+            },
+            "title": "Evidence Ids",
+            "type": "array"
+          },
+          "high_from_kph": {
+            "minimum": 0.0,
+            "title": "High From Kph",
+            "type": "number"
+          },
+          "limitations": {
+            "items": {
+              "maxLength": 600,
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          },
+          "medium_from_kph": {
+            "minimum": 0.0,
+            "title": "Medium From Kph",
+            "type": "number"
+          },
+          "pattern": {
+            "enum": [
+              "high_medium_gain_low_loss",
+              "mixed",
+              "insufficient"
+            ],
+            "title": "Pattern",
+            "type": "string"
+          },
+          "pattern_driver": {
+            "anyOf": [
+              {
+                "enum": [
+                  "A",
+                  "B"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pattern Driver"
+          },
+          "text": {
+            "maxLength": 600,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "categories",
+          "classification_rule",
+          "medium_from_kph",
+          "high_from_kph",
+          "pattern",
+          "pattern_driver",
+          "text",
+          "evidence_ids",
+          "limitations"
+        ],
+        "title": "AnalysisSummary",
+        "type": "object"
+      },
       "Catalog": {
         "additionalProperties": false,
         "properties": {
@@ -12,8 +101,8 @@
             "type": "array"
           },
           "schema_version": {
-            "const": "1.0.0",
-            "default": "1.0.0",
+            "const": "1.1.0",
+            "default": "1.1.0",
             "title": "Schema Version",
             "type": "string"
           }
@@ -24,9 +113,87 @@
         "title": "Catalog",
         "type": "object"
       },
+      "CompareRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "allow_cross_phase": {
+            "default": false,
+            "title": "Allow Cross Phase",
+            "type": "boolean"
+          },
+          "detail_level": {
+            "default": "auto",
+            "enum": [
+              "auto",
+              "telemetry",
+              "sector_only"
+            ],
+            "title": "Detail Level",
+            "type": "string"
+          },
+          "lap_a_id": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "title": "Lap A Id",
+            "type": "string"
+          },
+          "lap_b_id": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "title": "Lap B Id",
+            "type": "string"
+          },
+          "session_id": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "lap_a_id",
+          "lap_b_id"
+        ],
+        "title": "CompareRequest",
+        "type": "object"
+      },
+      "CompareResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact": {
+            "discriminator": {
+              "mapping": {
+                "sector_only": "#/components/schemas/SectorComparisonArtifact",
+                "telemetry": "#/components/schemas/ComparisonArtifact"
+              },
+              "propertyName": "detail_level"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ComparisonArtifact"
+              },
+              {
+                "$ref": "#/components/schemas/SectorComparisonArtifact"
+              }
+            ],
+            "title": "Artifact"
+          },
+          "swapped": {
+            "title": "Swapped",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "artifact",
+          "swapped"
+        ],
+        "title": "CompareResponse",
+        "type": "object"
+      },
       "ComparisonArtifact": {
         "additionalProperties": false,
         "properties": {
+          "analysis": {
+            "$ref": "#/components/schemas/AnalysisSummary"
+          },
           "channels_a": {
             "$ref": "#/components/schemas/DriverChannels"
           },
@@ -37,6 +204,13 @@
             "pattern": "^[A-Za-z0-9_-]{1,100}$",
             "title": "Comparison Id",
             "type": "string"
+          },
+          "corners": {
+            "items": {
+              "$ref": "#/components/schemas/CornerMarker"
+            },
+            "title": "Corners",
+            "type": "array"
           },
           "delta_ms": {
             "items": {
@@ -52,6 +226,11 @@
             "title": "Delta Ms",
             "type": "array"
           },
+          "detail_level": {
+            "const": "telemetry",
+            "title": "Detail Level",
+            "type": "string"
+          },
           "distance_m": {
             "items": {
               "minimum": 0.0,
@@ -60,6 +239,13 @@
             "maxItems": 5000,
             "minItems": 2,
             "title": "Distance M",
+            "type": "array"
+          },
+          "estimated_minisectors": {
+            "items": {
+              "$ref": "#/components/schemas/EstimatedMiniSector"
+            },
+            "title": "Estimated Minisectors",
             "type": "array"
           },
           "evidence": {
@@ -97,6 +283,9 @@
             "title": "Observations",
             "type": "array"
           },
+          "pairing": {
+            "$ref": "#/components/schemas/PairingContext"
+          },
           "provenance": {
             "$ref": "#/components/schemas/Provenance"
           },
@@ -104,8 +293,8 @@
             "$ref": "#/components/schemas/QualityReport"
           },
           "schema_version": {
-            "const": "1.0.0",
-            "default": "1.0.0",
+            "const": "1.1.0",
+            "default": "1.1.0",
             "title": "Schema Version",
             "type": "string"
           },
@@ -145,10 +334,12 @@
         },
         "required": [
           "comparison_id",
-          "provenance",
           "session",
           "lap_a",
           "lap_b",
+          "pairing",
+          "detail_level",
+          "provenance",
           "distance_m",
           "channels_a",
           "channels_b",
@@ -158,6 +349,9 @@
           "sector_boundaries_m",
           "quality",
           "segments",
+          "corners",
+          "estimated_minisectors",
+          "analysis",
           "evidence",
           "observations",
           "insufficient_evidence_reason"
@@ -171,6 +365,14 @@
           "comparison_id": {
             "pattern": "^[A-Za-z0-9_-]{1,100}$",
             "title": "Comparison Id",
+            "type": "string"
+          },
+          "detail_level": {
+            "enum": [
+              "telemetry",
+              "sector_only"
+            ],
+            "title": "Detail Level",
             "type": "string"
           },
           "lap_a": {
@@ -194,12 +396,215 @@
         },
         "required": [
           "comparison_id",
+          "detail_level",
           "session",
           "lap_a",
           "lap_b",
           "quality_status"
         ],
         "title": "ComparisonSummary",
+        "type": "object"
+      },
+      "CornerClassSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "a_wins": {
+            "minimum": 0.0,
+            "title": "A Wins",
+            "type": "integer"
+          },
+          "assessment": {
+            "enum": [
+              "insufficient",
+              "mixed",
+              "balanced",
+              "a_advantage",
+              "b_advantage"
+            ],
+            "title": "Assessment",
+            "type": "string"
+          },
+          "b_wins": {
+            "minimum": 0.0,
+            "title": "B Wins",
+            "type": "integer"
+          },
+          "distance_coverage": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Distance Coverage",
+            "type": "number"
+          },
+          "evidence_ids": {
+            "items": {
+              "pattern": "^[A-Za-z0-9_-]{1,100}$",
+              "type": "string"
+            },
+            "title": "Evidence Ids",
+            "type": "array"
+          },
+          "excluded_segment_ids": {
+            "items": {
+              "pattern": "^[A-Za-z0-9_-]{1,100}$",
+              "type": "string"
+            },
+            "title": "Excluded Segment Ids",
+            "type": "array"
+          },
+          "gains_a_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gains A Ms"
+          },
+          "gains_b_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gains B Ms"
+          },
+          "included_segment_ids": {
+            "items": {
+              "pattern": "^[A-Za-z0-9_-]{1,100}$",
+              "type": "string"
+            },
+            "title": "Included Segment Ids",
+            "type": "array"
+          },
+          "independent_units": {
+            "minimum": 0.0,
+            "title": "Independent Units",
+            "type": "integer"
+          },
+          "net_gain_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Gain Ms"
+          },
+          "neutral_units": {
+            "minimum": 0.0,
+            "title": "Neutral Units",
+            "type": "integer"
+          },
+          "sensitivity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GainSensitivity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "speed_class": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "title": "Speed Class",
+            "type": "string"
+          }
+        },
+        "required": [
+          "speed_class",
+          "included_segment_ids",
+          "excluded_segment_ids",
+          "independent_units",
+          "distance_coverage",
+          "gains_a_ms",
+          "gains_b_ms",
+          "net_gain_ms",
+          "a_wins",
+          "b_wins",
+          "neutral_units",
+          "sensitivity",
+          "assessment",
+          "evidence_ids"
+        ],
+        "title": "CornerClassSummary",
+        "type": "object"
+      },
+      "CornerMarker": {
+        "additionalProperties": false,
+        "properties": {
+          "distance_m": {
+            "minimum": 0.0,
+            "title": "Distance M",
+            "type": "number"
+          },
+          "label": {
+            "maxLength": 600,
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          },
+          "marker_id": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "title": "Marker Id",
+            "type": "string"
+          },
+          "number": {
+            "minimum": 1.0,
+            "title": "Number",
+            "type": "integer"
+          },
+          "reference_speed_kph": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Speed Kph"
+          },
+          "segment_id": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "title": "Segment Id",
+            "type": "string"
+          },
+          "speed_class": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "unknown"
+            ],
+            "title": "Speed Class",
+            "type": "string"
+          }
+        },
+        "required": [
+          "marker_id",
+          "number",
+          "label",
+          "distance_m",
+          "segment_id",
+          "reference_speed_kph",
+          "speed_class"
+        ],
+        "title": "CornerMarker",
         "type": "object"
       },
       "DistanceScale": {
@@ -314,6 +719,34 @@
         "title": "DriverChannels",
         "type": "object"
       },
+      "DriverEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "driver_code": {
+            "pattern": "^[A-Z0-9]{2,4}$",
+            "title": "Driver Code",
+            "type": "string"
+          },
+          "driver_name": {
+            "maxLength": 600,
+            "minLength": 1,
+            "title": "Driver Name",
+            "type": "string"
+          },
+          "driver_number": {
+            "pattern": "^[0-9]{1,3}$",
+            "title": "Driver Number",
+            "type": "string"
+          }
+        },
+        "required": [
+          "driver_number",
+          "driver_code",
+          "driver_name"
+        ],
+        "title": "DriverEntry",
+        "type": "object"
+      },
       "ErrorDetail": {
         "additionalProperties": false,
         "properties": {
@@ -344,6 +777,45 @@
           "error"
         ],
         "title": "ErrorResponse",
+        "type": "object"
+      },
+      "EstimatedMiniSector": {
+        "additionalProperties": false,
+        "properties": {
+          "end_m": {
+            "minimum": 0.0,
+            "title": "End M",
+            "type": "number"
+          },
+          "gain_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gain Ms"
+          },
+          "source": {
+            "const": "derived_telemetry",
+            "title": "Source",
+            "type": "string"
+          },
+          "start_m": {
+            "minimum": 0.0,
+            "title": "Start M",
+            "type": "number"
+          }
+        },
+        "required": [
+          "source",
+          "start_m",
+          "end_m",
+          "gain_ms"
+        ],
+        "title": "EstimatedMiniSector",
         "type": "object"
       },
       "GainSensitivity": {
@@ -429,20 +901,29 @@
             "title": "Lap Time Ms",
             "type": "number"
           },
+          "phase": {
+            "enum": [
+              "Q1",
+              "Q2",
+              "Q3"
+            ],
+            "title": "Phase",
+            "type": "string"
+          },
           "sector_times_ms": {
             "maxItems": 3,
             "minItems": 3,
             "prefixItems": [
               {
-                "minimum": 0.0,
+                "exclusiveMinimum": 0.0,
                 "type": "number"
               },
               {
-                "minimum": 0.0,
+                "exclusiveMinimum": 0.0,
                 "type": "number"
               },
               {
-                "minimum": 0.0,
+                "exclusiveMinimum": 0.0,
                 "type": "number"
               }
             ],
@@ -468,6 +949,7 @@
         },
         "required": [
           "lap_id",
+          "phase",
           "driver_code",
           "driver_name",
           "driver_number",
@@ -479,6 +961,131 @@
           "track_status"
         ],
         "title": "LapMetadata",
+        "type": "object"
+      },
+      "LapOption": {
+        "additionalProperties": false,
+        "properties": {
+          "capability": {
+            "enum": [
+              "telemetry",
+              "sector_only",
+              "unavailable"
+            ],
+            "title": "Capability",
+            "type": "string"
+          },
+          "driver_code": {
+            "pattern": "^[A-Z0-9]{2,4}$",
+            "title": "Driver Code",
+            "type": "string"
+          },
+          "driver_name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Driver Name",
+            "type": "string"
+          },
+          "driver_number": {
+            "pattern": "^[0-9]{1,3}$",
+            "title": "Driver Number",
+            "type": "string"
+          },
+          "lap_id": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "title": "Lap Id",
+            "type": "string"
+          },
+          "lap_number": {
+            "minimum": 1.0,
+            "title": "Lap Number",
+            "type": "integer"
+          },
+          "lap_time_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lap Time Ms"
+          },
+          "phase": {
+            "enum": [
+              "Q1",
+              "Q2",
+              "Q3"
+            ],
+            "title": "Phase",
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "maxLength": 600,
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "sector_times_ms": {
+            "maxItems": 3,
+            "minItems": 3,
+            "prefixItems": [
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0.0,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0.0,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0.0,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            ],
+            "title": "Sector Times Ms",
+            "type": "array"
+          }
+        },
+        "required": [
+          "lap_id",
+          "phase",
+          "driver_code",
+          "driver_name",
+          "driver_number",
+          "lap_number",
+          "lap_time_ms",
+          "sector_times_ms",
+          "capability",
+          "reasons"
+        ],
+        "title": "LapOption",
         "type": "object"
       },
       "MetricEvidence": {
@@ -706,6 +1313,34 @@
         "title": "Observation",
         "type": "object"
       },
+      "PairingContext": {
+        "additionalProperties": false,
+        "properties": {
+          "mode": {
+            "enum": [
+              "same_phase",
+              "cross_phase"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "maxLength": 600,
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "mode",
+          "warnings"
+        ],
+        "title": "PairingContext",
+        "type": "object"
+      },
       "Provenance": {
         "additionalProperties": false,
         "properties": {
@@ -760,10 +1395,10 @@
           "fastf1_version",
           "pipeline_version",
           "methodology_version",
-          "reference_sha256",
           "source_snapshot_sha256",
           "generated_at",
           "source_session",
+          "reference_sha256",
           "circuit_revision",
           "reference_lap_id"
         ],
@@ -918,6 +1553,144 @@
         "title": "ReconciliationCheck",
         "type": "object"
       },
+      "SectorComparisonArtifact": {
+        "additionalProperties": false,
+        "properties": {
+          "comparison_id": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "title": "Comparison Id",
+            "type": "string"
+          },
+          "cumulative_delta_ms": {
+            "maxItems": 3,
+            "minItems": 3,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Cumulative Delta Ms",
+            "type": "array"
+          },
+          "detail_level": {
+            "const": "sector_only",
+            "title": "Detail Level",
+            "type": "string"
+          },
+          "fallback_reason": {
+            "maxLength": 600,
+            "minLength": 1,
+            "title": "Fallback Reason",
+            "type": "string"
+          },
+          "lap_a": {
+            "$ref": "#/components/schemas/LapMetadata"
+          },
+          "lap_b": {
+            "$ref": "#/components/schemas/LapMetadata"
+          },
+          "pairing": {
+            "$ref": "#/components/schemas/PairingContext"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/TimingProvenance"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/SectorQuality"
+          },
+          "schema_version": {
+            "const": "1.1.0",
+            "default": "1.1.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "sector_delta_ms": {
+            "maxItems": 3,
+            "minItems": 3,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Sector Delta Ms",
+            "type": "array"
+          },
+          "session": {
+            "$ref": "#/components/schemas/SessionIdentity"
+          }
+        },
+        "required": [
+          "comparison_id",
+          "session",
+          "lap_a",
+          "lap_b",
+          "pairing",
+          "detail_level",
+          "provenance",
+          "quality",
+          "fallback_reason",
+          "sector_delta_ms",
+          "cumulative_delta_ms"
+        ],
+        "title": "SectorComparisonArtifact",
+        "type": "object"
+      },
+      "SectorQuality": {
+        "additionalProperties": false,
+        "properties": {
+          "checks": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "$ref": "#/components/schemas/ReconciliationCheck"
+              },
+              {
+                "$ref": "#/components/schemas/ReconciliationCheck"
+              }
+            ],
+            "title": "Checks",
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "warn",
+              "block"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "maxLength": 600,
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "warnings",
+          "checks"
+        ],
+        "title": "SectorQuality",
+        "type": "object"
+      },
       "Segment": {
         "additionalProperties": false,
         "properties": {
@@ -994,6 +1767,24 @@
             "title": "Segment Id",
             "type": "string"
           },
+          "speed_class": {
+            "anyOf": [
+              {
+                "enum": [
+                  "low",
+                  "medium",
+                  "high",
+                  "mixed",
+                  "unknown"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speed Class"
+          },
           "start_m": {
             "minimum": 0.0,
             "title": "Start M",
@@ -1003,6 +1794,7 @@
         "required": [
           "segment_id",
           "kind",
+          "speed_class",
           "label",
           "start_m",
           "end_m",
@@ -1032,20 +1824,16 @@
             "title": "Event Name",
             "type": "string"
           },
-          "phase": {
-            "enum": [
-              "Q1",
-              "Q2",
-              "Q3"
-            ],
-            "title": "Phase",
-            "type": "string"
-          },
           "round": {
             "maximum": 30.0,
             "minimum": 1.0,
             "title": "Round",
             "type": "integer"
+          },
+          "session_id": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "title": "Session Id",
+            "type": "string"
           },
           "session_type": {
             "const": "Q",
@@ -1061,13 +1849,149 @@
           }
         },
         "required": [
+          "session_id",
           "year",
           "round",
-          "phase",
           "circuit_id",
           "event_name"
         ],
         "title": "SessionIdentity",
+        "type": "object"
+      },
+      "SessionInventory": {
+        "additionalProperties": false,
+        "properties": {
+          "schema_version": {
+            "const": "1.1.0",
+            "default": "1.1.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/SessionSummary"
+            },
+            "title": "Sessions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "sessions"
+        ],
+        "title": "SessionInventory",
+        "type": "object"
+      },
+      "SessionLapIndex": {
+        "additionalProperties": false,
+        "properties": {
+          "drivers": {
+            "items": {
+              "$ref": "#/components/schemas/DriverEntry"
+            },
+            "title": "Drivers",
+            "type": "array"
+          },
+          "laps": {
+            "items": {
+              "$ref": "#/components/schemas/LapOption"
+            },
+            "title": "Laps",
+            "type": "array"
+          },
+          "schema_version": {
+            "const": "1.1.0",
+            "default": "1.1.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session": {
+            "$ref": "#/components/schemas/SessionIdentity"
+          },
+          "source_snapshot_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Source Snapshot Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session",
+          "source_snapshot_sha256",
+          "drivers",
+          "laps"
+        ],
+        "title": "SessionLapIndex",
+        "type": "object"
+      },
+      "SessionSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "driver_count": {
+            "minimum": 0.0,
+            "title": "Driver Count",
+            "type": "integer"
+          },
+          "selectable_lap_count": {
+            "minimum": 0.0,
+            "title": "Selectable Lap Count",
+            "type": "integer"
+          },
+          "session": {
+            "$ref": "#/components/schemas/SessionIdentity"
+          }
+        },
+        "required": [
+          "session",
+          "driver_count",
+          "selectable_lap_count"
+        ],
+        "title": "SessionSummary",
+        "type": "object"
+      },
+      "TimingProvenance": {
+        "additionalProperties": false,
+        "properties": {
+          "fastf1_version": {
+            "title": "Fastf1 Version",
+            "type": "string"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "methodology_version": {
+            "title": "Methodology Version",
+            "type": "string"
+          },
+          "pipeline_version": {
+            "title": "Pipeline Version",
+            "type": "string"
+          },
+          "source": {
+            "const": "fastf1",
+            "default": "fastf1",
+            "title": "Source",
+            "type": "string"
+          },
+          "source_session": {
+            "title": "Source Session",
+            "type": "string"
+          },
+          "source_snapshot_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Source Snapshot Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fastf1_version",
+          "pipeline_version",
+          "methodology_version",
+          "source_snapshot_sha256",
+          "generated_at",
+          "source_session"
+        ],
+        "title": "TimingProvenance",
         "type": "object"
       },
       "TrackGeometry": {
@@ -1146,6 +2070,74 @@
         "summary": "Catalog"
       }
     },
+    "/api/v1/compare": {
+      "post": {
+        "operationId": "compare_api_v1_compare_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompareRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompareResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Compare"
+      }
+    },
     "/api/v1/comparisons/{comparison_id}": {
       "get": {
         "operationId": "comparison_api_v1_comparisons__comparison_id__get",
@@ -1166,7 +2158,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ComparisonArtifact"
+                  "discriminator": {
+                    "mapping": {
+                      "sector_only": "#/components/schemas/SectorComparisonArtifact",
+                      "telemetry": "#/components/schemas/ComparisonArtifact"
+                    },
+                    "propertyName": "detail_level"
+                  },
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ComparisonArtifact"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SectorComparisonArtifact"
+                    }
+                  ],
+                  "title": "Response Comparison Api V1 Comparisons  Comparison Id  Get"
                 }
               }
             },
@@ -1222,6 +2229,94 @@
           }
         },
         "summary": "Health"
+      }
+    },
+    "/api/v1/sessions": {
+      "get": {
+        "operationId": "session_inventory_api_v1_sessions_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionInventory"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Session Inventory"
+      }
+    },
+    "/api/v1/sessions/{session_id}/laps": {
+      "get": {
+        "operationId": "session_laps_api_v1_sessions__session_id__laps_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9_-]{1,100}$",
+              "title": "Session Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionLapIndex"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Session Laps"
       }
     }
   }

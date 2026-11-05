@@ -9,15 +9,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from lapdna import __version__
-from lapdna.models import Catalog, ComparisonArtifact, ErrorResponse, Health
+from lapdna.inventory import (
+    CompareRequest, CompareResponse, SelectionError, SessionInventory, SessionLapIndex, SessionStore,
+)
+from lapdna.models import Artifact, Catalog, ErrorResponse, Health
 from lapdna.store import ArtifactNotFound, ArtifactStore, InvalidArtifact, QualityBlocked
 
 
-def create_app(artifact_dir: Path | None = None) -> FastAPI:
+def create_app(artifact_dir: Path | None = None, session_dir: Path | None = None) -> FastAPI:
     application = FastAPI(title="LapDNA API", version=__version__)
     default_dir = Path(__file__).resolve().parents[4] / "data" / "artifacts"
     directory = artifact_dir or Path(os.getenv("LAPDNA_ARTIFACT_DIR", str(default_dir)))
     store = ArtifactStore(directory)
+    sessions = SessionStore(session_dir or Path(os.getenv("LAPDNA_SESSION_DIR", str(directory.parent / "sessions"))))
     origins = [origin.strip() for origin in os.getenv(
         "LAPDNA_CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
     ).split(",") if origin.strip()]
@@ -25,8 +29,8 @@ def create_app(artifact_dir: Path | None = None) -> FastAPI:
         CORSMiddleware,
         allow_origins=origins,
         allow_credentials=False,
-        allow_methods=["GET"],
-        allow_headers=["Accept"],
+        allow_methods=["GET", "POST"],
+        allow_headers=["Accept", "Content-Type"],
     )
 
     @application.exception_handler(ArtifactNotFound)
@@ -53,6 +57,12 @@ def create_app(artifact_dir: Path | None = None) -> FastAPI:
             "code": "quality_blocked", "message": "This comparison did not pass its data quality checks."
         }})
 
+    @application.exception_handler(SelectionError)
+    async def invalid_selection(_request, error: SelectionError):
+        return JSONResponse(status_code=error.status, content={"error": {
+            "code": error.code, "message": error.message,
+        }})
+
     @application.get("/api/v1/health", response_model=Health)
     def health() -> Health:
         return Health(version=__version__)
@@ -63,11 +73,31 @@ def create_app(artifact_dir: Path | None = None) -> FastAPI:
     def catalog() -> Catalog:
         return store.catalog()
 
-    @application.get("/api/v1/comparisons/{comparison_id}", response_model=ComparisonArtifact, responses={
+    @application.get("/api/v1/comparisons/{comparison_id}", response_model=Artifact, responses={
         404: {"model": ErrorResponse}, 422: {"model": ErrorResponse}, 503: {"model": ErrorResponse},
     })
-    def comparison(comparison_id: str = ApiPath(pattern=r"^[A-Za-z0-9_-]{1,100}$")) -> ComparisonArtifact:
+    def comparison(comparison_id: str = ApiPath(pattern=r"^[A-Za-z0-9_-]{1,100}$")) -> Artifact:
         return store.load(comparison_id)
+
+    @application.get("/api/v1/sessions", response_model=SessionInventory, responses={503: {"model": ErrorResponse}})
+    def session_inventory() -> SessionInventory:
+        return sessions.inventory()
+
+    @application.get("/api/v1/sessions/{session_id}/laps", response_model=SessionLapIndex, responses={
+        404: {"model": ErrorResponse}, 422: {"model": ErrorResponse}, 503: {"model": ErrorResponse},
+    })
+    def session_laps(session_id: str = ApiPath(pattern=r"^[A-Za-z0-9_-]{1,100}$")) -> SessionLapIndex:
+        try:
+            return sessions.load(session_id)
+        except ArtifactNotFound as exc:
+            raise SelectionError(404, "session_not_found", "This session has not been imported.") from exc
+
+    @application.post("/api/v1/compare", response_model=CompareResponse, responses={
+        404: {"model": ErrorResponse}, 409: {"model": ErrorResponse},
+        422: {"model": ErrorResponse}, 503: {"model": ErrorResponse},
+    })
+    def compare(request: CompareRequest) -> CompareResponse:
+        return sessions.compare(request, store)
 
     return application
 
