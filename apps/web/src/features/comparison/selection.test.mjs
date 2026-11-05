@@ -1,0 +1,37 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { initialDraft, changeMode, changePhase, changeDriver } from './selection.ts';
+import { traceView } from './resultView.ts';
+
+const drivers = ['1', '2', '3'].map(n => ({ driver_number: n, driver_code: 'D' + n, driver_name: 'Test ' + n }));
+const lap = (driver_number, phase, lap_number, lap_time_ms, capability = 'telemetry') => ({
+  driver_number, phase, lap_number, lap_time_ms, capability,
+  lap_id: [driver_number, phase, lap_number].join('_'),
+});
+const index = { drivers, laps: [
+  lap('1','Q1',1,80000), lap('1','Q2',2,79000), lap('1','Q2',3,79000),
+  lap('1','Q2',4,78000,'unavailable'), lap('1','Q3',5,77000),
+  lap('2','Q1',1,81000), lap('2','Q2',2,80000), lap('3','Q1',1,82000),
+] };
+test('default selects fastest eligible laps in highest common phase with lower lap as tie-break', () => {
+  const draft = initialDraft(index);
+  assert.deepEqual([draft.a.lapId, draft.b.lapId], ['1_Q2_2','2_Q2_2']);
+});
+test('changing an independent phase preserves the other slot, relinking finds the highest common phase', () => {
+  const draft = changeMode(index, initialDraft(index), true);
+  draft.a.lapId = '1_Q2_3';
+  const changed = changePhase(index, draft, 'b', 'Q1');
+  assert.deepEqual([changed.a.lapId, changed.b.lapId], ['1_Q2_3','2_Q1_1']);
+  assert.equal(changeMode(index, changed, false).b.lapId, '2_Q2_2');
+  assert.equal(changeDriver(index, changed, 'b', '3').a.lapId, '1_Q2_3');
+});
+test('a reversed result exchanges channel roles and negates delta and minisectors, preserving unsupported samples', () => {
+  const channels = speed => ({ speed_kph: speed, brake: [], throttle_pct: [], gear: [] });
+  const fixture = { segments: [{ segment_id:'t1', start_m:0,end_m:100 }], corners:[
+    {segment_id:'t1',label:'T1',distance_m:40,speed_class:'low'}], lap_a:{driver_code:'XA'},lap_b:{driver_code:'XB'},
+    channels_a:channels([50]),channels_b:channels([45]),delta_ms:[null,123],distance_m:[0,100],
+    sector_boundaries_m:[30,65],estimated_minisectors:[{start_m:0,end_m:100,gain_ms:123}] };
+  const view = traceView(fixture,true);
+  assert.deepEqual([view.nameA,view.nameB,view.a.speed,view.delta,view.bins[0].gain], ['XB','XA',[45],[null,-123],-123]);
+  assert.equal(view.turns[0].at,40);
+});

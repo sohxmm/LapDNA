@@ -30,5 +30,6 @@ jobs:
           npm run contracts:check
       - name: Check and build web
         run: |
+          npm run test:web
           npm run typecheck
           npm run build

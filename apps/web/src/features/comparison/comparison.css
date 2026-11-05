@@ -1,0 +1,27 @@
+.session-browser { margin: 22px 0; padding: clamp(18px, 3vw, 34px); border: 1px solid var(--border); background: #11191f; min-width: 0; }
+.session-browser h2 { margin: 0 0 16px; font-size: clamp(20px, 3vw, 28px); }
+.session-browser p, .session-browser li { line-height: 1.55; }
+.session-browser select { width: 100%; min-width: 0; min-height: 44px; margin-top: 5px; padding: 6px 10px; border: 1px solid #52616b; border-radius: 3px; color: #e8eef1; background: #0b1014; font: inherit; }
+.session-browser :where(select, summary, input):focus-visible { outline: 2px solid var(--a); outline-offset: 3px; }
+.sc-session, .sc-slot label { display: block; margin: 12px 0; font-size: 13px; color: #c5d1d8; }
+.sc-session { max-width: 460px; }
+.sc-muted { color: var(--muted); font-size: 13px; }
+.sc-slots, .sc-lap-cards { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; margin: 16px 0; }
+.sc-slot { min-width: 0; margin: 0; border: 1px solid #38454e; padding: 6px 16px 14px; }
+.sc-slot legend { font-weight: 700; padding: 0 6px; }
+.sc-slot-a legend,.sc-lap-cards > div:first-child strong { color: var(--a); }
+.sc-slot-b legend,.sc-lap-cards > div:last-child strong { color: var(--b); }
+.sc-switch { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; font-size: 14px; }
+.sc-switch input { width: 18px; height: 18px; accent-color: var(--a); }
+.sc-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 16px 0 4px; }
+.sc-compare { border: 0; border-radius: 3px; padding: 10px 18px; min-height: 44px; background: var(--a); color: #081619; font-weight: 700; cursor: pointer; }
+.sc-actions .secondary-button { margin: 0; min-height: 44px; }
+.sc-actions button:disabled { opacity: .48; cursor: default; }
+.sc-warning { padding: 10px 14px; border-left: 3px solid #edbb72; background: #302b22; color: #f4d8a8; }
+.sc-result { margin-top: 28px; border-top: 1px solid var(--border); padding-top: 24px; min-width: 0; }
+.sc-lap-cards > div { padding: 12px 14px; background: #192329; }
+.sc-lap-cards p { margin: 5px 0; }
+.sc-analysis { margin: 18px 0; }
+.sc-category { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.sc-category summary,.sc-slot summary,.session-browser form summary { cursor: pointer; }
+@media (max-width: 640px) { .sc-slots,.sc-lap-cards { grid-template-columns: 1fr; } .session-browser { padding: 16px; } }
