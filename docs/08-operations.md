@@ -1,75 +1,86 @@
-# Local operation, data preparation and release
+# Local operation, preparation and release
 
-## Current setup
+## Current scaffold
 
-The repository targets Node 24 and Python 3.11. The root README gives exact install/start commands. No system-wide dependency installation is needed. The root `.venv`, npm dependencies, caches, logs and telemetry data are ignored.
-
-`npm run dev` starts the client on `127.0.0.1:5173` and proxies `/api` to `127.0.0.1:8000`. Run Uvicorn separately with the root virtual environment. Stop either foreground server with Ctrl+C. When not running, the browser URL will be unavailable; that is normal for this local scaffold.
-
-The API's default artifact directory is `<repository>/data/artifacts`. Set `LAPDNA_ARTIFACT_DIR` to an absolute directory to override it. Relative overrides resolve against the API process working directory. `LAPDNA_CORS_ORIGINS` is a comma-separated explicit allowlist; defaults cover localhost and 127.0.0.1 on port 5173. `.env.example` is documentation only; the scaffold does not auto-load `.env`.
-
-Do not activate a global Python environment or copy credentials into the example file. In PowerShell an optional explicit override is:
+Use the [README](../README.md) setup for Node 24, Python 3.11, the root virtual environment and locked dependencies. From the repository root, start the API and client in separate terminals:
 
 ```powershell
-$env:LAPDNA_ARTIFACT_DIR = (Resolve-Path ./data/artifacts).Path
 .venv\Scripts\python -m uvicorn lapdna.main:app --host 127.0.0.1 --port 8000
 ```
 
-## Planned operator commands
+```powershell
+npm run dev
+```
 
-The following interface is assigned to T01–T05 and **does not exist in the scaffold**:
+Vite serves the client at `http://127.0.0.1:5173` and proxies `/api` to port 8000. Ctrl+C stops either foreground process. The normal workspace displays imported data availability. Its explicitly labeled synthetic design preview demonstrates chart interactions. The optional standard-library source probe in [sources](09-sources.md) checks historical OpenF1 availability; it saves no session or comparison.
+
+| Current setting | Behavior |
+| --- | --- |
+| `LAPDNA_ARTIFACT_DIR` | Defaults to `data/artifacts` under the repository. Holds locally prepared comparison JSON. |
+| `LAPDNA_SESSION_DIR` | Defaults to the `sessions` sibling of the selected artifact directory. Holds local session lap indexes. |
+| `LAPDNA_CORS_ORIGINS` | Comma-separated allowed origins. Local defaults include localhost and 127.0.0.1 on port 5173. |
+
+Prefer absolute override paths. Relative values use the API process working directory. The example environment file documents settings; set PowerShell variables explicitly when needed. Never place credentials in the repository.
+
+Current GET routes expose health, session inventory, session laps, prepared catalogue and immutable result lookup. `POST /api/v1/compare` validates a request and can return a compatible prepared result, with a swap flag for reverse order. A new uncached selection currently returns `comparison_not_prepared`. A missing selected import returns `data_not_imported`. [The contract](05-contracts.md) distinguishes capability, bad identity and transport failures. T05 replaces the prepared-only miss behavior with bounded local computation.
+
+## Planned operator interfaces
+
+The CLI below is the target for T01–T05. Implement via `argparse`, with help, configurable local paths, a concise summary, JSON report path and nonzero exit on failure.
 
 ```text
 python -m lapdna.cli import-session --circuit monza --year 2024 --event "Italian Grand Prix" --session Q
-python -m lapdna.cli list-laps --snapshot <manifest-path> --phase Q3 --output <report-path>
-python -m lapdna.cli build-reference --snapshot <manifest-path> --profile <profile-path>
-python -m lapdna.cli build-comparison --snapshot <manifest-path> --profile <profile-path> --lap-a <id> --lap-b <id>
-python -m lapdna.cli validate --artifact <path> --review <review-path>
-python -m lapdna.cli publish --artifacts <validated-directory> --review <review-path>
+python -m lapdna.cli list-laps --snapshot <manifest> --output <report>
+python -m lapdna.cli build-reference --snapshot <manifest> --profile <profile>
+python -m lapdna.cli normalize-session --snapshot <manifest> --reference <reference> --output <revision-directory>
+python -m lapdna.cli build-comparison --session-revision <revision> --lap-a <id> --lap-b <id> --detail-level auto
+python -m lapdna.cli validate --artifact <artifact> --review <review-record>
+python -m lapdna.cli publish --session-revision <revision> --review <review-record>
 ```
 
-Use argparse for a small command tree; do not add a CLI framework by default. Each command emits a compact summary and JSON report path, exits 0 on success and nonzero on unsupported/unavailable/invalid input. `--help` must identify required inputs and local-only side effects. Parameterize output directories; never delete an entire data directory on an import failure.
+Only `import-session` contacts upstream. It uses a project-local cache, an explicitly resolved event, bounded retries for transient source failures, a sanitized manifest and atomic snapshot writes. Authentication and input errors fail immediately. A repeat import reuses a matching valid immutable snapshot; `--refresh` obtains a new revision. `list-laps` may take an optional phase filter for inspection; all participants/laps remain in the stored inventory. `build-comparison` takes `--allow-cross-phase` when the supplied phases differ. It exercises the same local selection/resolver/validator used by the API.
 
-`import-session` obtains source data; `build-reference` fixes the common geometry; `build-comparison` computes without publishing; `validate` checks a candidate; `publish` promotes only reviewed eligible outputs. These separation points make a later automation possible without hiding quality checks. Rate-limit source access, reuse supported caches and retry only transient errors with bounded backoff (three attempts, approximately 2/4/8 s plus small jitter). Do not retry authentication errors or corrupted inputs indefinitely.
+## Preparing a qualifying session
 
-## Preparing the next qualifying analysis
+1. Verify the completed conventional qualifying event and layout against the supported schedule. Resolve the upstream identity through the pinned FastF1 adapter and supported account flow. Capture retrieval UTC, versions, source coverage, counts and digests.
+2. Inspect the complete source roster and each driver's actual Q1/Q2/Q3 laps. Record timing/telemetry capabilities, eligibility reasons, known dry context and missing phases. Retain rejected rows or unknown-phase diagnostics for reconciliation. An eliminated driver's absent later phases stay unavailable.
+3. Review the versioned circuit reference, turn labels and distance mapping, including branch order at a crossover. Confirm disjoint region windows, native reference apex supports and the frozen 150/250 km/h bands. Preserve rejected/unstable classes as unknown. A changed profile, source snapshot or methodology starts a new revision.
+4. Normalize each eligible lap **once offline** to the canonical grid with 100 m bin edges and region/sector/turn markers. Save aligned arrays, the native evidence inputs T05 needs, masks and diagnostics alongside the session index under separate data paths. Keep sector-only eligible records even when spatial normalization fails. Run required individual timing checks before promotion.
+5. Build the representative matrix in [verification](07-verification.md), including new local cache misses, reversed selections, two phase contexts and reduced capability. Validate appropriate tiers independently. For promoted editorial examples, match actual lap rows to official documents, review all warnings and verify every selected claim.
+6. Atomically promote a validated **session revision** with its manifest and optional highlighted examples. This turns on all indexed eligible selections, including pairs with no existing result. Preserve the old complete revision for rollback. No pairwise cartesian prebuild is required.
+7. Open a newly computed real comparison, inspect its turn ruler, category analysis and both export formats. Publish analysis cards through a deliberate editorial action. The application generates exports locally.
 
-1. Confirm the event has completed and the supported source can load all required channels, timing, phases and validity flags. Check the pinned release's authentication requirements through its supported flow; never log credentials.
-2. Import an immutable session snapshot and inspect its inventory and source manifest.
-3. Review eligibility and select one common phase and four drivers. Record actual lap IDs and context; do not assume a driver's absolute fastest session lap is comparable.
-4. Confirm circuit layout/config compatibility; create a new reference revision for a new session rather than silently reusing another event's distances.
-5. Generate all intended pairs, run reconciliation and evidence checks, and review top observations and geometry. Investigate failures without hiding them.
-6. Record official source links and external verification scope. Review every warning before promotion.
-7. Publish the validated immutable artifacts with one atomic catalogue switch. Keep previous revision for rollback.
-8. Open representative comparisons, inspect PNG/JSON exports, then release the served artifact set. Publication of a social post is not automated by the MVP.
+## Serving a new pair after T05
 
-## Failure and recovery rules
+The service reads the selected session revision, validates exact driver/lap/phase identities and cross-phase opt-in, then checks the content-addressed result index. When the result is absent it computes from the two local normalized records/native-support sidecars, runs the quality gates and atomically persists the result. Do not start a source import, fetch source lap data or build an entire session on an HTTP request.
 
-| Failure | Required behavior |
+Canonicalize A/B for cache identity and use the order flag on return. Include method/config, source revision, profile/reference, selected IDs and output tier in the key. A changed input creates a different ID. Concurrent requests for one key share one builder. Bound simultaneous different-key builders, queued work, file sizes and disposable cache capacity using the documented runtime limits; shed excess load explicitly. A request interrupted before promotion leaves either the previous valid file or no file.
+
+Distinguish disposable decoded-array/hot-result caches from immutable shared results. Persist a successful result/identity on durable storage before emitting a share URL. Evicting a hot cache entry must still allow exact lookup or deterministic regeneration under its retained immutable revision. Keep published examples and shared-result provenance across restarts and dataset rollovers. If durable capacity is exhausted, fail new promotion explicitly and preserve existing shared results; expand/archive storage through an operator action. Avoid silently changing an ID's inputs or returning a different selection.
+
+## Failure and recovery
+
+| Failure | Behavior |
 | --- | --- |
-| Authentication/access unavailable | Show actual source failure; preserve old published data; no password in code/logs |
-| Data incomplete shortly after session | Do not publish partial analysis; retry later explicitly with a new snapshot |
-| Remote schema/API changes | Stop importer, record installed version and failing field, update adapter/test deliberately |
-| Timing/geometry guardrail failure | Keep rejection report; withhold local claims; inspect clocks/reference/coverage |
-| Corrupt published file | API fails clearly; restore the prior checked artifact/manifest and investigate source of corruption |
-| Missing comparison | 404 with prepared-data explanation; no on-demand remote import |
-| New pipeline version | Rebuild into new IDs/revisions; old immutable URLs keep their existing meaning |
-| Failed publication | Old catalogue remains active; remove only the known temporary file after inspecting it |
+| Authentication or source change during import | Report resolved event, pinned release and sanitized reason. Leave the previous revision active. |
+| Timing/validity missing | Record exclusion and disable actual lap/phase as applicable. Operator inspects source evidence. |
+| Telemetry absent, alignment or interior check blocked | For auto selection, use independently eligible recorded sector timing with the fallback reason. Explicit telemetry requires eligible telemetry. Never fill a spatial gap from sector ends. |
+| Timing also fails | Withhold both tiers, return the failure and retain diagnostics. |
+| Unknown session, foreign/unknown lap, same driver or cross-phase disabled | Return the corresponding selection error before doing numerical work. Preserve the reader's selection for correction. |
+| Local builder busy, crashed or disk full | Report retryable capacity/failure as appropriate. Remove only owned temporary files, keep last complete revision/IDs and permit a safe retry. |
+| Invalid artifact, revision or manifest | Reject corrupted data, log IDs/digests and restore a checked previous revision; never substitute an unrelated comparison. |
+| Missing immutable link | Explain the missing result. Preserve the original ID and return a recovery path to session selection. |
 
-Logs should include comparison/session IDs, phase, pipeline version, counts, runtime and safe reason codes. Exclude source credentials, private cache contents and authentication headers. Browser errors should explain recovery without revealing local filesystem paths.
+Log request/revision IDs, lap phases, chosen tier, cache hit/miss, build time and safe reason codes. Keep credentials, auth headers, raw source samples and local filesystem paths outside public responses.
 
 ## Production target for T12
 
-Use a Linux runtime with the pinned Python environment, the Vite production bundle, and read-only prepared artifacts. Serve the browser and `/api` from the same origin. Allow only GET to the public API. Keep import commands separate from the web process. Add immutable caching for content-addressed comparisons, revalidation for catalogue, response compression and health checks. Avoid caching transient errors as successful content.
+Serve the Vite bundle and FastAPI under one origin. Provide read-only validated session indexes/prealigned data, a durable writable result store and a bounded disposable cache as distinct responsibilities. Permit the documented GET endpoints and `POST /api/v1/compare` only; operator revision promotion uses offline local commands. Keep import dependencies/credentials out of the serving image wherever possible. Health checks, compression, immutable result caching, short inventory revalidation, bounds and clear error handling belong to packaging.
 
-No container/provider has been configured or deployed in T00. Create and test the image only after the data pipeline and routes are stable. Production environment must specify the artifact mount; the source-relative development default is not a deployment-storage strategy. Keep source credentials out of runtime images and frontend environment variables. If upstream access is unnecessary for serving prepared artifacts, do not provide those credentials to the web service at all.
+Verify startup and cold pair resolution with upstream networking disabled. Verify concurrent builders, restarts, corrupt-data rejection, independent rollback and shared-link persistence. Record actual environment, measurements and URL only after a release has passed [verification](07-verification.md).
 
-## Git workflow
+## Commits and handoff
 
-The requested destination is `https://github.com/sohxmm/LapDNA.git`; the empty repository is initialized on `main`. Use the current configured user identity. Commit and push each small completed feature after relevant checks; commit subjects describe changes without tool/model attribution. Do not force push or rewrite shared history. When a later task explicitly needs isolation, use a `codex/` feature branch and keep each checked feature separately committed.
+Push checked, small completed feature commits to the configured branch of [sohxmm/LapDNA](https://github.com/sohxmm/LapDNA). Use existing Git identity, factual imperative subjects and reviewed staged files. Preserve existing history. Exclude credentials, environments, dependency directories, local caches, bulk source telemetry, machine-specific paths and transient exports from Git.
 
-Before committing, inspect staged filenames and diff statistics. Exclude `.venv`, node_modules, data caches, credentials, exports generated for local QA and machine-specific paths. Documentation must describe current reality and the next step. Before pushing, check the remote/branch and avoid unrelated changes.
-
-## Decision and handoff discipline
-
-After each ticket update its status and `docs/10-handoff.md`: completed behavior, exact verification commands/results, any actual blockers, remaining limitations and the next ticket. An upstream assumption that fails needs a documented decision update, not a silent workaround. Keep planning documents coherent when changing method, schema, source version or scope.
+After each increment update the [ticket board](06-implementation-plan.md) and [handoff](10-handoff.md) with scope, verification commands/results, blockers and next step. Record any changed numerical assumption and its evidence in the methodology, rerun its regression gate and version affected results.

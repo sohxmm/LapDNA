@@ -1,311 +1,167 @@
-# Experience and visual specification
+# Comparison workspace experience
 
-This document fixes the initial interaction and presentation decisions so implementation can proceed without redesign. Product scope is defined in [the product blueprint](01-product.md); numerical meaning comes from [the methodology](03-telemetry-methodology.md). Exact JSON property names come from the contracts rather than the component names below.
+The workspace makes it possible to read a time change, locate its turn, and check the associated telemetry without translating between separate axes. This guide specifies the full application. The opt-in synthetic preview exercises the visual direction. Real session ingestion and numerical validation follow the implementation tickets. See [current handoff](10-handoff.md).
 
-Implementation boundary: the current `App.tsx` is a foundation screen that requests `/api/v1/catalog`, displays its count or an honest no-data/API-error state, and offers retry/refresh. It does not yet render comparison selection, charts, observations, quality panels, or export. The full workspace below is the T06–T10 target. `/api/v1/health` reports service health; it does not establish that any source session or analysis is valid. `/api/v1/comparisons/{comparison_id}` delivers one prepared artifact after selection is implemented.
+## 1. Layout and visual language
 
-## 1. Visual direction
+Use a dark analytical surface, system fonts with tabular numerals, high-contrast text, quiet gridlines and two persistent driver encodings. Driver A uses cyan (#5ADBEA) with solid traces. Driver B uses orange (#FFB16B) with dashed traces. Pair every color-coded value with a driver code, sign or text label. Use a neutral gray for gains beneath the configured display threshold and a separate hatch/gap plus “Unavailable” label for unknown intervals.
 
-Build an analytical workspace: dark ink background, restrained borders, readable labels, a clear official timing summary, and generous space for the telemetry. Track geometry and charts are the main visual material. Do not add a hero photograph, animated race cars, decorative gauges, fake live indicators, or team branding to fill the scaffold.
+The supplied reference informs the ordering and alignment of the traces. The interface uses LapDNA identity, factual labels, accessible chart descriptions and units. An image or decorative track outline cannot substitute for decoded source data.
 
-| Token | Value | Purpose |
-| --- | --- | --- |
-| `--bg` | `#0B1017` | Page background |
-| `--surface` | `#131C27` | Cards and chart panels |
-| `--surface-raised` | `#1B2837` | Popovers and selected controls |
-| `--border` | `#2A3A4D` | Quiet separators |
-| `--text` | `#F1F5F9` | Primary text |
-| `--muted` | `#A7B5C7` | Secondary text and axes |
-| `--driver-a` | `#5ADBEA` | Driver A and regions favoring A |
-| `--driver-b` | `#FFB16B` | Driver B and regions favoring B |
-| `--neutral` | `#74859B` | Neutral estimated difference |
-| `--warning` | `#F6D276` | Limited quality, combined with text/icon |
-| `--danger` | `#FF8A94` | Unavailable or failed state, with text/icon |
-| `--focus` | `#D9F7FF` | Visible keyboard focus |
-
-Verify contrast in the implemented combinations; the palette is not a substitute for an accessibility check. Use system sans-serif fonts for interface text and system monospace/tabular numerals for timing, numeric cells, and cursor readouts. Do not depend on a remote font download.
-
-Use a 4 px spacing base, 8 px control gaps, 16–20 px card padding, 24 px section gaps, and a maximum workspace width of 1600 px. Cards use an 8 px radius, 1 px border, and no prominent drop shadow. Interactive targets are at least 44 × 44 px; compact chart markers can have a larger invisible hit area. Body text is 14–16 px, card titles 16–18 px, page title 28–32 px. Numeric columns align on the right.
-
-Driver colors are positional, not team colors. Always label A/B and abbreviations. A's trace is solid; B's is dashed. The difference avoids relying on color alone and remains consistent when both drivers belong to the same team.
-
-## 2. Desktop information layout
-
-At 1100 px and wider, render the following reading order. Header and selection controls stay in normal document flow; chart panels may have their own sticky cursor readout while the telemetry stack is in view.
+Desktop reading order:
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ LapDNA  /  Where did the lap time go?              Methodology   Data status │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ Circuit / session     Q phase       Driver A       Driver B      Compare   │
-│ Selected lap A details               Selected lap B details        Swap     │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ Event • year • Q3         A  1:xx.xxx     B  1:xx.xxx    Official gap        │
-│ Quality summary + detail control                   Copy link   Export card │
-├─────────────────────────────────────┬───────────────────────────────────────┤
-│ TRACK OVERVIEW                      │ OFFICIAL SECTORS                      │
-│ Reference outline, corner labels    │       A          B        B − A       │
-│ Local gain colors + visible legend  │ S1    …          …        …           │
-│ Selected region / cursor marker     │ S2    …          …        …           │
-│                                     │ S3    …          …        …           │
-├─────────────────────────────────────┴───────────────────────────────────────┤
-│ TELEMETRY      [Full lap] [Selected region]        Cursor readout / reset   │
-│ Delta B−A       ─────── ±0 reference ────────────────────────────────────── │
-│ Speed            A ──────     B - - -                                      │
-│ Throttle         A ──────     B - - -                                      │
-│ Gear             ┌───┐          ┌───┐                                     │
-│ Brake            on / off lanes                                          │
-│ Distance (m)             common domain and sector/region markers           │
-├─────────────────────────────────────┬───────────────────────────────────────┤
-│ WHERE THE GAP DEVELOPED             │ THREE OBSERVATIONS                    │
-│ Ranked / Track order                │ Region + local estimate               │
-│ Region | local gain | speed context │ Quantitative channel evidence         │
-│ …                                   │ Inspect evidence                      │
-├─────────────────────────────────────┴───────────────────────────────────────┤
-│ Source • method version • generated date • limitations • data details      │
-└─────────────────────────────────────────────────────────────────────────────┘
+Event/session                         Dataset and quality details
+Mode: Same phase | Independent phases
+A: Driver / Phase / Lap               B: Driver / Phase / Lap     Compare
+Selected lap A | Selected lap B | Official gap | Context / Share / Export
+Local gain: estimated minisectors     [A] [Neutral] [B] [Unavailable]
+S1                               S2                           S3
+Turn ruler T1   T2 T3                 T4a T4b ...              Tn
+Speed (km/h)          A solid   B dashed              shared distance
+Throttle (%)          A solid   B dashed
+Gear                  integer steps
+Brake                 A on/off lane, B on/off lane
+Cumulative delta (s)  B−A, zero baseline, positive favors A
+Reference distance (m)                     Shared cursor and zoom / reset
+Track map + selected turn                 Official sector timing
+Corner-speed analysis: low / medium / high, coverage, exceptions
+Corner/straight table                     Regional evidence and findings
+Method, source, dataset revision and limitations
 ```
 
-The map/sectors row is approximately 56%/44%; the region/observation row is 52%/48%. The telemetry is full width because comparison quality benefits from horizontal resolution. The official gap is visually primary; region estimates should not appear more precise or authoritative than the official result.
+Keep speed the tallest channel panel and delta visibly separate with its own zero line. On narrow screens, stack selectors and summaries vertically and keep a single chart width. The turn chooser, region table and evidence follow the chart in document order. Permit an individual table to scroll horizontally with an accessible label, but avoid page-level horizontal scrolling. Use 44 px touch targets for primary actions. Dense chart marks obtain larger separate hit targets or a companion list.
 
-At 768–1099 px, keep the selector in two columns, stack the map and official sectors, and keep the telemetry full width. Below 768 px, use a single column. Driver A and B may share one row only if labels and controls do not truncate. Mobile order is selector, official summary, quality, map, telemetry, observations, region list, provenance. The region table becomes labeled cards instead of requiring horizontal page scrolling.
+## 2. Data entry and states
 
-## 3. Scaffold presentation
+The ordinary home view requests the session inventory and identifies available events. If the store is empty, say “No qualifying sessions imported yet” and link to the import workflow. A primary demonstration link may open `?preview=1`. Display “Synthetic design preview” prominently and continuously with fictional track geometry and anonymous driver slots. Isolate this fixture from real source loading, quality claims, the session catalogue, official attribution and editorial export. No image from the reference is required at runtime.
 
-Before any prepared data exists, render a useful application shell with:
+In a populated release, event selection loads the session's driver/lap inventory. Each slot shows driver, phase, lap, official time, compound, tyre age and start time as available. Put the actual phase next to every loaded lap in the comparison header even in same-phase mode. A phase option with no eligible lap is disabled with a reason. The form offers all eligible individual laps from the imported event, including non-fastest laps.
 
-- The LapDNA name and a one-line description.
-- The three planned circuit names with a shared or individual “Availability pending validation” label.
-- A prominent “No laps imported yet” or “No prepared comparisons yet” state. Include the exact local setup/ingestion step only once that command exists; the foundation currently explains the next milestone.
-- An explanation of the intended output: map, synchronized telemetry, and evidence-backed observations.
-- A visible foundation status and a link to project documentation when a real URL exists.
+Same-phase mode links the two phase controls. Its default is the highest common eligible phase and each driver's fastest eligible lap in that phase. Independent-phases mode unlocks each slot's phase control. Choosing different phases displays a persistent context notice and places `allow_cross_phase=true` in the request. This single mode choice is sufficient. Do not repeatedly interrupt selection with a confirmation dialog.
 
-Do not render fake lap times, fabricated driver evidence, synthetic track outlines labeled as actual circuits, chart skeletons that appear to be indefinitely loading, or buttons suggesting that unavailable features work. Disabled actions need a nearby reason. This makes the scaffold reviewable without presenting future work as implemented behavior.
+Maintain separate draft and loaded state. The draft contains session ID, both lap IDs and phase mode. A comparison request resolves that exact selection through the API. Cached and freshly computed results share the same workspace behavior. Until local computation is implemented, an eligible pair without a prepared result gets a specific “Comparison engine has not prepared this pair” state.
 
-## 4. State model
+| Event | State transition and visible result |
+| --- | --- |
+| Inventory loading / empty / failure | Skeleton during active request, clear no-data state on empty, retry on failure |
+| Draft changes | Keep loaded title and traces together, mark pending selection, offer Compare |
+| Valid draft submitted | Freeze request identity, disable export of the pending result, abort superseded requests |
+| Telemetry result received | Switch header, chart and evidence together and reset view state for the new artifact |
+| Sector-only result received | Render the timing workspace and fallback reason |
+| Missing session/lap or rejected pair | Show the exact missing choice or quality reason and preserve the prior loaded result's identity |
+| Transient failure | Retry the same request or return to selection |
+| Shared link refers to an unknown revision | Explain the missing result and offer the inventory without silently changing laps |
 
-Keep remote loading state separate from the interaction state of a successfully loaded comparison.
+Use the source's reason codes for missing data and rejected eligibility. Avoid claiming a sporting elimination from a missing source row alone. A comparison accepted across phases carries phase labels, time separation and compound/weather limitations in the analysis and export. Further data checks may still reject the pair.
 
-```mermaid
-stateDiagram-v2
-    [*] --> LoadingCatalog
-    LoadingCatalog --> NoPreparedData: empty catalog
-    LoadingCatalog --> CatalogError: load failed
-    LoadingCatalog --> Selecting: catalog ready
-    CatalogError --> LoadingCatalog: retry
-    Selecting --> LoadingComparison: valid selection + Compare
-    LoadingComparison --> Ready: usable artifact
-    LoadingComparison --> Limited: artifact with limitations
-    LoadingComparison --> Unavailable: blocked artifact
-    LoadingComparison --> ComparisonError: request failed
-    ComparisonError --> LoadingComparison: retry
-    ComparisonError --> Selecting: change selection
-    Ready --> LoadingComparison: new valid selection + Compare
-    Limited --> LoadingComparison: new valid selection + Compare
-    Unavailable --> Selecting: choose other laps
-    NoPreparedData --> LoadingCatalog: refresh after preparation
-```
+## 3. Chart implementation decision
 
-While a replacement comparison loads, retain the old comparison with its original title, a visible loading notice, and disabled export/share until the new selection resolves. If it fails, retain the old comparison and show an error associated with the pending selection; do not relabel old charts with new driver names. A monotonically increasing request token or request cancellation prevents a slow earlier response from replacing a later selection.
+Keep React, TypeScript and Vite for the UI. Apache ECharts 6.1.0 owns the telemetry rendering through a small direct adapter, with a single multi-grid Canvas chart for the stacked channels. React owns selection state, controls, layout, accessibility and the textual readout. The reference map uses SVG with stable region paths. A dedicated export composition produces the PNG independently of the live chart scroll/zoom state.
 
-Interaction state for a loaded artifact:
+Use one numeric x-axis per grid with identical minimum, maximum and plot margins. Link the axis pointers. Apply one shared dataZoom domain to all x-axis indices. Give the React workspace one canonical cursor distance, selected turn/region and viewport. Map pointer and chart events to that shared state, avoiding an independent cursor or domain per panel. Resize the chart with ResizeObserver, update series when the artifact changes, clean up listeners and dispose the chart instance on unmount. Avoid recreating the entire instance on every cursor movement.
 
-| State | Meaning | Owner |
-| --- | --- | --- |
-| `cursorDistance` | One distance in the full reference domain, or absent | Comparison workspace |
-| `cursorPinned` | Readout stays while pointer leaves charts | Comparison workspace |
-| `selectedRegionId` | Selected region/observation interval | Comparison workspace |
-| `viewport` | Full lap or a bounded distance interval | Comparison workspace |
-| `regionSort` | Absolute local gain or track order | Region list |
-| `qualityDetailsOpen` | Reconciliation panel visibility | Quality control |
-| `exportState` | Idle, generating, complete, or failed | Export control |
+Renderer responsibilities end at display transformations. The browser formats units, maps data to pixels, finds a nearest shared-grid sample for a readout and applies an explicit view swap. Python calculates elapsed time, gains, support, class summaries and findings. The app should not require an external chart server, graph image service or model call to render the result.
 
-Do not store a separate cursor in each chart. Driver selection is pending form state; the loaded artifact carries the authoritative rendered driver/lap identity. A comparison change resets cursor, region, zoom, and export state. Merely opening a quality panel does not reset exploration.
+## 4. Turn ruler, sectors and local dominance
 
-## 5. Component boundaries
+Give the turn ruler its own horizontal band between the dominance strip and speed panel. Place each T-number or lettered label at the reviewed marker's canonical distance. Never space labels evenly by ordinal number. A marker can lie inside a multi-turn complex. In that case the tooltip names both the selected marker and the gain-owning complex.
 
-These are responsibilities, not a demand for a file per row.
+Turns and sectors share exactly the same projection as all channel and delta panels. Draw subtle sector divider lines across the entire stack and label S1/S2/S3 intervals. Official sector durations come from timing records. Their displayed positions on the distance axis are estimates from the frozen reference crossings. Selecting a turn draws a higher-contrast guide through all panels and shows its name, distance and referenced segment.
 
-| Component | Input | Responsibility |
-| --- | --- | --- |
-| `AppShell` | App/catalog status | Page frame, title, navigation, initial errors |
-| `ComparisonSelector` | Prepared catalog and pending selection | Session/phase/driver/lap selection and validation |
-| `ComparisonWorkspace` | One validated comparison artifact | Shared distance selection, viewport, cursor, rendered identity |
-| `OfficialTimingSummary` | Exact official values | Lap and sector durations, signed gap, contextual labels |
-| `QualitySummary` / `QualityDetails` | Validation report | Plain summary plus raw reconciliation, check basis, and interval limitations |
-| `TrackMap` | Reference geometry, regions, shared state | Local gain colors, region/cursor selection, reference label |
-| `TelemetryPanel` | Shared distance grid, channel arrays, shared state | Five aligned charts, axes, masks, cursor readout |
-| `RegionList` | Region metrics and shared state | Ranking, track order, keyboard/tap selection |
-| `ObservationList` | Evidence-backed observations | Human-readable claims and evidence links |
-| `ExportControl` / `AnalysisCard` | Same artifact and export state | Deterministic export from already validated values |
-| `ProvenanceFooter` | Artifact/source/method identifiers | Source and method links, generated date, limitations |
+Keep every marker selectable. Use measured label widths and two staggered ruler rows where possible. When full-lap labels still collide, group adjacent labels into an explicit range such as T6–T8. Clicking the group zooms far enough to resolve its members. A searchable/focusable turn list always exposes every exact marker and label. Recalculate collisions on resize, zoom or font changes while keeping data coordinates fixed. Labels, hit targets and guide lines must move together.
 
-Numeric computations belong to the Python analysis pipeline. The browser may format values, derive pixels, select the nearest grid index, and invert signs on an explicitly supported swap operation; it must not implement a second scientific analysis engine.
+The dominance strip uses estimated 100 m minisectors by default. Its legend reads “Estimated minisector gain · nominal 100 m.” Equal-width data bins occupy their actual projected distance, including the final short bin. Color by local B−A traversal difference. Neutral and unsupported bins are visually distinct. Tooltip lists bounds, both durations, signed gain, data support and any overlapping turn markers. The 10 ms neutral visual band is distinct from the stricter evidence threshold in the methodology.
 
-### Current metadata boundary
+The adjacent region table and track map use the reviewed corner/complex/straight partition. Give each partition an explicit name. A user can inspect the same distance through either view, but totals from the two partitions describe the same lap and must be kept separate.
 
-The existing model provides `comparison_id`, `schema_version`, `session`, `lap_a`, `lap_b`, `provenance`, `quality`, aligned sample arrays, `segments`, `evidence`, and `observations`. Session metadata includes year, round, session type, phase, circuit ID, and event name. Each lap includes driver identity, lap number, official lap/sector times, compound, tyre life when known, and track-status text. Current provenance includes source, FastF1/pipeline/methodology versions, reference and source snapshot hashes, generated time, source-session identity, circuit revision, and reference-lap ID. Quality includes distance normalization diagnostics; evidence includes transition intervals and native support spans.
+## 5. Telemetry panels
 
-Use those fields as supplied; do not derive lap start time from artifact generation time or call `generated_at` the source retrieval time. Source retrieval time, review status, threshold settings, corner labels and lap-start context are planned contract additions in T01–T05, with exact names in [the contract guide](05-contracts.md). Add them to Python and regenerate before dependent UI work. Omit an unavailable optional field or explain its absence, never manufacture it.
+| Panel | Rendering and readout |
+| --- | --- |
+| Speed | A/B lines on one km/h scale, with headroom for both. Make this the most prominent channel. |
+| Throttle | A/B percent traces on a fixed 0–100 scale. |
+| Gear | Previous-sample step rendering with integer ticks. Distinguish neutral gear from unknown. |
+| Brake | Two labeled state lanes. On and off are discrete, and an unavailable span has a separate treatment. |
+| Cumulative delta | One raw estimated B−A curve in seconds with zero baseline and sign legend. Use a symmetric y-domain around zero. |
 
-At the API boundary timing values are milliseconds, including `delta_ms` and `gain_ms`. The UI converts milliseconds to seconds only for display. `delta_ms` is the raw `channels_b.time_raw_ms − channels_a.time_raw_ms` series wherever valid. The initial model has no corrected delta array.
+Every panel uses the same horizontal axis and current viewport. Show distance ticks on the last panel with faint aligned guides above. Use symbols only where they convey specific meaning. Preserve null gaps and the step transitions. Keep local estimates available at useful displayed precision without implying exact physical positioning.
 
-## 6. Chart specification
+The shared cursor readout names distance, containing region, nearby turn, cumulative delta and both laps' supported channel values. If a channel is missing at the cursor, return “Unavailable” at that location. Do not skip a gap to a distant valid point and display it as though it were at the cursor. A persistent summary above the stack works on mobile and for keyboard users.
 
-### Shared distance axis
+The public channel set excludes steering angle and brake pressure. Do not add placeholder axes for either. A missing throttle/gear/brake channel can suppress that channel's evidence while supported time and speed remain usable under the method's rules.
 
-- Domain is 0 to the reference length; label “Reference distance (m)”. This is an approximate alignment coordinate, not centimeter-accurate physical position.
-- All plots use the identical left/right plot margins and horizontal scale. Tick positions and sector markers align exactly across panels.
-- Desktop panel heights: delta 144 px, speed 176 px, throttle 120 px, gear 104 px, brake 88 px, excluding title and tick margins. Mobile may reduce speed to 150 px but must retain legible labels.
-- Show x-axis ticks on the final panel; upper panels use matching subtle vertical grid lines. Each panel has its own unit label.
-- Missing regions break the rendered path. Never connect a line over an unsupported telemetry gap.
-- Sector markers use a subtle dashed line and S1/S2/S3 labels. Corner labels are sparse in the default view; selecting a region reveals its bounds and label.
-
-### Delta
-
-Show only the raw telemetry-derived cumulative difference, `delta_ms`, converted to seconds for display. Do not add an adjusted/sector-anchored curve or mode toggle in the MVP. The y-axis is seconds; include a zero line. A persistent subtitle reads “B − A · positive favors A”. Auto-scale symmetrically around zero to keep direction easy to read. Do not smooth values for presentation in a way that changes endpoints or local differences. Official lap/sector numbers remain separate reference values, not control points used to force the curve to match.
-
-### Speed and throttle
-
-Speed uses km/h and a domain containing both traces with modest padding; do not truncate away a meaningful local difference. Throttle uses 0–100%. A and B use their fixed colors and line styles. The cursor lists both values and their difference where valid. Apparent interpolation detail is not presented as new measured samples.
-
-### Gear
-
-Use integer y-ticks, step rendering, and the source's supported gear range. Never linearly interpolate between gears. Show neutral/unknown only when the channel actually represents it, and distinguish an unknown value from gear zero.
-
-### Brake
-
-Render two compact labeled state lanes, one per driver, with filled spans for on and quiet spans for off. The legend says “Brake on/off”. A gap is a hatched/empty interval labeled unavailable; it is not off. No percentage axis, pressure unit, or wording such as “braked harder” appears.
-
-### Cursor readout
-
-The shared readout shows distance, region, delta, and both drivers' speed/throttle/gear/brake values. Missing values are “Unavailable”. It follows the cursor on desktop without obscuring the selected chart, and uses a stable area above the chart stack on mobile. Do not announce every pointer movement through a screen reader live region.
-
-## 7. Interaction specification
+## 6. Selection and inspection behavior
 
 | Action | Result |
 | --- | --- |
-| Hover a chart | Update cursor to nearest valid distance-grid index; all charts and map reflect it |
-| Leave a chart | Clear temporary cursor unless pinned |
-| Click/tap chart | Set and pin cursor at nearest index |
-| Focus shared distance slider | Expose an accessible numeric distance control and readout |
-| Arrow keys on slider | Move one grid step; Shift+arrow moves ten steps; Home/End go to domain bounds |
-| Click map region | Select region, pin cursor at its midpoint, highlight matching row and evidence |
-| Hover map path | Resolve nearest reference polyline location; if multiple candidates are close, restrict to the selected region or choose the nearest point deterministically |
-| Click region row | Select region and show its interval; do not automatically change the chart viewport |
-| Click “Inspect evidence” | Select the observation's interval and zoom to it with fixed context padding |
-| Click “Zoom to region” | View selected bounds plus 10% interval-width padding, clamped to the lap |
-| Click “Full lap” | Restore the full domain and preserve the selected region |
-| Press Escape | Clear pinned cursor/temporary selection; close an open popover before clearing the workspace selection |
-| Click “Swap drivers” | Exchange A/B identity, colors, signed deltas, and text while preserving exact laps and physical reference data |
-| Change region sort | Reorder rows only; retain selected interval and cursor |
+| Hover chart | Move temporary shared cursor to nearest reference-grid distance and highlight the same map location |
+| Tap/click chart | Pin cursor until moved or cleared |
+| Leave chart | Clear temporary cursor, preserve pinned cursor and selected region |
+| Move keyboard distance slider | Move one grid step with arrows, ten with Shift+arrow, Home/End to view bounds |
+| Select turn in ruler/list | Set cursor to its marker, highlight owning region and all associated evidence |
+| Select a dominance bin | Highlight that bin's exact interval and show local gain with overlap labels |
+| Select a map region or table row | Highlight the same region across map and chart, allow explicit zoom |
+| Inspect an observation | Select its interval and zoom with 10% context padding, clamped to lap bounds |
+| Select a corner class | Highlight the member intervals as a set and expand their rows. Do not create a contiguous zoom spanning separated corners. |
+| Inspect a class member | Select that member's actual region and offer normal region zoom |
+| Reset to full lap | Restore distance domain while keeping the current selection readable |
+| Swap A/B | Reverse applicable signs, exchange colors and evidence columns, keep geometry and member classes fixed |
+| Escape | Close active popover first, then clear temporary/pinned inspection state |
 
-Avoid freehand chart brushing in the MVP. A full-lap/selected-region viewport and accessible distance control cover the primary job with fewer synchronization edge cases. A future brush must use the same workspace state.
+A class can contain disjoint corners. A group summary should not shade intervening straights or imply a single continuous high-speed interval. For Suzuka's crossover, restrict map picking to an identified segment and its ordered distance range. The accessible turn/region list duplicates every map action.
 
-For chart focus, provide one shared slider rather than hundreds of focusable SVG points. Each chart has an accessible title and a concise description; tabular region and official-sector values provide a nonvisual alternative to interpreting strokes.
+Use clear focus styling, semantic buttons and labels, an accessible chart description, and one shared distance slider. Keep source values, region contributions and class summaries available as actual text or tables. Avoid placing thousands of Canvas points in the focus order or announcing every pointer movement on a live region. Announce explicit selections and completed comparison loads.
 
-## 8. Local performance map
+## 7. Corner-speed analysis and evidence
 
-The path is a reference geometry with a visible start/finish marker, direction arrow, and named corner markers where they do not collide. Apply the circuit rotation consistently to path, markers, and cursor. Keep a fixed viewBox padded by 8% on all sides; never rotate individual layers independently.
+Place a section titled **Where each lap gained by corner speed** after the chart and map. Display one class summary sentence scoped to these selected laps, followed by low/medium/high rows. A compact definition states that classes come from the frozen reference profile and shows the thresholds below 150, 150 to below 250, and at least 250 km/h. Each class row can expose its reference basis and actual member turns.
 
-Map color is discrete by validated analysis region in the MVP. Use cyan/orange with intensity buckets derived from absolute local estimated gain, and neutral gray below the methodology's display floor. Display a legend with the actual bucket boundaries used for that comparison. Unsupported spans have a dashed neutral treatment and explanatory tooltip. Do not assign a winning driver when the region fails quality checks.
+| Column | Meaning |
+| --- | --- |
+| Class | Low, medium or high with the versioned reference-speed band |
+| Supported | Included/expected independent corner units and supported distance coverage |
+| A gains / B gains | Gross estimated advantage in each direction across supported members |
+| Net | A gains minus B gains, with sign and favored driver label |
+| Pattern | Directional, mixed, balanced or insufficient as returned by Python |
+| Inspect | Member turns, gains, excluded regions, reasons and evidence links |
 
-An accessible region selector or linked region list duplicates every map interaction. Map labels show region name, estimated local gain, and favored driver; cumulative advantage is shown separately in the cursor readout. The map must not resemble two accurately measured racing lines.
+Keep mixed complexes, unknown classes and straights visible as separate context. A corner can be slow in a chosen driver's lap without changing its frozen reference class. Display “No eligible units in this class” when the class is absent, and “Insufficient evidence” for inadequate support. Neither condition is a 0.00 s tie.
 
-## 9. Timing and number formatting
+A headline about gaining through high/medium while losing through low-speed windows requires the methodology's coverage, counts, materiality and sign-stability checks. Show opposing member gains and qualifying exceptions. Avoid “only” or “all” where the member evidence is mixed or incomplete. Carry the two phase labels and cross-phase warning into this section. The backend owns the wording and evidence references so UI and export agree.
 
-- Official lap time: `m:ss.sss`; official sectors: `ss.sss`.
-- Official signed gap: `+0.123 s` or `−0.123 s`, preserving millisecond timing precision where sourced.
-- Approximate region time contribution: usually hundredths of a second with `≈`, with the display floor controlled by the methodology. Keep exact internal values for reconciliation.
-- Delta chart ticks: two decimal places unless a tighter scale needs three; an explicit telemetry estimate label remains visible.
-- Speed: whole km/h in summaries; one decimal only in detailed readouts if it clarifies interpolation rather than implying source precision.
-- Throttle: whole percent. Gear: integer. Brake: On, Off, or Unavailable.
-- Distance: nearest whole meter in cursor display, with `≈` for inferred transition positions. Do not display submeter brake-point claims.
-- Missing is an em dash plus an accessible explanation. Zero is displayed as zero. `NaN`, infinity, null strings, and placeholder zeros never reach the interface.
-- Negative zero is formatted as zero. Tiny values beneath the region display floor say “Below display threshold” rather than inventing a decisive gain.
+Below this aggregate analysis, show up to three disjoint regional observations. Each includes the signed estimate, driver names, region/turn range, measured pattern, support and an “Inspect evidence” action. Keep a short plain-language reason when fewer qualify. A class total or quality warning cannot fill a missing regional observation slot.
 
-Time and distance formatting are centralized utilities. Driver abbreviations accompany signed estimates so users do not need to remember the sign convention while reading a single row.
+## 8. Sector-only workspace
 
-## 10. Observations and evidence display
+Keep the header, exact selected phases/laps and context. Show one official table with S1, S2, S3, both durations, the signed sector difference, and cumulative B−A at that boundary. Draw separate labeled points or bars at S1 end, S2 end and Finish on a categorical axis. The title says “Official delta at sector ends”. Show the reason that detailed telemetry is unavailable.
 
-Observation structure:
+This capability has no measured distance support for turn-level attribution. Omit the turn ruler, colored map, continuous telemetry/delta curves, estimated minisectors, corner classes and corner observations. Keep an explicit “Sector timing only” badge in the workspace and export. If official sector eligibility fails too, render the unavailable state and recovery options.
 
-```text
-01  {Region name}                              ≈ {gain} to {driver}
-{Template sentence describing the local time change.}
-Evidence: {metric A} vs {metric B}; {second supported metric if available}.
-{Short context/limitation when relevant.}
-[Inspect evidence]
-```
+## 9. Map, quality and formatting
 
-Use one primary observation per disjoint region/group. If the top-ranked regions overlap, the pipeline resolves them before the UI receives the observations. The UI does not rank or compose its own claims. Observations do not have fake confidence percentages or opaque “AI insight” labels. Use the quality/coverage evidence supplied by the pipeline.
+Draw the frozen reference path at equal x/y scale with start/finish, direction and reviewed corners. Apply rotation once to all geometry. Map color represents estimated local gain through the reviewed region. The marker identifies current reference distance. Unknown spans have a visible gap or hatched treatment. Provide an adjacent linked list for small screens and nonvisual inspection.
 
-On selection, show the interval bounds in the chart header and shade the same interval in all charts. Preserve the distinction between “local time gain in this region” and “total advantage at the region exit”. Evidence text must identify which quantity it uses.
+The quality panel exposes source timing, raw estimates and signed residuals by lap/pair. Identify timing-record consistency, imposed lap-edge constraints, reference calibration and interior cross-lap consistency. Show native sample counts/gaps, missing channels, distance scale factors, reference ID, profile/config/method versions, source retrieval time if known, generation time and applicable exclusions.
 
-An observation may describe a lower minimum speed, a speed difference on a straight, a difference in the brake-on transition estimate, or a throttle pickup pattern only when the methodology's validity rules allow that metric. Words such as “caused”, “mistake”, “optimal”, “understeer”, and “confidence” are not generated from these channels.
+Format official lap times as m:ss.sss and official sectors as ss.sss. Official signed gaps retain source precision. Regional gains ordinarily use approximately hundredths of a second. The chart delta values remain labeled estimates. Speed uses km/h, throttle percent, gear integers and brake On/Off/Unavailable. Show missing values with a dash and accessible reason. Format negative zero as zero.
 
-## 11. Error and empty-state copy
+A quality warning remains visible during zoom, class expansion and export. A blocked spatial analysis may transition to a separately validated sector-only result. Its header names its actual capability and reason.
 
-| Condition | Heading | Required action/detail |
-| --- | --- | --- |
-| Empty catalog | No prepared comparisons yet | Explain preparation command/workflow; planned circuits remain visibly unprepared |
-| Catalog request failed | Could not load prepared sessions | Retry; preserve a useful error identifier without exposing stack traces |
-| Only one eligible driver | Two eligible drivers are required | Explain phase restriction and offer another available phase/session |
-| Driver has no eligible lap | No supported lap in this phase | Show exclusion reason summary; choose another driver or phase |
-| Pair/lap artifact absent | This pair has not been prepared | Offer published pairs/laps from the catalog; do not start live scientific processing |
-| Same driver in both slots | Choose two different drivers | Inline validation; Compare disabled |
-| Unsupported URL | This comparison is not available | Return to prepared catalog; never silently substitute another comparison |
-| Comparison request failed | Could not load this comparison | Retry while retaining the previous comparison identity if present |
-| Timing reconciliation failed | Regional analysis is unavailable | Block catalog promotion; keep official times/reason in operator report; defensively suppress narrative/export if a blocked artifact is loaded |
-| Missing brake channel | Brake data unavailable | Keep other valid channels; suppress brake-specific evidence |
-| Telemetry gap | Data unavailable in this interval | Break paths, mark affected regions, disclose limitation |
-| Too few observations | Fewer supported observations | Show only valid observations and explain why |
-| Export failed | Could not create the card | Keep the analysis intact; retry or download JSON |
-| Clipboard unavailable | Link could not be copied | Show selectable URL text in a focused field |
+## 10. Export, failure and acceptance
 
-Error messages should name the user's next available action. Network details and diagnostic traces belong in logs, not in the normal interface. An upstream data absence is different from an application crash.
+A 1080 × 1350 analysis card uses the loaded artifact, view order and exact laps. Prioritize event, both phase/driver/time labels, official gap, compact map/delta or sector-only visual, class pattern and concise local findings, then source/method/quality footer. Place cross-phase context alongside the people and laps it qualifies. Keep text legible at half size by using compact deterministic templates. The JSON companion retains full detail and source order.
 
-## 12. Quality details panel
+| Failure | Reader action |
+| --- | --- |
+| Missing import | Select another imported session or follow the import workflow |
+| Driver/phase has no eligible lap | Read the reason, choose another actual phase/lap |
+| Same driver selected twice | Select a different driver in one slot |
+| Cross-phase selection while phases linked | Enable Independent phases or select a common phase |
+| Scaffold has no computed pair | Explain the prepared-result boundary without pretending data is unavailable upstream |
+| Local processing busy or failed | Retry the same selection and retain the last valid result's identity |
+| No supported class pattern | Show coverage and member evidence with insufficient/mixed status |
+| Unknown shared revision | Return to session inventory with an explicit missing-result explanation |
+| Export or clipboard failure | Retain the comparison and offer retry, JSON download or selectable link |
 
-Use an expandable section adjacent to the quality summary, not a modal required to understand the lap. It includes:
-
-1. Overall status and machine-readable reason codes translated to plain language.
-2. For each driver: eligibility status, sample coverage, missing channels, and major telemetry gaps.
-3. Official lap/sector values alongside the raw estimates and residuals used for validation, including each check's `timing_constraint`, `calibration`, or `cross_lap_consistency` basis.
-4. Distance normalization scale factors and methodology version supplied by the current contract. No timing-correction result or adjusted curve is implied; raw timing remains unchanged.
-5. Regions excluded from analysis and why.
-6. Reference lap, circuit revision, artifact generation time, and methodology/pipeline/schema versions in a compact technical details subsection. Add source retrieval time and grid settings when the ingestion contract supplies them; keep the timestamps distinct.
-
-Status uses the exact `pass | warn | block` values and methodology thresholds. Display labels are “Data checks passed”, “Limited”, and “Unavailable”. The browser must not choose looser thresholds to display a more favorable badge. Reconciliation data remains available in JSON exports even if the card shows only a compact summary.
-
-## 13. Export card layout
-
-Render an explicit `AnalysisCard` composition independent of the scroll position and current zoom, using the loaded artifact's full-lap summary. Output size is 1080 × 1350 px with 48 px outer padding, the same palette, and no interactive controls.
-
-| Vertical area | Approximate allocation | Content |
-| --- | --- | --- |
-| Header | 150 px | Brand, event/year/phase, exact selected laps |
-| Official summary | 130 px | Both official times, gap, sectors |
-| Track and delta | 420 px | Map, local-gain legend, compact cumulative delta |
-| Observations | 430 px | Up to three compact evidence blocks |
-| Provenance/footer | 124 px | Quality, source, method/artifact version, limitations |
-
-The allocation is a design starting point; test rendered output rather than assuming the arithmetic prevents overflow. Use at least 24 px body text in the exported image. The source label and limitations stay legible at half size. Font loading, SVG rasterization, clipping, and missing-channel scenarios must be checked before calling export complete.
-
-The card always includes “Regional estimates are approximate. Brake telemetry is on/off.” with source attribution. Any significant limitation on the loaded comparison appears on the card as well. A blocked comparison cannot produce a normal-looking analysis card.
-
-## 14. Frontend acceptance checklist
-
-- An empty repository data directory produces an honest no-data screen, not fabricated content.
-- Choosing a new pair cannot leave old values under new names, even when responses arrive out of order.
-- Swapping A/B reverses signs and favored-driver labels without changing physical region locations or selected laps.
-- A single cursor location updates all charts, map location, and readout consistently.
-- Clicking an observation selects exactly its evidence interval.
-- Delta and map legends describe different quantities correctly: cumulative difference versus local contribution.
-- Gear uses steps; brake is binary; unknown data is not drawn as zero/off.
-- A keyboard user can select laps, inspect regions and evidence, move the cursor, reset zoom, read quality details, and export.
-- At 390 px width there is no page-level horizontal overflow, clipped primary action, unreadable axis label, or inaccessible region value.
-- At 200% zoom the selection controls and summary remain usable.
-- A reduced-motion preference disables nonessential animation; no motion is required to interpret data.
-- Exported values match the loaded artifact and the card carries the same material limitations.
-- Real session names and lap times appear only after source-backed artifacts are prepared and validated.
+Acceptance requires useful layouts at 1440×900, 768×1024 and 390×844, plus keyboard exploration and 200% text zoom. Check that every turn can be selected, ruler/sector guides align through the delta panel after resizing/zooming, the cross-phase warning survives export, a sector-only response never renders a false curve, and mixed/insufficient groups remain visible. Test an A/B swap with mixed class contributions and an eliminated driver's missing Q3 laps. See [verification](07-verification.md).

@@ -1,168 +1,133 @@
-# Implementation tickets and coding handoff
+# Implementation tickets
 
-Execute one ticket at a time. All tickets below are **not started** except T00. Each ends in a working, checked change and a separate pushed commit. Dependencies are gates, not suggestions. A failed data gate stays visible; do not mark it complete because code exists.
+T00 is the runnable scaffold. T01–T12 are implementation work. Take the first unfinished ticket whose prerequisites passed, run its checks and record actual results in the [handoff](10-handoff.md). A ticket may contain multiple small verified features. Commit and push each independently usable change as it passes. The two-week schedule assumes source access and suitable real sessions.
 
 ## Status board
 
-| ID | Deliverable | Depends on | Target day | Status |
+| Ticket | Deliverable | Requires | Day | Status |
 | --- | --- | --- | --- | --- |
-| T00 | Blueprint, typed API, empty workspace, CI | — | Setup | Complete |
-| T01 | Pinned FastF1 adapter and reproducible import | T00 | 1 | Not started |
-| T02 | Qualifying eligibility and selection report | T01 | 2 | Not started |
-| T03 | Frozen reference and circuit profile | T02 | 3 | Not started |
-| T04 | Alignment, delta and reconciliation | T03 | 4 | Not started |
-| T05 | Segments, evidence and artifact promotion | T04 | 5 | Not started |
-| T06 | Catalogue selection and comparison state | T05 | 5 | Not started |
-| T07 | Synchronized telemetry views | T06 | 6 | Not started |
-| T08 | Track map and shared selection | T07 | 7 | Not started |
-| T09 | Corner table, findings and quality details | T08 | 8 | Not started |
-| T10 | Share links and PNG/JSON export | T09 | 8 | Not started |
-| T11 | Three-circuit data and integration pack | T10 | 9 | Not started |
-| T12 | Release packaging and final verification | T11 | 10 | Not started |
+| T00 | Contracts, local selection boundary, synthetic chart preview and source probe | — | Setup | Complete |
+| T01 | Pinned FastF1 session import | T00 | 1 | Not started |
+| T02 | Full qualifying roster, actual phase/lap inventory and eligibility | T01 | 2 | Not started |
+| T03 | Frozen reference geometry, turn markers and reviewed windows | T02 | 3 | Not started |
+| T04 | Offline lap normalization, raw delta and reconciliation | T03 | 4 | Not started |
+| T05 | Local pair resolver, two result tiers, findings and cache | T04 | 5 | Not started |
+| T06 | Production driver/phase/lap selection | T05 | 5 | Not started |
+| T07 | Synchronized real telemetry, turns, minisectors and sector fallback | T06 | 6 | Not started |
+| T08 | Performance map linked to shared distance | T07 | 7 | Not started |
+| T09 | Category analysis, corner/straight ranking and evidence | T08 | 8 | Not started |
+| T10 | Shareable comparisons and PNG/JSON cards | T09 | 8 | Not started |
+| T11 | Three complete inventories and representative validations | T10 | 9 | Not started |
+| T12 | Release packaging and verification | T11 | 10 | Not started |
 
 ## T00 — Existing foundation
 
-Implemented: repository configuration, Python package with health/catalog/artifact reads, structural Pydantic validation, generated contracts, strict TypeScript build, live catalogue status in the honest no-data page, source research, CI workflow and this blueprint. Unit fixtures are artificial and isolated from the application. No ingestion CLI, numerical pipeline, plots, observations, export or deployment exists yet.
+The API exposes health, session inventory, session laps, prepared artifact catalogue/lookup and a local selection POST. Contract v1.1.0 distinguishes telemetry and sector-only results. The selection path validates a request, enforces cross-phase opt-in and finds an existing compatible artifact. A valid uncached selection gets an explicit preparation error. The React workspace reads inventory, selects actual indexed laps/phases and renders supplied cached artifacts through a chart, sector-only view or evidence panels as appropriate. A separate labeled synthetic ECharts preview runs without an import. See [contracts](05-contracts.md) for the current routes and shapes.
 
-The schema carries planned analytical fields but does not independently prove analytical validity. T04/T05 introduce the publication validator. A schema-valid JSON is not automatically a reviewed dataset.
+The [historical source probe](09-sources.md) checked OpenF1 availability for one Monza driver/lap. The first real FastF1 import, pair computation, public-data comparison view, results and exports belong to the tickets below. Synthetic examples and schema checks cannot satisfy real-data acceptance gates.
 
 ## T01 — Import one supported session
 
-**Read:** methodology §§2–4 and sources; operations import conventions. **Files:** `services/api/src/lapdna/ingestion/{adapter,snapshot}.py`, `cli.py`, `services/api/tests/test_ingestion.py`, `services/api/requirements-data.lock`, data documentation.
+Read [methodology §§2–4](03-telemetry-methodology.md), the [source register](09-sources.md) and [operations](08-operations.md). Implement `ingestion/{adapter,snapshot}.py`, `cli.py`, the data dependency lock and offline adapter tests in the API package.
 
-Implement `load_session(spec: SessionSpec, cache_dir: Path) -> SessionSnapshot` behind a `FastF1Adapter`. `SessionSpec` contains circuit ID, season, resolved event round and `session_type='Q'`. Resolve candidate event name with the source schedule once, then persist numeric round. Do not choose driver pairs yet.
+1. Resolve the candidate 2024 Italian Grand Prix conventional qualifying session from the schedule. Persist the actual round, layout and source identity. Implement `load_session(spec, cache_dir) -> SessionSnapshot` and the documented `import-session` command.
+2. Verify the installed FastF1 3.9.2 cache configuration, supported authentication flow and load APIs. Pin compatible optional dependencies, including a parquet engine, in a separate data lock. Keep credentials and raw caches outside Git.
+3. Load all participants and laps, phase/session status, timing/validity fields, native car and position streams, circuit markers, weather and race-control data. Preserve native clocks, ordering, units and nullable fields.
+4. Write an immutable snapshot and manifest atomically. Include source version, resolved event, fields, counts, UTC, digests and sanitized access status. Reuse a valid matching snapshot; an explicit refresh creates a revision. Distinguish authentication, unsupported/missing data, transient service and filesystem errors.
 
-1. Install the optional data dependencies in a controlled environment, resolve compatibility against FastF1 3.9.2, and freeze a separate data lock; preserve the small core lock. Inspect the installed public cache/auth/load APIs. Version 3.9.2 access requirements must be handled explicitly.
-2. Implement `python -m lapdna.cli import-session --circuit monza --year 2024 --event "Italian Grand Prix" --session Q`. Command names in this plan are target interfaces; they do not exist in T00.
-3. Load laps, native car streams, native position streams, qualifying phase metadata, circuit markers, weather and race-control information. Check source channel presence before processing.
-4. Snapshot per-lap metadata and per-driver channels with explicit UTC/session clocks and original row order. Store local parquet tables plus a JSON manifest; add/pin a parquet engine only in this ticket. No pandas object pickle in published artifacts.
-5. Manifest includes source/package versions, resolved identity, source field inventory, row counts, timestamps, local file SHA-256 values, authentication result without credentials, and import status. Use temporary output and atomic rename. Avoid re-download when a matching valid snapshot exists; `--refresh` explicitly obtains a new snapshot.
-6. Distinguish unsupported event, missing telemetry, upstream unavailable/authentication required, invalid snapshot and filesystem failure. Exit nonzero with an actionable message; redact secret-bearing exceptions.
+**Gate.** Offline tests cover success, missing channels, auth failure, duplicate import and interrupted write. Perform one real import and inspect its secret-free manifest. An access failure leaves T01 open with the exact blocker and reproducible command. The OpenF1 availability probe cannot close this gate. Suggested commit `Add cached qualifying session import`.
 
-**Checks:** adapter tests use a fake upstream object with missing-channel/auth-failure cases, not network; one real Monza candidate imports locally or the genuine access blocker is documented. A second import reuses the valid snapshot. Inspect the manifest for secrets and correct version/identity. **Done:** real data access and supported API behavior established; no invented sample substituted. **Commit:** `Add cached qualifying session import`.
+## T02 — Index drivers, phases and actual laps
 
-## T02 — Select comparable laps
+Implement `evaluate_laps(snapshot)`, `build_session_lap_index(report)` and a deterministic selector in `selection/`. Write the schema-defined session index and a more detailed operator report. The index includes every participant, including a driver with zero selectable laps. Determine phase from FastF1's supported session split, retaining missing/cancelled phases explicitly in the report. Retain unassignable records in the report with reasons; an ambiguous event phase split prevents publishing that event.
 
-**Read:** methodology eligibility table. **Files:** `selection/{eligibility,laps}.py`, CLI `list-laps`, tests with explicitly synthetic rows.
+For every known-phase lap, store its immutable ID, driver, Q phase, lap number, recorded lap/sector times, capability and exclusion reasons. Apply methodology §3.2. A timing-ineligible lap is unavailable. A timing-eligible lap with insufficient telemetry can be sector-only. Preserve supporting metadata and native-coverage diagnostics for subsequent stages. Final capability incorporates T03/T04 quality checks. Display eliminated/absent Q phases as having no selectable laps.
 
-Implement `evaluate_laps(snapshot) -> list[LapEligibility]` and `choose_laps(report, phase, driver_numbers) -> dict[str, LapId]`. Retain all rejection reason codes per lap, not just the first. Phase comes from FastF1's supported phase split, not an assumed time window. Required metadata unknown → ineligible. Apply the exact deleted/generated/accuracy/pit/track-status/tyre/weather policy in the methodology. A fastest candidate that fails must not be silently used; choose the next eligible lap and show why.
+Two different drivers must share the imported event/layout. Default to the highest common eligible phase, then fastest eligible lap per driver, breaking ties by lap number. Allow either driver to override to any actual eligible lap in their selected phase. Different phases require explicit opt-in and a warning with both phase labels, lap-start separation and relevant tyre/weather context. If no common phase exists, require deliberate independent selection. Cross-phase opt-in never overrides a validity/conditions rejection.
 
-Add `list-laps --snapshot <manifest> --phase Q3 --output data/reports/...json`. The report includes lap timing, sectors, tyre compound/life, phase, eligibility flags, source sample coverage, rejected reasons and selected fastest lap per driver. Equal times choose lower lap number. Require two different drivers, same event, same phase and compatible dry conditions. Restrict user-facing choices to actual prepared pairs later.
+**Gate.** Verify roster and source counts, repeated laps in one phase, deleted fastest lap, ties, eliminated driver, driver with no eligible lap, unknown phase, cancelled Q3, sector-only capability, same driver/foreign lap rejection and cross-phase allowed/denied. List all laps with `list-laps`; optional phase filter must preserve the full persisted index. Suggested commit `Index qualifying laps by driver and phase`.
 
-Choose four drivers with complete eligible data in one phase only after inspecting this report. Record the rationale and actual lap IDs in a local seed selection manifest. If Q3 cannot support this, evaluate another common phase or candidate year at the same circuit; document the replacement. The operator must not invent a four-driver set in code before data inspection.
+## T03 — Freeze the reference and review circuit windows
 
-**Checks:** exact eligibility reason coverage, missing/unknown flags, deleted fastest lap fallback, equal-time tie, mixed-phase refusal, missing sectors, pit and generated laps. **Done:** reproducible four-driver selection or explicit reason the seed cannot be used; one intended close pair identified from measured times. **Commit:** `Add qualifying lap eligibility and selection`.
+Implement `prepare_native_lap`, `integrate_distance` and `build_reference` under `alignment/`. Sort eligible candidates once as in methodology §4. Freeze the first reviewed usable reference and record fallback decisions. Bracket timing boundaries with native samples, reject conflicting timestamps and integrate speed on the native clock. Convert position to metres and use ordered marker projection across crossovers. Store reference ID, source/config hashes, length, geometry, rotation, sector crossing estimates and each marker's ID, number, lettered label and distance.
 
-## T03 — Freeze the reference and reviewed circuit profile
+Review and version the circuit profile under `config/circuits/`: disjoint corner/complex regions, complementary straights, constituent turn-to-region links, lap-wrap group IDs and native reference apex neighborhoods for speed classification. These are authored from the actual source, with inspection notes. Insert turn/sector/region and 100 m bin boundaries into the planned grid in T04.
 
-**Read:** methodology §§4–6. **Files:** `alignment/{native,reference,distance}.py`, `config/circuits/<id>/<revision>.json`, circuit profile validation tests.
+**Gate.** Compare constant-speed integration with a closed-form answer, test bracketing/gaps, duplicate timestamps, coordinate conversion, ordered crossover projection and full partition coverage. Inspect and sign off Monza geometry, each turn label and apex window. Swapping the two selected laps cannot change the reference. Suggested commit `Add canonical track reference and reviewed turn windows`.
 
-Implement `prepare_native_lap(snapshot, lap_id) -> NativeLap`, `build_reference(native_laps, profile_spec) -> ReferenceProfile`, and `integrate_distance(native_lap) -> DistanceTransform`. Use the methodology's deterministic reference selection, independent of pair A/B ordering. Preserve original channel rows and support intervals. Insert lap boundaries only through bracketing; reject missing coverage and conflicting duplicate timestamps. Integrate speed in m/s against elapsed seconds; use no XY path integration for the analysis axis.
+## T04 — Normalize eligible laps offline and reconcile timing
 
-Freeze reference ID, source digest, approximate reference length, coordinate unit conversion, rotation, map arrays, official sector crossing distances and ordered corner marker locations. Convert FastF1 position units to metres. Ordered projection must disambiguate Suzuka's crossover; do not pick nearest XY globally. Version the profile by event/layout/reference and include a digest.
+Implement `align_lap(native, reference, settings)`, `compare_laps(a,b)` and `reconcile(a,b,reference,timing)` under `alignment/` and `analysis/quality.py`. Build one canonical grid with endpoints, markers, region/sector boundaries and the second 100 m partition. Normalize every timing-eligible lap with available telemetry once at import/preparation time. Persist content-addressed aligned arrays, native support data/intervals required by T05, selected timing metadata and per-lap diagnostics. Pair-independent preprocessing scales with lap count. Record reduced capabilities and reasons in the inventory.
 
-Author a reviewed nonoverlapping partition of corner/complex windows and complementary straights. Store segment IDs, labels, bounds, kinds, optional group IDs, marker mappings and explicit metric subwindows. These boundaries must come from inspection of actual imported geometry/telemetry, not guessed distances. Circuit config is original analytical annotation with source/review notes, not an uncredited raw-data dump.
+Use continuous interpolation for supported continuous quantities and previous-value samples for discrete gear/brake. Preserve nulls and raw elapsed time. Compute B−A in ms. Grade both laps' timing consistency, individual and pair interior residuals, reference calibration, endpoint constraint, scale factors and support gaps separately per methodology §§4–5,7. A telemetry failure can still permit sector-only output if the independent timing checks pass. A timing failure blocks both.
 
-**Checks:** analytic constant-speed integration, boundary interpolation, conflicting duplicates, long speed gap, absent position stream, rotation/inverse transforms, ordered marker projection and crossing case; partition ordered, starts at 0, ends at L with no gaps/overlap. **Done:** one reviewed Monza profile and reference fingerprint with diagnostic plot/report; every later comparison reuses it. **Commit:** `Add canonical track reference and segment profile`.
+**Gate.** Run analytical identity, known delta, A/B sign swap, equality of shared grids, gap, discrete step, perturbed official sector, reference calibration and pair cancellation tests. Inspect one real pair's raw curve and individual residuals. Re-normalizing the same revision reproduces arrays. A pair request after T05 must never call this preparation step. Suggested commits `Normalize qualifying laps on the reference distance grid`, `Reconcile raw telemetry against recorded sector timing`.
 
-## T04 — Align laps and reconcile timing
+## T05 — Resolve any eligible local pair and produce supported findings
 
-**Read:** methodology §§4–5 and 7; verification invariant matrix. **Files:** `alignment/{resample,compare}.py`, `analysis/quality.py`, numerical tests.
+Read methodology §§6–8, [contracts](05-contracts.md) and [architecture](02-architecture.md). Implement independent features in `analysis/` plus the existing session/artifact stores and CLI. Keep the signatures pure up to the cache/publication boundary.
 
-Implement `align_lap(native_lap, reference, config) -> AlignedLap`, `compare_laps(a, b, reference) -> ComparisonArrays`, and `reconcile(a, b, reference, official_timing) -> QualityReport`. Build the specified grid once; insert important boundaries and endpoint, deduplicate strictly. Use continuous interpolation only for supported continuous channels, previous-value semantics for gear/brake, and null beyond support. Keep raw elapsed time; never integrate `1/speed` from the resampled display grid or stretch time to match timing.
+1. `summarize_segments(aligned,profile)` and `build_estimated_minisectors(aligned,profile)` produce **two separate partitions**. On each supported interval use end delta minus start delta. Insert each 100 m edge plus L, preserving a shorter final bin, null intervals and source `derived_telemetry`. Never add a bin total to a corner total. Tests cover exact multiples, remainder, gap masking, independent telescoping and slot swap.
+2. `classify_reference_corners(profile,native_reference,settings)` runs once per frozen profile during preparation, caching its result. Classify each marker by its supported native minimum in the reviewed apex window: low below 150, medium 150 to below 250, high at least 250 km/h. Use the support/boundary-shift tests in §6.6. Retain unknown/mixed cases explicitly. `aggregate_corner_classes(segments,evidence,classes,settings)` counts linked pieces as one unit, aggregates gross A/B gain, net, coverage, win/neutral counts, sensitivity and evidence IDs. Apply the §6.7 gates before emitting a directional or exclusive pattern. Test exact cutoffs, reference stability under arbitrary A/B and swap, opposing contributions, cancellation, partially supported wrap groups, no class members and limited coverage.
+3. `measure_evidence` uses native observations. `generate_observations` ranks distinct supported regions using prescribed sensitivity and materiality checks. Link each fact to source values, bounds and support. Include up to three regional observations plus the separate category analysis. Use the actual driver names, units and contextual warnings. Test 0–3 observations, duplicate regions, unsupported brake events and deterministic wording.
+4. Implement `build_sector_result` from eligible recorded timings only. Emit local and cumulative sector gaps, lap metadata, fallback reason, source and pairing context. For `detail_level=auto` use the best eligible **computed** tier, falling back only for real data-quality limits. An explicit telemetry request may fail with the documented capability reason. Test missing timing, telemetry block, exact S1/S2/S3 arithmetic, and the absence of distance, corner and observation fields.
+5. Extend `POST /api/v1/compare` to compute a cache miss from the two selected local normalized laps/timings. No source API, downloads or full-session parsing on this path. Resolve exact indexed IDs, opt-in and context first. Use canonical unordered lap identity plus dataset, reference, method, settings and tier; return the existing orientation flag. Bound work by allowed IDs, array length, file sizes, concurrent builds and cache limits. Deduplicate identical in-flight requests; a retry or swap reuses the result. Persist via temporary validated write and atomic rename. Keep persisted shareable artifact IDs resolvable according to the retention policy in [operations](08-operations.md).
+6. Validate each newly built artifact's schema, analytical provenance, quality and evidence references before serving it. Publish reviewed session revisions and curated artifacts through an atomic manifest switch. Keep blocked results in operator reports, show warnings in browsable results and review designated shareable examples. An errored or changed source revision cannot replace the last usable published session.
 
-Compute `delta_ms = B − A`. Record native support counts/gaps, scale deviations and channel missingness. Implement timing metadata checks, individual and pair interior checks, endpoint accounting and calibration labels separately. Exact endpoint agreement is not an accuracy pass for the interior. Evaluate all thresholds in a versioned config; overall severity is the worst applicable check. Ensure pair cancellation cannot hide bad individual residuals.
+**Gate.** Start with a real normalized session and two eligible laps absent from the cache. Offline, the first request yields the correct result, repeated/concurrent/reversed requests reuse it, a different actual pair computes independently, and invalid requests perform no build. Exercise sector-only, no eligible timing, interrupted write, revision-key change, capacity limit and restart. Inspect one real candidate's curve, regional/category evidence and residual report. Suggested commits `Calculate local gains and estimated minisectors`, `Summarize supported corner speed patterns`, `Generate evidence-backed lap observations`, `Resolve qualifying comparisons from local session data`.
 
-Add a machine-readable and human-readable validation report. Complete required check-set validation (the wire schema alone cannot establish that required checks ran). Numerical code has no HTTP imports and no filesystem writes; the CLI orchestrates it.
+## T06 — Wire production session and lap selection
 
-**Checks:** identical arrays, known analytical delta, swap sign/reference invariance, native gap contamination, discrete steps, null support, official-sector perturbation, cancellation, reference calibration, threshold boundaries and no time correction. **Done:** inspect one real pair's raw delta and all residuals; any failed guardrail remains visible and blocks publication. **Commit:** `Add distance alignment and timing reconciliation`.
+Read [UX](04-experience.md) and contracts. Extend the existing `apps/web/src/features/comparison/` inventory browser, selector and result adapter. Its session/laps GETs and selection POST already use exact IDs and the generated contracts. Connect them to T05's cold-build and bounded-load responses. Validate existing fastest-common-phase defaults, independent phase controls, overrides, reduced capabilities and contextual warnings against the full real inventory. Reserve the preview for its explicitly labeled entry point.
 
-## T05 — Build supported findings and promote an artifact
+Use a reducer for selection, loading, ready telemetry, sector-only, insufficient/unavailable data and transport error. Abort stale fetches and reject late responses. Route returned immutable comparison IDs with orientation and optional segment. Respect the returned `swapped` flag before rendering signed values. Preserve the reader's selection on retry and URL reload.
 
-**Read:** methodology §§6–8; schema; architecture identity rules. **Files:** `analysis/{segments,metrics,evidence,observations,publication}.py`, CLI `build-comparison` and `publish`, tests and fixture manifests.
+**Gate.** Test eliminated Q3, no shared eligible phase, cross-phase confirm/cancel, explicit slower eligible lap, invalid/deep-linked IDs, empty index, stale response, retry and double swap. Open one real result of each available capability through the normal selection path. Suggested commit `Connect the analysis workspace to qualifying lap selection`.
 
-Implement `summarize_segments(comparison, profile)`, `measure_evidence(native_a, native_b, aligned, profile)`, `generate_observations(evidence, config)` and `validate_for_publication(artifact, review_record)`. Define metric evidence and uncertainty intervals exactly as the methodology. Segment gain is end delta minus start delta; all partition gains telescope to the final raw gap. Boundary sensitivity is a deterministic robustness check, not a statistical confidence interval.
+## T07 — Synchronize the production trace board
 
-Use the existing three template categories with explicit versioned variants; select at most three distinct eligible intervals. Require the native support, materiality and sensitivity checks. Every number in a sentence must resolve to structured evidence. Published text names actual driver codes/names, not positional A/B slots, so a later display swap leaves the claim true without string substitution. If fewer qualify, emit an insufficient-evidence reason. Do not count warnings as performance observations. Verify generated text against data with exact formatting functions.
+Reuse `features/telemetry/{TraceBoard,SectorPoints,view}` and the comparison result adapter. Validate the existing cached-artifact rendering against T05 results. Use one Apache ECharts Canvas instance with linked distance grids. Verify the derived 100 m dominance strip, S1/S2/S3 guides, numbered/lettered turns on the same x ruler, speed, throttle, gear steps, brake On/Off and B−A delta panel with zero baseline. Finish turn visibility and selection through zoom, reflow and label collisions. Show the actual ruler location and linked selectable turn list even when labels are thinned.
 
-Create immutable artifact IDs from the canonical input/settings identity. Add an atomic published manifest under `data/artifacts/catalog.json`, containing summaries and artifact digests; change `ArtifactStore` to use it instead of globbing when this ticket introduces it. Keep artifacts in a dedicated subdirectory or explicitly exclude the manifest from artifact enumeration. Validate all referenced artifacts before replacing the manifest. A failed build/promote must preserve the previous usable catalogue. Blocks stay in reports outside served storage; warnings require a recorded review and visible annotation.
+Keep cursor/pin/zoom in shared React state. Use one keyboard distance control, text readout, resize handling and clickable turn/region controls. Gaps stay empty; retain A/B stroke distinctions and axis units. Sector-only results go to `SectorPoints` and a values table with three discrete official boundary comparisons; hide every spatial plot/turn-local claim in this tier.
 
-**Checks:** full partition accounting, native-vs-grid support, missing brake, overlapping onset intervals, threshold recovery, sensitivity sign reversal, tie ranking, three/fewer findings, duplicate IDs, deterministic outputs, corrupt artifact rejection and atomic promotion failure. **Done:** one real reviewed comparison served by API, with explicit source and residual report. **Commit:** `Add segment evidence and comparison publication`.
+**Gate.** Verify all grid guides align on desktop and mobile, pointer/keyboard readouts agree after resize/zoom, zero and unknown bins differ, brake stays binary and sector-only has no interpolated line. Profile cursor interaction on a real artifact. Suggested commit `Render synchronized qualifying telemetry and turn deltas`.
 
-## T06 — Select and load a prepared comparison
+## T08 — Link the local-performance map
 
-**Files:** `apps/web/src/features/comparison/`, `api.ts`, `App.tsx`; add Vitest + React Testing Library as development dependencies and pin lock changes. **Read:** UX states and contracts.
+Render frozen reference geometry in SVG at equal scale with rotation, start/finish and numbered corners. Default to reviewed corner/straight region gains, offer the separately labeled estimated-minisector layer. Distinguish unknown, neutral and both gain directions, with actual numeric tooltips. Use the known distance range for branch-safe picking at Suzuka. The shared cursor, pinned turn and region zoom update map, chart and list; offer keyboard equivalents. Hide the performance map for sector-only comparisons.
 
-Replace the scaffold hero with the specified analysis workspace once a valid artifact exists. Derive circuit/session/phase/driver/lap controls from catalogue summaries, with dependent controls reset when their parent changes. Offer only combinations that exist. Use a comparison ID as the canonical URL selection (`?comparison=<id>&swap=1`); default to an explicit first prepared catalogue item by documented sort order, not an assumed driver pair. A/B swap is a view transform that negates displayed delta/gain and exchanges channels/metadata while keeping grid and reference fixed.
+**Gate.** Test both map modes, closure, geometry gaps, crossover picking, zoom/reset and swap without moving the geometry. Inspect at all three viewport sizes. Suggested commit `Link the performance map to telemetry distance`.
 
-Implement a central comparison reducer with loading, ready, limited, empty, unavailable and error states. Abort stale requests, ignore late results and preserve useful selection on retry. Keep official timing summary separate from estimated values. Parse the schema version and reject unsupported payloads. Do not duplicate Python domain types; import generated TypeScript. Runtime checks verify API boundary shape without implementing numerical inference in JS.
+## T09 — Show comparison-specific analysis and evidence
 
-**Checks:** empty catalogue, invalid URL, unavailable pair, error/retry, request race, same driver disallowed, eligible override only, reload restoration and double swap identity. **Done:** one real comparison loads with metadata and official sectors; absent charts are explicitly pending until next ticket, not fake visual placeholders. **Commit:** `Add prepared comparison selection`.
+Extend the existing class/observation display with region ranking, linked evidence drawer and quality details in `features/evidence/`. Keep the disjoint region table in distance order with sortable absolute gain. Render low/medium/high rows with thresholds, included/expected units, distance coverage, both gross values, net, assessment, members and evidence links. Surface mixed/unknown complexes, absent classes, opposing units and cross-phase context. Render the Python-authored tailored interpretation and up to three local observations. Provide a reason when fewer qualify. Avoid deriving patterns in JavaScript.
 
-## T07 — Synchronize five telemetry panels
+**Gate.** Test default, sparse and contradictory member patterns, linked wrap, missing member, no findings, drawer focus, warning visibility and correct A/B interpretation. Selecting a member or local observation must open its measured region in the map/traces. Sector-only keeps only official timing analysis. Suggested commit `Add corner class analysis and regional evidence details`.
 
-**Files:** `features/telemetry/{TelemetryStack,TracePanel,CursorReadout,scales,paths}.tsx|ts`, shared `comparison/view-state.ts`. **Read:** detailed UX cursor/zoom/null behavior.
+## T10 — Export and restore a comparison
 
-Use a shared distance domain, dimensions and cursor in one provider/reducer. Draw delta, speed, throttle, gear and boolean brake in SVG; A solid/cyan, B dashed/orange. Break paths at nulls, use steps for gear/brake and label brake on/off. The delta baseline is zero with explicit B−A meaning. Render official sector markers on the same distance scale; label spatial positions approximate.
+Build a dedicated 1080 × 1350 PNG card from the loaded artifact plus view order, with a separate JSON download preserving original A/B and evidence. Show event, both driver/phase/lap identities, official times/gap, source and methodology version, quality/context warnings and ID. A telemetry card includes local-performance visual, supported category pattern and qualifying observations. A sector-only card identifies its tier and uses the three official boundary values. Use local fonts and deterministic SVG-to-canvas export. Link to the immutable comparison ID, orientation and optional region. Expose a selectable URL on clipboard failure.
 
-Pointer movement maps to canonical distance and nearest supported readout; mouse leave behavior follows UX without clearing a pinned segment. Keyboard focus on a distance control changes the same cursor. A region click sets the shared domain with specified padding; reset returns full lap. Use ResizeObserver rather than fixed viewport widths. Keep raw arrays intact; any path simplification is display-only and must preserve gaps/extrema.
+**Gate.** Download and inspect at full and half size. Test sector-only, cross-phase warning, 0–3 findings, long labels, swapped view, unavailable export, JSON round-trip and copied URL restoring exact laps. Suggested commit `Export shareable qualifying analysis cards`.
 
-**Checks:** shared cursor coordinate on all panels, same distance under resize, null gaps, integer gears, binary brake, pointer/keyboard parity, zoom/reset, axis units and official-vs-estimated wording. Profile one real artifact; avoid one React element per sample. **Done:** all five readable traces at 1440 px and 390 px. **Commit:** `Add synchronized distance telemetry views`.
+## T11 — Validate three complete session inventories
 
-## T08 — Add the relative-performance track map
+Repeat T01–T05 for Silverstone and Suzuka. Validate the entire source roster, phase availability and every actual known-phase lap's capability/reasons. Use the common engine and reviewed layout profiles. Run automated integrity checks for every imported lap and every returned comparison. Do not precompute or manually review the Cartesian product of laps.
 
-**Files:** `features/track/{TrackMap,geometry,picking}.tsx|ts`. **Read:** methodology map coloring and UX selection.
+Build the [representative acceptance matrix](07-verification.md) across the three real sessions. Cover close/wide controls, default and overridden lap selections, phase elimination, cross-phase opt-in, tier failures and cache-miss behavior. Verify selected real lap/sector values against the correct FIA rows. Choose one curated telemetry comparison per circuit with three legitimate distinct observations when supported. If data cannot support an advertised case, record the missing case and use another real qualifying event at that circuit or keep the release gate open. Synthetic rejection tests can cover unavailable edge cases if explicitly identified.
 
-Render frozen reference geometry in SVG with equal x/y aspect ratio, configured rotation and corner labels. Color by partition `gain_ms` using the same neutral threshold and scale as the table; show saturation legend with actual tooltip values. Unknown geometry or unsupported segments have a distinct pattern, not a neutral-performance color. Never color by cumulative delta.
-
-Use segment paths with accessible labels and forgiving hit areas. Clicking a map region pins/selects its canonical interval and updates the telemetry domain. Cursor movement in traces puts a marker at the corresponding reference index. A map hover resolves along its segment's known distance range so Suzuka's crossing cannot select an unrelated branch. Keyboard segment traversal provides the same behavior. Preserve reference after A/B swap; swap colors/sign only.
-
-**Checks:** aspect ratio, orientation, cross-over picking, segment path boundaries, endpoint closure, swap invariance, keyboard selection and missing geometry state. **Done:** selection is synchronized across map/trace and all three layouts are structurally supported. **Commit:** `Add local-performance track map`.
-
-## T09 — Surface the evidence
-
-**Files:** `features/evidence/{SegmentTable,ObservationList,EvidenceDrawer,QualityPanel}.tsx`. **Read:** product truth levels and UX sorting/selection/quality.
-
-Show partition segments in distance order by default with optional absolute-gain ranking. Every row has estimated gain, direction, quality and supported metrics; null is a dash with an explanation. Selecting an observation/table row sets the same pinned segment used by the map and charts. The evidence drawer exposes exact metric definition, values, support and sensitivity; it is not only a repeated prose claim.
-
-Show up to three observation cards with the insufficient-evidence panel when needed. Implement quality details with timing metadata, individual and pair residuals, calibration labels and endpoint constraint explanation. Reconciliation errors must remain unchanged when users swap drivers; relabel and sign-transform only where appropriate. Warn state stays visible throughout. Blocked artifacts are withheld: the browser shows unavailable/reason with no findings/export; the operator report retains official metadata.
-
-**Checks:** all evidence refs resolve, selection round-trip, sorting ties, no duplicate wrapped-complex counting, fewer-findings state, keyboard table access, focus-return from drawer, warn/block behaviors. **Done:** reader can verify every displayed sentence against its interval and metric. **Commit:** `Add corner summaries and evidence details`.
-
-## T10 — Export a reviewable analysis card
-
-**Files:** `features/export/{AnalysisCard,renderSvg,download,serialize}.tsx|ts`. **Read:** UX export layout.
-
-Build a dedicated 1080×1350 card from the frozen loaded artifact and view order. Include event/phase, driver and lap IDs, official times/gap, local-gain map/legend, the three supported observations or explicit fewer-findings message, quality warning, source credit, method/version and short comparison identity. Draw SVG text/shapes from templates and rasterize to PNG via a canvas. Use local/system fonts and wait for font readiness; avoid remote assets and screenshotting the live browser DOM. Provide JSON evidence/provenance export separately with original raw A/B order plus view-order metadata.
-
-Share URL serialization includes comparison ID, swap flag and optional selected segment. Clipboard failure displays a selectable URL; no silent success. Export failure keeps the workspace usable and displays a retry. A blocked comparison cannot export a performance card. Never regenerate analysis while rendering an image.
-
-**Checks:** image dimensions, long driver/segment labels, line wrapping, warning footer, 0/1/2/3 observations, swapped order correctness, no clipping at 100% image inspection, no network/font dependency, JSON round-trip and clipboard failure. **Done:** downloaded PNG matches the shown evidence and companion JSON. **Commit:** `Add analysis card and evidence export`.
-
-## T11 — Validate all three circuits
-
-**Files:** remaining circuit configs, reviewed dataset manifests, non-bundled acceptance corpus, browser integration tests. **Read:** verification release checklist.
-
-Repeat import/reference/selection for Silverstone and Suzuka, inspecting layout/version and source availability each time. Prepare at least four drivers and all six pairs per circuit in one eligible phase (18 minimum total). Reuse the same engine; no circuit-name branches in numerical code. Circuit-specific differences belong in versioned profiles. Choose one showcase pair per circuit that supports three distinct observations; document quality limitations for every pair.
-
-Build the validation pack: close pair, wider-gap control pair and rejected-lap example per circuit, official classification/sector source links, native sample/gap summaries, all residuals, profile inspection and evidence review. Add exact known numerical regression assertions from reviewed local results with clear source provenance, but do not commit raw upstream data without resolving distribution terms. CI continues using synthetic tests; real acceptance is a separately documented command and locally available corpus.
-
-**Checks:** all 18 artifacts schema + analytical validation; official timing cross-checks; all observation numbers reviewed; Suzuka branch mapping; circuit switches; public export source labeling; no mixed phase/weather pair. **Done:** three circuit datasets are actually validated, not merely listed in a dropdown. **Commit per circuit:** `Add validated Silverstone circuit profile` / `Add validated Suzuka circuit profile`, then `Add three-circuit acceptance checks`.
+**Gate.** Three actual complete inventories load, all roster/lap counts reconcile, repeat selections hit cache and new valid pairs compute locally, validated examples resolve to evidence and reviewed turn geometry, and no published tier overstates verification. Commit each completed circuit profile/validation increment separately.
 
 ## T12 — Package and release
 
-**Files:** Dockerfile/runtime config, operations notes, CI browser job if added, final handoff. Implement same-origin static serving and `/api` routing, readonly artifact volume, process health, safe errors, bounded reads, compression/cache headers, immutable artifact caching and catalogue revalidation. Keep port/API/paths configurable. Test restart with existing artifacts and no upstream network.
+Implement same-origin Vite/static and FastAPI serving, health, read-only session input mount and bounded writable result/cache storage. Permit GET and the validated local comparison POST. Separate operator imports, reviewed manifests and web process. Keep upstream credentials out of the serving environment. Test warm/cold access, network-disabled operation, cache limits, concurrent requests, restart, previous-manifest recovery and immutable published share links.
 
-Run the final checks in verification on clean install. Capture responsive and keyboard QA, download/inspect exports, measure target budgets with named conditions, and record source distribution scope. Confirm empty/corrupt catalogue behavior in the deployment image. Keep any source/account secrets in the runtime secret mechanism, never the browser bundle or Docker layers. Publish only when release checks are fulfilled and record the actual deployed URL in operations; no deployment is part of T00.
+**Gate.** Run every [release check](07-verification.md) on clean installs, record performance and responsive/keyboard/export evidence, source distribution scope and known limitations, then document the actual deployment target. Suggested commit `Package the first LapDNA release`.
 
-**Done:** reproducible documented build, usable release with three circuits and export, known limitations visible, no failing required checks. **Commit:** `Package the first LapDNA release`.
+## Later experiment
 
-## Later extension: corner-profile clustering
+After release, evaluate clustering of normalized corner profiles against the fixed reference-speed categories. Keep feature definitions, comparable windows and stability evaluation in a separate ticket. A cluster describes an observed profile shape.
 
-Do not start before T12. Proposed experiment: normalize speed/throttle/gear/brake profiles within reviewed corner windows, retain duration/length separately, scale features using training data only, cluster comparable corner types and inspect stability across sampling/parameter choices. Avoid presenting a cluster as a driver skill label or causal diagnosis. The evaluation question is whether clusters reveal repeatable observable shapes beyond simple corner-speed bins. This is an experiment with its own acceptance plan, not an unfinished MVP requirement.
+## Implementation handoff
 
-## Copyable implementation prompt
-
-> Work in the LapDNA repository. Read AGENTS.md and docs/10-handoff.md. Implement only ticket T01 from docs/06-implementation-plan.md and its named dependencies/specifications. Keep the architecture and methodology fixed. Run the listed checks, update ticket status and handoff with evidence, then commit and push the bounded feature to the configured GitHub branch using a descriptive imperative message. If an upstream assumption fails, record the exact issue and the smallest required decision; do not fabricate data or silently redesign the project.
-
-Replace `T01` with the next uncompleted ticket for later sessions. The implementation model should not infer completion from this prompt; the status board and recorded checks govern.
+Use the [handoff](10-handoff.md) and the selected ticket as the work order. Include the inputs, outputs, tests, gate, source limitations and separate commits for each completed feature. When upstream access or validation fails, retain the evidence and report the precise blocker.

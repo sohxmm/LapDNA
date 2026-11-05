@@ -1,99 +1,99 @@
-# Architecture and decision record
+# Architecture and decisions
 
-## Structure and ownership
+## Ownership and layout
 
-The application has one analytical source of truth: Python emits immutable comparison artifacts; the browser displays them. A user changing cursor position must never trigger numerical re-analysis or a remote FastF1 request. The API exposes only validated prepared results.
+Python computes lap eligibility, reference alignment, delta, mini-sectors, class metrics and findings. React renders those supplied facts. Cursor and zoom operations never request upstream data or recompute scientific metrics.
 
 ```text
-LapDNA/
-  apps/web/src/
-    api.ts                       HTTP boundary (exists)
-    App.tsx                      Honest no-data workspace (exists)
-    styles.css                   Foundation styling (exists)
-    features/comparison/         T06 selection and URL state
-    features/telemetry/          T07 scales, traces, synchronized cursor
-    features/track/              T08 geometry and segment picking
-    features/evidence/           T09 summaries and evidence drawer
-    features/export/             T10 deterministic SVG/card export
-  services/api/src/lapdna/
-    main.py                      Read-only HTTP application (exists)
-    models.py                    Authoritative wire contracts (exists)
-    store.py                     Artifact discovery/validation (exists)
-    ingestion/                   T01 FastF1 adapter + snapshots
-    selection/                   T02 lap/phase eligibility
-    alignment/                   T03–T04 reference, distance, resampling
-    analysis/                    T05 segments, metrics, evidence
-    cli.py                       T01 onward; offline operator commands
-  packages/contracts/            Generated JSON Schema/OpenAPI/TS
-  config/circuits/                Seed manifest now; versioned profiles T03
-  data/cache/                    Ignored FastF1 cache
-  data/raw/                      Ignored adapter snapshots/manifests
-  data/processed/                Ignored normalized lap arrays
-  data/artifacts/                Ignored served comparison JSON
-  data/reports/                  Ignored eligibility/quality diagnostics
-  docs/                          This specification
+apps/web/src/
+  App.tsx                         Home and explicit preview routing
+  features/comparison/            Inventory, phase/lap controls and cached-result UI
+  features/telemetry/              ECharts adapter, turn ruler, numeric readout
+    DesignPreview.tsx             Explicit synthetic example
+    design-fixture.json           Offline-generated fictional loop only
+    SectorPoints.tsx              Discrete sector-crossing points and table
+  features/track/                 T08 real reference map
+  features/export/                T10 card and evidence download
+services/api/src/lapdna/
+  main.py                         Local HTTP API
+  models.py                       Analytical wire contracts
+  inventory.py                    Roster/lap indexes and selection validation
+  store.py                        Validated immutable artifact reads
+  ingestion/                      T01 source adapters and snapshots
+  selection/                      T02 eligibility and phase inventory
+  alignment/                      T03–T04 reference and normalized per-lap arrays
+  analysis/                       T05 metrics, class evidence and local engine
+packages/contracts/               Generated OpenAPI, JSON Schema, TypeScript
+data/sessions/                    Ignored imported roster/lap indexes
+data/processed/                   Ignored normalized per-lap arrays
+data/artifacts/                   Ignored immutable prepared/cache outputs
+config/circuits/                  Versioned profiles and seed candidates
 ```
 
-Folders marked Txx are future responsibilities, not empty abstraction layers to create in advance. Prefer a few cohesive modules until behavior warrants splitting them.
+Future folders are responsibilities, not empty layers to create pre-emptively. The default application never imports synthetic data; its opt-in preview is code-split.
 
-## Data lifecycle
+## Revised comparison lifecycle
 
-1. **Resolve** a supported circuit/session specification. Record season, event round, session identifier, source availability and adapter version. Never resolve by mutable display name alone.
-2. **Acquire** once into FastF1's supported local cache. Keep credentials out of configuration files and Git. Copy only the normalized fields needed for reproducible analysis into a versioned snapshot after access/terms review.
-3. **Select** qualifying phase and eligible laps, preserving rejection reasons. Candidate four-driver seeds are selected after inspecting data, not hard-coded by presumed finishing order.
-4. **Freeze** a canonical reference and circuit profile for that exact event/layout. Store its reference lap ID and fingerprint. Changing the reference invalidates every comparison using it.
-5. **Normalize** native channels into SI-compatible numeric arrays, preserving timestamp provenance and unsupported intervals. Keep finite numeric milliseconds at the API boundary, including fractional interpolated values. Round only for display.
-6. **Compare** two explicitly identified laps; deterministic artifact identity includes the ordered lap IDs, reference fingerprint, circuit revision, methodology version and schema version. Compute in a consistent base ordering; a UI swap is a sign/label transform, not a new alignment.
-7. **Validate** the entire artifact through Pydantic plus the stronger analytical checks. Reject blocked analyses from the catalogue. Record diagnostics separately so rejected comparisons remain inspectable by the operator.
-8. **Publish locally** by writing a temporary file in the artifact directory, flushing and renaming atomically only after validation. Keep previous content-addressed files; never overwrite a published ID with different numbers.
-9. **Serve** read-only from the allowlisted artifact directory. Unknown ID → 404; invalid request → 422; corrupt stored artifact → safe service error without file paths.
-10. **Render/export** all claims from the same loaded artifact. Record comparison ID and methodology version in shared output.
+1. Resolve a supported event and import its full session offline. Record source versions, access status and file fingerprints.
+2. Retain the complete roster and all laps. Each lap has its own phase, timing, eligibility reasons and capability: telemetry, sector_only or unavailable. A missing Q3 lap is absence, not zero.
+3. Freeze one event/layout reference independent of the selected pair. Normalize every eligible telemetry lap onto that reference once. Preserve native samples for evidence and supported intervals.
+4. Publish the reviewed dataset/index. Review covers source identity, circuit/reference, per-lap checks and method/config; it does not require a human to inspect every combinatorial pair.
+5. A user selects two actual lap IDs and requests a result. Validate inventory membership, distinct drivers, eligibility, phase opt-in, capability and current source digest.
+6. Return a matching validated cached result. The scaffold currently stops with HTTP 409 on a cache miss; T05 adds calculation from local normalized arrays. A miss never downloads a remote session.
+7. T05 executes a bounded local comparison: reuse precomputed alignment, reconcile the pair, build segments/estimated bins/categories/evidence, validate and store an immutable artifact atomically. Blocked results stay in reports.
+8. Render the capability-specific result. A telemetry failure may permit a separate sector-only result from trusted recorded timings; never disguise it as a continuous analysis.
+9. Export the frozen artifact, current display ordering and its warnings after T10.
 
-## Reference and cache identity
+## Compute and storage limits
 
-Recommended ID format is `cmp_<24 lowercase hex chars>` from SHA-256 of canonical sorted JSON containing `lap_a_id`, `lap_b_id`, `reference_sha256`, `circuit_revision`, `methodology_version`, `schema_version` and normalized analysis settings. This is a naming decision for T05; the current service accepts safe alphanumeric/underscore/hyphen IDs for fixture compatibility.
+The first implementation uses local files, not a distributed queue. A comparison operates on two prevalidated arrays capped at 5000 grid points. Target <2 s cold local calculation and <500 ms cached response under measured conditions. Set a default capacity of two concurrent calculations per process, deduplicate identical in-flight keys and return a retryable 503 when capacity is exhausted. Do not claim cancellation of CPU work simply because the browser aborts HTTP.
 
-Normalized source snapshots have their own content digest. Artifact files can use a sidecar `.sha256`; do not place a digest of the entire artifact inside itself. Pipeline version and generated UTC timestamp provide provenance but must not cause an otherwise identical comparison to receive a different identity. Re-running identical inputs must yield the same numbers and observation IDs; generated-at metadata may differ only in a newly built unpublished file.
+Keep curated publication artifacts read-only and generated cache outputs in a separate writable directory in production. Compute to a temporary file, validate, then rename atomically. Existing immutable IDs never change meaning. T05 introduces a versioned published manifest and updates discovery in the same change; current flat readers must not see a manifest as a comparison JSON.
 
-Cache keys are scoped by source and adapter versions, event round and season, session and snapshot fingerprint. Intermediate alignment is keyed by lap, reference and method settings. Never reuse a circuit profile merely because its name matches across years.
+If measured bounds fail, add an explicit persistent job system in a new decision. Do not silently run unbounded work in a request or introduce an in-memory background task that is presented as durable.
 
-## Why these technologies
+## Identity and reproducibility
 
-React/TypeScript with Vite is appropriate for an interactive client with no MVP server rendering requirement. FastAPI and Pydantic keep the Python analysis and JSON contract adjacent. The initial service uses only those core dependencies; FastF1/NumPy/pandas/SciPy are optional analysis dependencies until T01. Package lockfiles record the verified scaffold environment; dependency updates are separate checked commits.
+A result ID is `cmp_<24 lowercase hex characters>`, derived from canonical JSON including sorted lap IDs, source snapshot SHA-256, reference SHA-256, circuit revision, methodology version, schema version, result tier and analysis-settings hash. Sorting defines stable storage order; `CompareResponse.swapped` preserves requested A/B orientation without recomputing the reference.
 
-Use NumPy arrays internally and a narrow Pydantic serialization boundary. Avoid large DataFrames leaking into routes or UI schemas. Build custom SVG telemetry paths over one scale utility in T07; the grid has roughly 1,000–1,300 points for these circuit lengths, so this is manageable without a chart framework. Use SVG for the map, canvas only for PNG export. Add a chart dependency only after measuring a specific need and documenting its accessibility behavior.
+Generation UTC is provenance, not a cache key. Full artifact hashes use external sidecars/manifests, not a self-referential digest field. Reimports with changed upstream flags produce a new snapshot and results. All file paths remain operator configuration, never user-supplied route paths.
 
-No database, Redis, distributed job queue, authentication system, LLM API, live websocket or serverless numerical worker is needed for the curated release. If later users request arbitrary comparisons, introduce a bounded job API with explicit states and a persistent worker; do not execute a remote download in an HTTP request or rely on a process-local background task surviving deployment.
+## Why React and ECharts
 
-## Frontend state boundaries
+React manages forms, state, evidence panels and navigation. Graph quality comes from the plotting layer. The selected layer is **Apache ECharts**, imported directly without an additional React wrapper.
 
-- **Remote state:** catalogue and one immutable comparison. Abort a previous fetch when the comparison changes. Ignore late responses. Runtime validation/version checks belong at this boundary.
-- **Selection state:** catalogue-derived session/phase/lap pair encoded by comparison ID in the URL; never arbitrary unvalidated filesystem paths.
-- **View state:** A/B order, distance domain, cursor distance, pinned segment, visible channels, open evidence. One provider/reducer owns shared distance state; no independent cursors inside charts.
-- **Derived display state:** sign/labels, sorted segment ranking, selected observation and formatted units. These transformations may not change analytical numbers.
-- **Export state:** idle → preparing → ready/error. Snapshot the current comparison and selection before generating an image so user interaction cannot change the output mid-export.
+| Option | Fit and decision |
+| --- | --- |
+| React + ECharts | Selected: linked multi-grid axes, Canvas rendering, annotations and controlled updates fit the reference-style telemetry stack |
+| React + uPlot | Strong lean time-series alternative; custom turn/category rails and annotations would require more plugin work for this scope |
+| Plotly | Useful scientific explorer; its wider charting surface is unnecessary for this focused workspace |
+| Custom SVG traces | Maximum control, but more interaction/axis/accessibility code for an implementation-focused handoff |
+| Streamlit/Dash | Useful internal analysis tools; the bespoke responsive two-driver workspace is better served by the existing browser stack |
 
-Start with React state/context and a reducer. Do not add a global store or routing framework for one workspace. URL encoding must be versioned and parse unknown values safely. Never persist a complete telemetry artifact into localStorage.
+This is a project fit decision, not a benchmark claim that React or one renderer is universally faster. ECharts supports Canvas and SVG; the scaffold uses Canvas for the trace stack, with a separate SVG map and card renderer. [ECharts renderer guidance](https://echarts.apache.org/handbook/en/best-practices/canvas-vs-svg/), [axis guidance](https://echarts.apache.org/handbook/en/concepts/axis/), [uPlot project](https://github.com/leeoniya/uPlot), [Plotly documentation](https://plotly.com/javascript/).
 
-## Service and deployment boundaries
+One ECharts instance contains five grids. Every x-axis shares the same distance domain and margins; axis pointers are linked. The turn ruler and local-gain strip use the same transform. The scaffold implements turn-window/full-lap controls; T07 adds production shared zoom/map/selection state and resolves label collisions for dense circuits. Use previous-value steps for gear/brake and break paths at nulls. No chart smoothing or display interpolation can create evidence.
 
-Development runs Vite on loopback port 5173 and FastAPI on loopback 8000. Vite proxies `/api`, so the browser uses a same-origin path. Explicit development CORS remains useful for a separately hosted client. The production target is one Linux Python container or VM, with the built frontend served by a reverse proxy/static mount and `/api` forwarded to Uvicorn. Artifacts are mounted read-only; import jobs run separately with upstream access. A filesystem-backed single service is the MVP baseline; a static catalogue/object-store architecture is a later alternative if it removes operational cost without breaking contracts.
+Initialize once in a React effect, observe size, update options on data/domain changes and dispose on unmount. Do not put every sample into React state. Import only the necessary ECharts components. Lazy-load the chart so the empty session workspace remains light.
 
-T12 supplies a Dockerfile and exact production command after the data size and serving behavior are measured. Avoid pretending the scaffold is deployment-ready: static routing, caching, compression, limits and health probes remain release work.
+## State boundaries
 
-## Operational budgets (targets to measure)
+- Remote: session inventory, one lap index, and one immutable result.
+- Selection: session, two driver IDs, independently chosen phases/laps, cross-phase opt-in and requested tier.
+- View: requested A/B order, distance domain/cursor, selected turn/segment, channel visibility and evidence drawer.
+- Derived presentation: pixels, units, labels, sign transforms and category column orientation. Python owns the underlying numbers.
+- Export: frozen result plus view metadata, progressing idle → preparing → ready/error.
 
-| Operation | MVP target | Measurement |
-| --- | --- | --- |
-| Warm catalogue | <200 ms server time | Local representative 18-artifact corpus |
-| Warm comparison fetch | <500 ms server time | Read/validate one real artifact |
-| Compressed artifact | <1 MB | Inspect representative JSON gzip size |
-| Initial workspace | <2 s on ordinary broadband after warm service | Browser measurement with named test conditions |
-| Cursor interaction | <16 ms median update; no sustained visible stutter | Profile full comparison on documented device |
-| Export | <3 s | 1080×1350 PNG with loaded local fonts |
+Abort obsolete reads and ignore late responses. Selection changes invalidate the old result. Keep default selection deterministic: fastest eligible laps within the highest common phase for the chosen two drivers, then explicit overrides. The roster includes eliminated/unavailable drivers with reasons. No browser localStorage telemetry cache.
 
-These are product targets, not measured scaffold performance. If repeated schema validation makes the service slow, cache validated objects by path/mtime/size with bounded capacity, or load a validated manifest at startup. Measure first. Never weaken validation to improve a benchmark.
+## HTTP and deployment
 
-## Scope-change rules
+Development: Vite on 127.0.0.1:5173 proxies /api to FastAPI on 127.0.0.1:8000. Production: one Python service plus static browser assets, reviewed datasets mounted read-only, a separate writable result cache, and no upstream source credentials on ordinary serving paths.
 
-An architectural change needs an explicit note here containing the trigger, selected change, rejected alternative, migration and impacted tickets. A numerical change also updates methodology/version and test corpus. This stops implementation from drifting when handed between coding sessions.
+Current endpoints are health, catalogue, artifact read, session inventory, lap index and cached compare POST. The POST only selects local validated results now; the numerical engine remains T05. No public upload, arbitrary URL fetch, account, live timing stream, or scheduling service is part of this scope.
+
+Targets to measure: catalogue/index <200 ms server time; cached comparison <500 ms; local cold comparison <2 s; compressed artifact <1 MB; cursor update <16 ms median on a documented test device; 1080×1350 export <3 s. These are acceptance targets, not scaffold measurements.
+
+## Revision record
+
+Revision 2 implements the user's expanded request. It replaces the four-driver/prepared-pair limit with full-session inventory and local on-demand comparison, adds independent qualifying phases, two capability tiers, turn rails, estimated mini-sectors, class analysis, and ECharts. It preserves official timing authority, raw delta, reference symmetry and supported evidence. All T01–T12 dependencies remain explicit in the implementation plan.

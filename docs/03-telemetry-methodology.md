@@ -1,6 +1,6 @@
 # Telemetry methodology
 
-Status: implementation specification; numerical thresholds below are proposed project policy, not measured accuracy claims. No real comparison has been validated by this scaffold. Method identifier: `distance-v1`.
+This implementation specification uses method identifier `distance-v2`. Numerical thresholds are proposed project policy. T01 onward will validate them on real comparisons. This revision adds independent Q-phase selection, explicit data tiers, estimated minisectors and stable corner-speed categories.
 
 ## 1. What the product can claim
 
@@ -14,15 +14,30 @@ Use these phrases consistently:
 - **Observed braking onset:** a transition in an on/off signal, reported as an interval between samples.
 - **Data checks passed:** the checks in this document passed; it does not mean the intermediate curve is accurate to the displayed millisecond.
 
-The source distinguishes native car and position streams, identifies brake as boolean, and treats gear as discrete. Position coordinates use tenths of a metre. Prefer the native streams over merged convenience telemetry for computation. [FastF1 channel and access definitions](https://github.com/theOehrly/Fast-F1/blob/main/fastf1/core.py)
+FastF1 provides native car and position streams, including speed, throttle, gear, RPM, DRS and brake on/off. Its listed channels do not provide steering angle or brake pressure. Position coordinates use tenths of a metre. Prefer native streams over merged convenience telemetry for computation. The supplied broadcast image is an interaction/layout reference, not proof that every illustrated channel is available. [Pinned FastF1 channel definitions](https://github.com/theOehrly/Fast-F1/blob/v3.9.2/fastf1/core.py)
+
+### 1.1 Data tiers and honest fallback
+
+The numerical result is one of two explicit capabilities:
+
+- **Telemetry comparison:** both laps support the aligned raw-time curve. It can show distance traces, turn labels, derived minisectors, segment gains and supported corner-class findings. Individual optional channels can still be missing.
+- **Sector-only comparison:** eligible recorded lap/sector timing exists, but telemetry is unavailable or cannot pass the alignment gates. It shows official sector durations, sector gaps and cumulative gap at the timing boundaries only. It cannot show a continuous distance delta, a colored performance map, per-corner gains, estimated minisectors or corner-class performance conclusions.
+
+For sector-only mode calculate `sector_delta_ms[k] = sector_B_ms[k] - sector_A_ms[k]` and `cumulative_delta_ms[k] = sum(sector_delta_ms[0:k+1])` for zero-based sector index k. Show the recorded lap gap, sector-sum residual and `fallback_reason`. Plot discrete points labeled S1, S2 and Finish on a categorical axis. Do not spread a sector gap evenly over distance, connect it with a curve suggesting measured interior values, or manufacture turn positions from it. The MVP sector-only result omits spatial data entirely.
+
+FastF1 remains the first adapter. OpenF1 is an investigated optional source for sector timing, with its own source provenance and eligibility mapping before use. Its `segments_sector_*` arrays are mini-sector status/color codes, not durations; they cannot supply numeric head-to-head delta. Do not convert green/purple into a guessed number of milliseconds. [OpenF1 lap definitions](https://openf1.org/docs/#laps)
+
+If neither valid timing nor valid telemetry is available, return unavailable with the actual reason. A fallback is a lower capability, not repaired telemetry. There is no verified public source for the exact higher-frequency steering/brake-pressure dataset shown in the reference image within this project.
 
 ## 2. Fixed scope and identifiers
 
 MVP imports completed conventional qualifying (`Q`) for Monza, Silverstone and Suzuka. Begin validation with each circuit's 2024 qualifying event; these are candidate datasets, not promises of availability or suitable pairs. The importer resolves the event through the schedule and records the round and circuit key. Never hardcode an unverified round from memory.
 
-Keys must distinguish season, round, session, circuit layout/version, driver number and lap number. Use driver number as a string; display abbreviation is metadata, not a stable database identity. A comparison contains exactly two different drivers from the same session and qualifying phase. No sprint, race, wet/dry mixing, cross-year lap comparison or cross-layout comparison in v1.
+Keys must distinguish season, round, session, circuit layout/version, driver number and lap number. Use driver number as a string; display abbreviation is metadata, not a stable database identity. A comparison contains exactly two different drivers from the same qualifying event and layout. All imported participants and all eligible laps are selectable; no fixed four-driver or six-pair restriction remains. No sprint, race, wet/dry mixing, cross-year lap comparison or cross-layout comparison is in this release.
 
-Select the highest phase common to the chosen drivers with eligible laps, then the fastest eligible lap in that phase. Display that rule and allow explicit eligible lap selection. Do not automatically combine one driver's Q3 with another's Q2. If no common eligible phase exists, return an actionable empty state. Equal `LapTime` ties use lower lap number.
+Default to the highest phase common to the chosen drivers with eligible laps, then the fastest eligible lap for each in that phase. Each lap stores its own phase. Allow explicit lap selection and independent Q1/Q2/Q3 controls for A and B. Selecting different phases requires `allow_cross_phase=true`; retain a persistent warning that track evolution and conditions differ. Never silently replace a requested phase with another or invent a Q3 lap for an eliminated driver. If there is no common phase, explain this and offer explicit cross-phase selection rather than auto-mixing. Equal `LapTime` ties use lower lap number.
+
+Pair context records same-phase versus cross-phase, both phases, lap-start UTC when available, time separation, compound/tyre age and material weather/track warnings. Cross-phase numeric comparison is allowed when both laps independently pass eligibility, but its language is limited to **these selected laps**. Do not infer that the resulting pattern establishes an enduring driver/car strength. A weather mismatch or otherwise blocked lap cannot be bypassed by the cross-phase opt-in.
 
 ## 3. Import, eligibility and provenance
 
@@ -31,16 +46,17 @@ Select the highest phase common to the chosen drivers with eligible laps, then t
 1. Resolve an allowlisted season/event/session to an exact upstream identifier.
 2. Open a project-local FastF1 cache. Load timing, telemetry, weather, session status and race control messages through the installed public API. Record the exact FastF1 version and import timestamp.
 3. Obtain Q1/Q2/Q3 membership with `split_qualifying_sessions()`. If phase membership is unavailable or ambiguous, stop publication of that session rather than infer phases from lap order.
-4. Retain a lap index with every lap's eligibility and machine-readable exclusion reasons, including rejected laps.
+4. Retain a lap index for every participant and all Q1/Q2/Q3 laps, with timing eligibility, telemetry eligibility and machine-readable exclusion reasons, including rejected laps.
 5. Validate car data and position data separately. Preserve native timestamp/value records as the audit inputs outside Git.
-6. Freeze one session geometry/reference version. Produce normalized laps, comparisons, quality reports and catalog manifests as immutable derived artifacts.
-7. Validate all artifacts before atomically switching the catalog manifest. A failed import leaves the previous published catalog intact.
+6. Freeze one session geometry/reference version and normalize each eligible lap once. Publish the full imported inventory; a missing phase/lap remains visibly unavailable.
+7. The request path compares explicitly selected normalized local laps with bounded computation and caches immutable results by the complete inputs/method identity. It must never contact upstream to fulfill a comparison. Previously prepared artifacts remain useful as examples/cache entries, not the limit on allowed pairs.
+8. Validate session inventory and derived results before promotion. A failed import leaves the previous usable session revision intact. Distinguish session-not-imported, lap-unavailable, computation-not-implemented and genuine data-quality failures.
 
 Race control data is necessary to evaluate deleted laps, and `IsAccurate` is a timing integrity flag rather than a blanket telemetry-accuracy guarantee. [Timing reference](https://github.com/theOehrly/Fast-F1/blob/main/docs/api_reference/timing_data.rst) Phase splitting also depends on session status. [FastF1 phase implementation](https://github.com/theOehrly/Fast-F1/blob/main/fastf1/core.py)
 
 ### 3.2 Publication eligibility
 
-Every following condition is required for a normal comparison:
+The timing eligibility checks apply to both result tiers; native coverage and speed/time checks additionally gate the telemetry tier:
 
 | Check | Required outcome | Failure behavior |
 | --- | --- | --- |
@@ -50,13 +66,13 @@ Every following condition is required for a normal comparison:
 | `IsAccurate` | Explicitly true | Exclude; retain reason |
 | Pit in/out | Both absent | Exclude |
 | Phase | One known Q phase | Exclude |
-| Track status | Green throughout for the curated MVP | Exclude other/unknown states |
+| Track status | Green throughout for the initial release | Exclude other/unknown states |
 | Tyre | Known dry compound | Exclude wet/intermediate/unknown |
 | Native car coverage | Brackets both timing boundaries, acceptable gaps | Exclude from aligned telemetry |
 | Speed/time integrity | Satisfies section 5 | Exclude from alignment |
-| Timing consistency | Satisfies section 7 | Warn or block as specified |
+| Timing consistency | Satisfies applicable section 7 checks | Warn or block the affected tier as specified |
 
-Same phase does not mean same conditions. Display compound, tyre age, lap start UTC/time-of-day, and elapsed time between the laps. Different dry compounds or tyre ages are a visible comparison-context warning, not an automatic claim about tyre performance. Do not infer wetness from a dry compound alone; rain/weather/track context can also trigger review.
+Same phase does not mean same conditions. Display compound, tyre age, lap start UTC/time-of-day, and elapsed time between the laps. Different dry compounds or tyre ages are a visible comparison-context warning, not an automatic claim about tyre performance. Cross-phase requests always add that context warning even if sampled weather appears similar. Do not infer wetness from a dry compound alone; rain/weather/track context can also trigger review.
 
 No silent fallback from a rejected fastest lap: label the chosen result **fastest eligible lap** and retain a reason if it differs from the official phase best. Classification order and lap availability are separate concepts.
 
@@ -64,7 +80,7 @@ No silent fallback from a rejected fastest lap: label the chosen result **fastes
 
 Store the source identifier, source session identifier, import UTC, FastF1 version, pipeline commit, methodology version, circuit-config hash, canonical-reference lap ID, native-input hash, output hash, units, all thresholds, and dataset review status. The served-artifact contract currently accepts only `provenance.source = fastf1`; a future browser demo fixture would need an explicit synthetic source value and prominent UI labelling. Keep software and input versions independent. Reimports may change upstream lap validity; publish a new revision rather than mutating an old comparison.
 
-The scaffold contains an artificial unit-test factory only. It is not served by the app; the app starts with an honest empty-data state. Test geometry and times must never be presented as a real event.
+Unit tests use artificial inputs and UI examples must display their synthetic status. The live historical-source availability probe is recorded separately in the [source register](09-sources.md). Its sampled response is evidence of data availability only. The real comparison pipeline still requires a complete validated session import.
 
 ## 4. Canonical distance and time conventions
 
@@ -105,7 +121,7 @@ FastF1 cautions that sparse, jittery data, repeated interpolation and integratio
 
 ### 4.4 Shared grid and channel interpolation
 
-Create `distance_m = sorted(unique([0, 5, 10, ..., floor(L/5)*5, L, segment boundaries, sector boundaries]))`. Record a nominal spacing of 5 m; the final interval and explicitly inserted boundaries may be shorter. This is display resolution, not measurement resolution. A 5 m grid creates no new source evidence.
+Create `distance_m = sorted(unique([0, 5, 10, ..., floor(L/5)*5, L, segment boundaries, sector boundaries, minisector boundaries, reviewed turn markers]))`. Record a nominal spacing of 5 m. The final interval and explicitly inserted boundaries may be shorter. The native sampling rate still determines measurement support.
 
 Invert the monotone native `distance_i(t)` with piecewise linear interpolation to get `time_ms_i(s)`. This mathematical notation maps to each driver's wire field `time_raw_ms`; there is no adjusted-time series. No cubic splines. Evaluate continuous channels at the same distance using their native support. Use the same transformations for both drivers.
 
@@ -153,6 +169,8 @@ Interpolate the reference lap's *position stream* onto reference native session 
 
 Project corner marker positions onto this reference polyline in known corner order, resolving self-crossings using local distance neighborhoods. Use supplied marker numbers and letter suffixes as labels. Do not blindly trust their precomputed distance against a different reference lap. Suzuka's crossing is a specific test case: nearest X/Y alone can select the wrong branch.
 
+Store marker number, label and canonical distance independently of performance segments. These exact marker distances label the shared telemetry ruler and all panels, including delta; do not space turn numbers uniformly or attach them to each driver's separate speed minimum. Label collision handling changes text placement only, not the underlying distance. Selecting T7 may highlight a containing T6–T7 complex; report the complex's supported gain rather than pretending it belongs uniquely to T7.
+
 The marker dataset is intended for annotation and is manually constructed, with approximate rather than survey-grade placement. It includes corner and marshal markers; marker distances are computed from a reference lap. [CircuitInfo source](https://github.com/theOehrly/Fast-F1/blob/main/fastf1/mvapi/data.py)
 
 ### 6.2 Versioned segment configuration
@@ -177,7 +195,57 @@ Boundary movement sensitivity: recalculate each segment gain for allowed boundar
 
 The primary map colours each reviewed partition segment by `gain_ms`, with a diverging A/neutral/B scale and textual legend. This exactly matches the corner/straight ranking. Saturate colour at a documented display limit, show actual values in the tooltip, and retain a neutral band for gains below the observation floor. Unknown is hatched, never neutral.
 
-Do not colour by cumulative delta: a driver who gained earlier would otherwise appear faster on a later section where they are losing time. A future continuous 100 m local-window view may be added as a separate labelled mode; it is not necessary for v1.
+Do not colour by cumulative delta: a driver who gained earlier would otherwise appear faster on a later section where they are losing time. A separate **Estimated 100 m minisectors** strip/map mode is part of this revision, using the non-overlapping bins below. The selected mode and legend must distinguish it from corner/straight summaries.
+
+### 6.5 Estimated minisectors
+
+Build a second, independent partition with edges `0,100,200,...,floor(L/100)*100,L`, removing a duplicate endpoint. Insert these edges into the grid. For bin `[a,b]`, return `gain_ms=delta_ms(b)-delta_ms(a)` only with full valid elapsed-time support across that bin. Otherwise return null and retain the reason in the quality report. The `estimated_minisectors` wire entries contain `start_m`, `end_m`, `gain_ms` and `source=derived_telemetry`. A/B traversal durations are recoverable from the existing elapsed-time arrays at the same edges. The last bin may be shorter. The v1.1 contract fixes this project-defined bin width at 100 m. A future change requires a method/schema revision.
+
+The local-dominance strip colors bins by sign and magnitude of that local gain, with unknown hatching and a labeled neutral threshold. Use a 10 ms neutral display band initially; this is visual suppression of tiny estimates, not the 30 ms evidence floor. A visible bin is not automatically eligible for a written claim. Provide numeric tooltip and overlap turn labels, but do not assign a bin's full gain to every turn it touches.
+
+For a fully supported lap, the minisector partition telescopes to the raw final delta. The corner/straight partition independently telescopes to the same value. Never add both partitions together. A continuous curve must come from aligned telemetry, not interpolation of these bin totals or official sector endpoints. Optional source mini-sector status colors, if ever displayed, require a separate labeled view; they are not this dominance strip.
+
+### 6.6 Stable corner-speed classification
+
+Classify the circuit profile once using the frozen reference lap. Store `classification_rule=reference_apex_minimum_v1`, config version, reference lap ID and speed evidence. Selecting a slower lap or swapping A/B must preserve each corner's category.
+
+Each reviewed corner marker has an apex-neighborhood interval inside its analysis region. The scalar `reference_speed_kph` is the minimum valid **native reference** speed in that interval, not an interpolated minimum on the 5 m grid and not necessarily the geometric apex speed. Require at least three native speed samples and no supporting timestamp span above 0.50 s. Evaluate the same window with its boundaries shifted by -10/0/+10 m within the profile limits; if the category changes, or the window lacks support, use `unknown` and record the reason.
+
+The initial project thresholds are:
+
+| Class | Reference window minimum |
+| --- | --- |
+| Low speed | `<150 km/h` |
+| Medium speed | `>=150 and <250 km/h` |
+| High speed | `>=250 km/h` |
+| Unknown | Missing/unstable classification support |
+
+These are configurable editorial categories, not FIA standards or proof of aerodynamic/mechanical behavior. Show the thresholds in the analysis details. Do not re-tune them for an individual comparison. A profile revision that changes thresholds or windows invalidates category summaries and cache identity.
+
+Attach each additive corner segment to one class. A complex whose constituent corner markers all share one supported class may use that class. A complex containing different classes is `mixed`; an unresolved/missing constituent is `unknown`. Do not split an overlapping complex just to force a neat speed-category result. Straights have no corner-speed class. Linked pieces of a lap-wrap complex form one independent analysis unit with combined gain, sensitivity and support; include their metres once each and count the unit once.
+
+### 6.7 Category aggregates and comparison-specific interpretation
+
+`classify_reference_corners(profile, native_reference, settings)` produces frozen corner classes; `aggregate_corner_classes(segments, evidence, classes, settings)` produces the comparison summary. These functions are separate: only the second depends on A/B.
+
+For each low/medium/high category, expected units are the disjoint corner/complex analysis units assigned that class. A unit is supported if all its component segments have valid elapsed-time support, known gain and sensitivity, at least five native car observations per driver, and maximum supporting span <=0.50 s. Excluded units remain in expected counts/length; never discard them from the denominator to inflate coverage.
+
+For supported unit gains `g_j` in the established A-favoring convention:
+
+```text
+gains_a_ms = sum(max(g_j, 0))
+gains_b_ms = sum(max(-g_j, 0))
+net_gain_ms = gains_a_ms - gains_b_ms
+coverage_fraction = supported_expected_length / total_expected_length
+```
+
+In `analysis.categories`, emit `included_segment_ids`, `excluded_segment_ids`, `independent_units`, `distance_coverage`, `a_wins`, `b_wins`, `neutral_units`, gross gains in both directions, net gain, `sensitivity`, `assessment` and `evidence_ids`. Derive expected and excluded unit counts by grouping the ID lists by `group_id` (or segment ID for ungrouped segments). Sum component lengths for expected and covered distance. If any linked group member fails support, exclude the entire group. Sensitivity lower/upper bounds are sums of unit minima/maxima. Their width describes variation under the prescribed boundary shifts. Unit neutral/material classification uses its own `max(30 ms,2*unit_sensitivity_spread)` threshold and stable sign. `gains_a_ms`/`gains_b_ms` include all supported numeric gains, including neutral ones, so arithmetic still reconciles.
+
+An empty selection returns `insufficient` with null performance totals and sensitivity. When the expected length is zero the wire coverage is 0 and the table reads “No corners in this class.” For partial coverage show both supported and expected counts. A directional `a_advantage` or `b_advantage` assessment requires >=80% expected distance coverage, a stable aggregate sign, `abs(net_gain_ms)>=max(30 ms,2*aggregate_sensitivity_spread)`, at least two independent material wins for that driver and at least two-thirds of material units favoring that direction. Describe any material opposite-sign units as exceptions. With adequate coverage and support, use `balanced` when all units are neutral and `mixed` for offsetting wins/losses without a qualifying directional pattern. Use `insufficient` when missing support, sample count or sensitivity prevents classification.
+
+Scope prose to the selected laps, e.g. “Across the {n}/{expected} supported high-speed corner regions, {driver} gained an estimated {net}. The low-speed regions favored {other_driver} by {loss}.” Link both rows and their contributing segments. Include gross gained/lost values when cancellation hides mixed behavior. Emit `pattern=high_medium_gain_low_loss` for `pattern_driver=A` or `B` only with complete coverage of all three classes, at least two independent material wins in the required direction per class, stable net gains in high/medium, stable net loss in low, and zero opposite material units in every asserted class. The wording always refers to classified, supported corner regions. Report mixed/unknown regions separately. A circuit-wide exclusivity claim additionally needs every corner unit classified and supported.
+
+The category analysis is a separate structured section from the three local observations. It does not consume three slots by restating one aggregate. It is deterministic metric interpretation, tailored to the selected laps; no runtime language model is needed to decide the facts. It must never conclude “better aerodynamics,” “poor mechanical grip,” “braver driver,” or a persistent driver trait from a single pair. Cross-phase analysis includes the phase/time/conditions warning in the section and export.
 
 ## 7. Reconciliation without circular validation
 
@@ -202,7 +270,7 @@ Evaluate individual and pair residuals: large individual errors must not cancel 
 
 ### 7.2 Initial severity policy
 
-These defaults must be checked on the three real validation datasets before release. Changing them requires a methodology/config version, before/after evidence and updated fixtures.
+These telemetry-tier defaults must be checked on the three real validation datasets before release. Changing them requires a methodology/config version, before/after evidence and updated fixtures. Sector-only results apply timing-record consistency checks and explicitly lack the interior-distance checks; unavailable telemetry checks must not be reported as passed.
 
 | Metric | `pass` | `warn` | `block` |
 | --- | --- | --- | --- |
@@ -212,7 +280,7 @@ These defaults must be checked on the three real validation datasets before rele
 | Absolute distance scale deviation | <=1% | >1 and <=3% | >3% |
 | Native speed/time gap | <=0.50 s | >0.50 and <=0.75 s | >0.75 s |
 
-Take the worst applicable severity. `pass` means eligible for a reviewed publication, not an accuracy guarantee. `warn` may be browsed with a persistent explanation and a residual table; publication/export must include that warning and requires dataset review before catalog promotion. `block` retains official timing and reasons in the operator report but is withheld from the public catalogue and API artifact response. The browser shows an unavailable comparison, not ranked local claims or publication cards.
+Take the worst applicable severity within the selected capability. `pass` means the applicable checks passed, not an accuracy guarantee. `warn` may be browsed with a persistent explanation and residual table; shared publication includes that warning and requires dataset review. A telemetry-tier `block` suppresses all local claims. If timing separately remains eligible, return an explicit sector-only result; otherwise keep the rejected result in the operator report and show unavailable. Never downgrade a timing-integrity failure into an apparently successful fallback.
 
 Keep thresholds separate from output precision. Official values can display 0.001 s; local gains ordinarily display about 0.01 s and the word **estimated**. Never advertise “millisecond-accurate corners.”
 
@@ -269,7 +337,7 @@ Use synthetic arrays for deterministic tests and a separately downloaded small r
 | Swap A/B | Exact sign reversal, identical grid/geometry/ranking |
 | Partition accounting | Sum segment gains equals delta(L)-delta(0) within floating-point tolerance |
 | Boundary insertions | Correct 0/L inclusion, no duplicate grid coordinates |
-| Missing lap boundary | No extrapolation; lap blocked |
+| Missing lap boundary | No extrapolation; telemetry blocked, sector-only fallback only if timing independently eligible |
 | Conflicting duplicate timestamp | Explicit rejection |
 | Long speed gap | Whole alignment blocked, not only the visible hole |
 | Missing brake only | Timing usable; brake observation absent; null not false |
@@ -284,12 +352,25 @@ Use synthetic arrays for deterministic tests and a separately downloaded small r
 | Thin native support | Dense 5 m grid does not satisfy sample-count gate |
 | Observation language | Every number resolves to evidence, templates avoid causal wording |
 | Missing third finding | Fewer than three returned, no invented prose |
+| Independent phase selection | Q1/Q2/Q3 stored per lap; cross-phase requires opt-in and persistent context warning |
+| Eliminated driver | Missing Q2/Q3 remains unavailable; no substitution |
+| Complete session inventory | Any valid imported driver/lap pair is selectable without a prebuilt-pair whitelist |
+| Sector-only fallback | Only categorical timing-boundary deltas; no synthesized distance arrays or turn gains |
+| Mini-sector status codes | Never interpreted as durations or pair delta |
+| Estimated minisector accounting | Independent partition telescopes; never added to corner-partition totals |
+| Class boundary speeds | 150 belongs to medium, 250 to high; unstable window variants yield unknown |
+| Class invariance | Driver/lap selection and A/B swap preserve reference classes |
+| Mixed complex | No forced assignment from only its slowest constituent; excluded from class claim |
+| Category cancellation | Gross gains/losses and material unit counts reveal a mixed pattern despite small net |
+| Incomplete category coverage | Denominator retains excluded units; insufficient evidence cannot be labeled balanced |
+| Wrapped category unit | Both pieces counted in length/gain, but independent-unit count increases once |
+| Category exclusivity | “Only high/medium” suppressed unless every stated completeness/sign gate passes |
 | Serialization | Finite numbers/null, equal array lengths, valid ranges, stable hash |
 
 Recompute the same inputs/config twice and compare canonical artifact hashes excluding operational timestamps. All rounding happens in presentation. A numerical pipeline change increments the methodology version and regenerates reviewed artifacts.
 
 ## 10. First importer handoff
 
-Implement in this order: resolve/import/cache → lap eligibility report → native-channel checks → canonical reference and normalization → grid interpolation → raw delta → official reconciliation → circuit partition → metrics → observation templates → catalog promotion. Do not begin inference templates until the reconciliation report is inspectable.
+Implement in this order: resolve/import/cache full session → complete lap/phase inventory and tier eligibility → native-channel checks → canonical reference and classification → grid interpolation → raw delta → official reconciliation → independent corner/minisector partitions → metrics/category summaries → observation templates → bounded local pair resolver/cache → reviewed publication. Implement sector-only arithmetic separately so it cannot accidentally inherit telemetry claims. Do not begin interpretation templates until reconciliation and coverage reports are inspectable.
 
 The analysis extra pins FastF1 3.9.2. Its request implementation uses `Cache.configure` and a Formula 1 account authentication adapter; the first importer ticket must exercise that supported flow and check actual seed-event availability. [FastF1 3.9.2 request implementation](https://github.com/theOehrly/Fast-F1/blob/v3.9.2/fastf1/req.py) General `main` documentation can still move independently of the release. If upstream access is unavailable, keep the empty-data workspace and offline tests usable and report the actual access failure without substituting invented real telemetry. Do not persist user credentials in artifacts or logs.

@@ -1,79 +1,84 @@
 # LapDNA implementation blueprint
 
-Decision baseline: 5 November 2026. Status: **planning + runnable scaffold**, not an implemented analysis engine. This document is the entry point; the numbered specifications below define the actual work.
+Revision 2 · 5 November 2026. Status: **expanded blueprint and runnable scaffold**. Real-session processing remains implementation work. The user's reference image defines the visual direction: stacked synchronized traces, sector dividers, a local-performance strip, turn numbers, and a cumulative delta.
 
-## The outcome
+## The product
 
-A reader chooses a prepared qualifying session and two drivers, sees where their lap-time difference developed, follows the same location across a map and five telemetry panels, and exports a defensible analysis card. A useful first slice is one real, validated comparison. The release expands this to Monza, Silverstone, and Suzuka with at least four eligible drivers and all six unordered pairs per circuit in one common qualifying phase.
+Choose any two different drivers from an imported qualifying session, choose each driver's Q1/Q2/Q3 phase independently, and select eligible laps. The app explains where their elapsed-time difference developed and which supported telemetry patterns accompany it. Same-phase selection is the default; cross-phase comparisons require explicit opt-in and persistent context warnings.
 
-The baseline is deliberately curated. The app only offers comparisons that have been imported and checked. It does not download a session while a visitor waits. Candidate sessions are the 2024 Italian, British and Japanese Grand Prix qualifying sessions; suitability and upstream availability are unverified. If a candidate is wet, incomplete or inaccessible, document a replacement session at the same circuit before proceeding. Q3 is preferred, not guaranteed.
+All imported drivers appear in the roster. An eliminated driver's absent phase is unavailable with an explanation. No four-driver shortlist or six-pair restriction remains. The three starting circuits are Monza, Silverstone and Suzuka; the 2024 qualifying sessions remain candidate datasets awaiting full ingestion/eligibility/profile validation.
 
-## Decisions already made
+## Core outputs
+
+1. Track map colored by estimated local gain.
+2. Speed, throttle, gear, binary brake and cumulative delta over one distance axis, with aligned T1/T2/... labels and official sector-crossing markers.
+3. An estimated local-gain strip using 100 m bins, distinct from recorded sector timing and from the corner partition.
+4. Up to three supported local observations.
+5. A tailored corner-speed analysis covering low, medium and high speed: included/excluded windows, independent units, coverage, gains for each driver, net contribution and limitations.
+6. PNG analysis cards and evidence JSON after export implementation.
+
+Corner classes use the frozen reference lap's reviewed apex windows, with initial project thresholds low <150 km/h, medium 150–<250 and high ≥250. They do not change when A/B are swapped. Mixed complexes and unknown classifications stay explicit. A positive net alone cannot establish that a driver is consistently faster in a class.
+
+## Source fidelity
+
+FastF1 is the primary ingestion target. An actual historical OpenF1 probe retrieved recorded sectors and 306 car samples for one Monza qualifying lap; this verifies availability, not a completed comparison. Source definitions and FIA per-lap sector report links are in [sources](09-sources.md).
+
+Public channels do not include the reference image's steering trace or brake pressure. OpenF1's mini-sector arrays contain status/color codes rather than measured durations. LapDNA therefore labels its 100 m splits **estimated mini-sectors**. If only recorded sectors are available, show a sector table and separate cumulative-gap points at crossings; do not invent a continuous curve, turn attribution or corner-class analysis.
+
+## Frozen decisions
 
 | Concern | Decision |
 | --- | --- |
-| Product | Analysis workspace, not live timing or driver coaching |
-| Data source | FastF1, isolated behind a versioned Python adapter |
-| Client | React + TypeScript + Vite; responsive single page |
-| Service | FastAPI + Pydantic; read-only validated artifact delivery |
-| Numerical work | Python, native channel timestamps, NumPy; no browser recomputation |
-| Persistence | Ignored local cache + immutable processed artifacts; no database in MVP |
-| Compute | Operator-run import/compare/publish commands, implemented in T01–T05 |
-| Alignment | Frozen reference lap per session/layout, normalized speed-integrated distance, 5 m display grid |
-| Delta | `elapsed_B − elapsed_A` in ms; positive favours A |
-| Map | Local segment gain, not the cumulative delta curve |
-| Timing | Official lap/sector fields remain authoritative; publish residuals and limitations |
-| Evidence | Deterministic templates with machine-readable evidence, no text-generation service |
-| Quality | pass / warn / block; missing evidence produces fewer observations |
-| Sharing | PNG card + JSON evidence/provenance; versioned comparison URL |
-| Deployment | One Python service + static browser bundle, prepared artifacts on persistent read-only storage |
-| Git | Small checked commits, ordinary descriptive messages, pushed to `sohxmm/LapDNA` |
+| Browser | React + TypeScript + Vite |
+| Charts | Apache ECharts 6.1, direct adapter, one Canvas multi-grid chart |
+| Map/export | SVG reference map and dedicated card renderer |
+| Backend | FastAPI + Pydantic, Python owns analytical numbers |
+| Data | Whole-session offline import and per-lap normalization; cached local comparison on demand |
+| Scope | Two drivers, all eligible imported laps, independent Q phases, three starting circuits |
+| Alignment | Frozen session reference, integrated-speed normalized distance, nominal 5 m display grid |
+| Delta | B elapsed minus A elapsed, milliseconds; positive favours A |
+| Observations | Deterministic evidence templates; no runtime LLM dependency |
+| Quality | pass / warn / block with raw residuals preserved |
+| Contracts | Version 1.1.0; telemetry and sector-only result variants |
+| Persistence | Local normalized datasets and immutable artifacts; no database in the initial release |
 
-## Read in this order
+## Read in order
 
-1. [Product contract](01-product.md): scope, users, acceptance criteria.
-2. [Architecture](02-architecture.md): modules, ownership, data lifecycle, release structure.
-3. [Telemetry methodology](03-telemetry-methodology.md): exact transformations, thresholds, uncertainty.
-4. [Experience specification](04-experience.md): components, interactions, visual language, all states.
-5. [Contracts](05-contracts.md): schema conventions, endpoints, errors and generation.
-6. [Implementation plan](06-implementation-plan.md): ordered tickets, file targets, checks and commits.
-7. [Verification](07-verification.md): invariants, fixtures, real-session release gates.
-8. [Operations](08-operations.md): setup, data preparation, deployment and publishing.
-9. [Sources](09-sources.md): primary references and the boundaries of their claims.
-10. [Current handoff](10-handoff.md): implemented work, current checks and next ticket.
+1. [Product contract](01-product.md)
+2. [Architecture and renderer decision](02-architecture.md)
+3. [Telemetry, mini-sector and class methodology](03-telemetry-methodology.md)
+4. [Experience and screenshot translation](04-experience.md)
+5. [API and contract guide](05-contracts.md)
+6. [Implementation tickets](06-implementation-plan.md)
+7. [Verification](07-verification.md)
+8. [Operations](08-operations.md)
+9. [Sources](09-sources.md)
+10. [Current handoff](10-handoff.md)
+11. [Implementing with GPT-6.1 Sol](11-implementation-workflow.md)
 
-The Python models and generated contracts are authoritative for field names. The methodology is authoritative for numerical meaning. The implementation plan governs scope. If these disagree, fix the disagreement in one small commit before implementing dependent work; do not silently choose whichever is easiest.
+Python models govern field names; methodology governs numerical meaning; tickets govern current status. Resolve contradictions in one small documented change before dependent implementation.
 
-## System flow
+## Flow
 
 ```mermaid
 flowchart LR
-  F[FastF1 upstream] --> C[Local cached session]
-  C --> E[Eligible laps and native channels]
-  E --> R[Frozen reference and circuit profile]
-  R --> A[Distance alignment]
-  A --> Q[Timing reconciliation and quality gates]
-  Q --> S[Segments and evidence]
-  S --> J[Versioned comparison JSON]
-  J --> API[Read-only API]
-  API --> UI[Map and synchronized traces]
-  UI --> X[PNG plus evidence JSON]
+  U[Upstream source] --> I[Offline full-session import]
+  I --> L[Eligible per-lap data and inventory]
+  L --> R[Frozen reference and normalized laps]
+  R --> C[Local comparison request]
+  C --> Q[Quality and evidence gates]
+  Q --> A[Immutable result and cache]
+  A --> T[Telemetry workspace]
+  A --> S[Sector-only view]
+  T --> E[Analysis card and JSON]
 ```
 
-## Two-week execution strategy
+## What exists now
 
-Assume ten focused working days, with the remaining calendar time as buffer. This is a target, not a promise that upstream data work will fit a fixed date. The critical path is real session access → valid lap selection → defensible alignment → one honest comparison → interactive rendering → exports. If the first three steps fail, do not fill the UI with invented results.
+The scaffold has a typed local API, complete-inventory selection contracts, cached comparison lookup, telemetry/sector-only schemas, turn/minisector/class fields, and a synthetic design preview of the chart layout. The preview uses a fictional six-turn loop with Sample A/B and cannot be mistaken for real F1 results. It provides turn selection, a shared distance cursor and discrete sector-only presentation. Production analysis, real track geometry, source import, URL persistence and export remain ticketed work.
 
-- Days 1–2: complete T01–T02; one reproducibly imported session and clear selection report.
-- Days 3–4: T03–T04; frozen geometry, alignment, timing reconciliation and quality tests.
-- Day 5: T05–T06; segment evidence and selectable real comparison artifact.
-- Days 6–7: T07–T08; synchronized traces and track map with keyboard access.
-- Day 8: T09–T10; ranked summaries, observation details and analysis export.
-- Day 9: T11; three circuits, reproducible comparisons and integration checks.
-- Day 10: T12; release build, operational notes, accessibility and final QA.
+## Delivery sequence
 
-Stop adding features when a release gate fails. If time is tight, defer clustering, animations, theme switching and extra sessions; keep data honesty, readable traces, reconciled timings, map interaction, evidence and export.
+Ten working days remains a stretch target for the expanded scope. First finish one real session end to end, then extend the same engine to the other two circuits. Do not replace complete driver selection or evidence checks with a hard-coded showcase.
 
-## What this scaffold proves
-
-The repository structure, Python service, API contract generation, browser build and empty-data experience can be run and checked. It does **not** prove that FastF1 access works, the proposed alignment thresholds are appropriate, the three candidate sessions are suitable, or the eventual observations are valid. Those are explicit implementation gates, not assumed accomplishments.
+Days 1–2: full-session import and lap inventory. Days 3–4: reference, alignment and reconciliation. Day 5: local comparison engine, mini-sectors and class evidence. Days 6–7: production chart/map integration. Day 8: tailored analysis and exports. Days 9–10: three-circuit acceptance and release. Preserve buffer for upstream access and numerical issues. Clustering remains deferred.

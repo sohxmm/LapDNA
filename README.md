@@ -2,13 +2,14 @@
 
 Where did the lap time go? Compare two qualifying laps on a common track-distance axis and connect approximate local gains to observed telemetry.
 
-**Status: blueprint and runnable foundation.** This repository currently contains a typed read-only API, an honest empty-state web workspace, generated contracts, checks, and the implementation plan. FastF1 ingestion, alignment, charts, observations, and export are planned work. No real telemetry is bundled and no comparison has been validated yet.
+**Status: expanded blueprint and runnable foundation.** The scaffold has a typed local API, full-session driver/lap selection, independent Q1/Q2/Q3 controls, cached comparison delivery, and an opt-in synthetic telemetry preview with turn labels. FastF1 ingestion, the numerical comparison engine, real circuit maps and export remain implementation tickets. No real telemetry is bundled and no real comparison has been validated yet.
 
 ## Start here
 
 - [Blueprint and reading order](docs/00-blueprint.md)
 - [Implementation tickets](docs/06-implementation-plan.md)
 - [Current handoff](docs/10-handoff.md)
+- [Implementing with GPT-6.1 Sol](docs/11-implementation-workflow.md)
 - [Contributor rules](AGENTS.md)
 
 ## Local setup
@@ -34,10 +35,13 @@ npm run dev
 
 Open the local URL printed by Vite (normally http://localhost:5173). Vite proxies `/api` to port 8000. On macOS/Linux replace `.venv\Scripts\python` with `.venv/bin/python`.
 
+Use the **Open telemetry design preview** link, or append `?preview=1`, to inspect the explicitly synthetic trace layout. It includes turn selection, a shared cursor and a sector-only example. If port 5173 is unavailable, run `npm run dev --workspace @lapdna/web -- --port 5273`.
+
 ## Verify
 
 ```powershell
 .venv\Scripts\python -m pytest services/api/tests
+npm run test:web
 npm run contracts:check
 npm run typecheck
 npm run build

@@ -1,51 +1,60 @@
 # Current handoff
 
-Last updated: 5 November 2026. Current milestone: **T00 complete — blueprint and runnable foundation**. The full analysis app is not implemented.
+Updated 5 November 2026 · Revision 2. **Blueprint and expanded scaffold complete; real-data implementation starts at T01.**
 
-## Implemented
+## Working folder
 
-- React/TypeScript/Vite workspace with catalogue loading, honest no-data state, API failure and retry/refresh. Responsive dark visual foundation; no fake timings or track geometry.
-- FastAPI read-only health, catalogue and comparison endpoints. Safe IDs and artifact-root confinement, file-size guard, structural validation and explicit invalid/blocked responses.
-- Pydantic comparison contracts for metadata, shared distance/channels, raw delta, geometry, reconciliation, segment partitions, sensitivity, evidence and observations. Generated OpenAPI/JSON Schema/TypeScript stay in sync.
-- Core Python and npm dependency locks, test suite and GitHub Actions workflow.
-- Detailed product, architecture, numerical methodology, UX, contracts, implementation tickets, verification and operations documentation.
-- Three **unverified candidate** circuit/session entries: 2024 qualifying at Monza, Silverstone and Suzuka. No upstream data is bundled or downloaded.
+Use the Desktop LapDNA checkout selected by the user. It has the original Git history and the remote https://github.com/sohxmm/LapDNA.git. The original Documents checkout is retained as an earlier copy; continue work in the Desktop checkout.
 
-## Verification recorded for T00
+## Implemented and checked
 
-| Check | Result |
+- Pydantic/OpenAPI/TypeScript contract 1.1.0, with per-lap Q1/Q2/Q3 identity, explicit cross-phase context, telemetry and sector-only result variants.
+- Session roster and lap inventory endpoints, strict local selection validation, cached compare POST, canonical storage ordering and swapped view indication. Cache misses return an honest 409.
+- Session browser with full imported roster, phase/lap choices, fastest eligible common-phase defaults, excluded-lap reasons, explicit cross-phase opt-in, aborted stale requests, result invalidation on changed selection and cached result rendering.
+- Lazy-loaded ECharts Canvas trace stack: speed, throttle, gear, binary brake and raw cumulative delta; aligned sector/turn rails, estimated mini-sector strip, turn-window selection and shared numeric cursor.
+- Actual result adapter for stored telemetry, class summaries and observations; recorded sector table and separate boundary delta points for both tiers.
+- Opt-in synthetic design preview at `?preview=1`, using a fictional loop and Sample A/B. It demonstrates a high/medium-gain versus low-speed-loss profile. The default application remains empty until a real dataset is imported.
+- Source availability probe, research, revised numerical methodology, full implementation tickets, verification/operations guides and GPT-6.1 Sol workflow.
+
+## Verification
+
+| Check | Recorded result |
 | --- | --- |
-| `.venv/Scripts/python -m pytest services/api/tests` | 26 passed |
-| `npm run contracts:check` | Pass |
-| `npm run typecheck` | Pass |
-| `npm run build` | Pass |
-| GitHub Actions on implementation commit `0f37b2a` | [Passed on Ubuntu/Python 3.11/Node 24](https://github.com/sohxmm/LapDNA/actions/runs/41938476921) |
-| Local browser | Empty-data page renders; refresh works; API shutdown produces clear failure; retry restores the empty-data view after restart |
-| Layout | Desktop and narrow/mobile layouts inspected; no horizontal overflow in measured DOM |
+| Python API/contract/selection suite | 44 passed; one upstream TestClient deprecation warning |
+| `npm run test:web` | 3 passed: eligible/common-phase defaults, independent overrides, reversed result orientation |
+| `npm run contracts:check` | Passed |
+| `npm run typecheck` | Passed |
+| `npm run build` | Passed; lazy chart chunk produces a non-fatal size advisory |
+| Browser preview | Desktop/mobile inspected; turn selection, keyboard cursor and sector-only mode checked |
+| Isolated UI fixture | Full roster, unavailable phase/driver, cached sector-only output, swap, cross-phase warning and cache miss checked |
+| Empty production-data folders | No sessions imported; synthetic QA indexes remain outside default data paths |
+| GitHub CI on integrated scaffold 8af7d3b | [Passed on Ubuntu](https://github.com/sohxmm/LapDNA/actions/runs/42069714006) |
 
-One non-fatal upstream Starlette warning recommends a future httpx2 transition for TestClient. No real FastF1 authentication, event retrieval, timing reconciliation, observation accuracy or exports have been verified. The optional data dependency set is declared but not installed/locked yet; T01 owns that work. The core lock was verified both locally on Windows/Python 3.11 and by the successful Linux CI run.
+Local preview used port 5273 because 5173 was unavailable. Override with `npm run dev --workspace @lapdna/web -- --port 5273` when needed; same-origin proxy behavior is unchanged.
 
-## Important decisions to preserve
+The narrowly scoped OpenF1 probe retrieved one historical sample and complete recorded sectors; see the source register. No FastF1 session import, reference geometry, aligned real comparison, official-document reconciliation, valid real corner-class finding or export has been completed.
 
-- Offline computation, immutable artifacts and read-only delivery. No remote session download in a browser request.
-- One frozen reference independent of A/B selection. Positive delta is B−A and favours A. Map colors show segment contributions, not cumulative delta.
-- Raw elapsed-time curve only. Official timing is a separate check; constrained endpoints are not independent proof of accuracy.
-- Brake is boolean. Native sampling limits evidence; a dense display grid is not new information.
-- Up to three supported claims, with an explicit reason when fewer qualify. Published prose names actual drivers, so swapping display slots never changes its meaning.
-- Each circuit initially has four eligible drivers and all six prepared pairs; at least 18 total for release. Availability depends on actual ingestion and validation.
+## Decisions to preserve
 
-## Next action: T01
+1. Whole-session import and per-lap normalization offline; bounded local comparison on demand after T05. No upstream download on the compare request path.
+2. All imported drivers and eligible laps, per-lap phases, same-phase default and explicit cross-phase context.
+3. Fixed reference independent of A/B; raw delta B−A, positive favors A.
+4. Local bins and corner windows are separate partitions. Mini-sector colors/status codes cannot supply duration differences.
+5. Corner classes derive from reviewed reference apex windows with configurable 150/250 km/h thresholds. Retain mixed/unknown, gross gains/losses, coverage, independent units and sensitivity.
+6. Sector-only results provide recorded timing and discrete cumulative boundary deltas. They cannot support turn-level or class findings.
+7. Python generates supported facts and driver-identity-based text. React/ECharts renders them; the synthetic fixture generator is isolated.
+8. Three circuits remain the target; no fixed four-driver or 18-artifact cap remains. Validate complete per-lap accounting and representative pair/phase matrices.
 
-Read `AGENTS.md`, `docs/00-blueprint.md`, then T01 in `docs/06-implementation-plan.md` and its named documents. Implement the pinned FastF1 adapter/importer and validate access to one candidate qualifying session. FastF1 3.9.2 source includes cache/authentication changes; inspect the installed public API and report actual access failures. Never substitute invented telemetry.
+## Next implementation gate
 
-The implementation plan contains a copyable coding prompt, file targets, function boundaries, checks, completion gates and proposed commit subjects for every ticket. Treat the blueprint as fixed unless real evidence requires a documented adjustment.
+Implement **T01** from the updated plan. Start GPT-6.1 Sol at High; use Extra High for T03–T05 numerical work. Use Ultra for independently owned parallel work after interfaces are fixed. [Workflow and copyable prompts](11-implementation-workflow.md).
 
-## Known future work and boundaries
+T01 must create a reproducible full-session source adapter/snapshot with actual access behavior, provenance and failure handling. The OpenF1 availability probe does not replace it. FastF1 3.9.2 access/cache interfaces require installed-release verification. Never invent source data to bypass an access issue.
 
-There is no CLI yet. Numerical processing, circuit geometry/markers, real eligibility, artifact promotion/review, charts/map synchronization, findings UI, export, production hosting and all real-data QA remain T01–T12. The current store discovers flat artifact JSON; T05 introduces an atomic catalogue manifest and must update the reader in the same change. Do not put a manifest into the current flat artifact directory.
+## Remaining work
 
-The contract guide lists exact required metadata additions assigned to T01–T05. Wire validation currently checks structural/arithmetic integrity; the publication validator must additionally verify source-to-array correspondence, thresholds, eligibility, metric support and dataset review.
+T01–T05 implement source import, real eligibility/reference/alignment, timing reconciliation, estimated mini-sectors, evidence/classes and local cold comparison calculation. T06–T09 extend the existing scaffold with immutable URL restoration, production shared chart/map selection, dense-label handling, complete quality/evidence details and real circuit maps. T10 implements export. T11/T12 complete three-circuit acceptance and release packaging.
 
-## Working practice
+The flat artifact/session readers are current scaffold behavior. T05 must introduce reviewed dataset/publication manifests and writable result-cache separation without feeding manifest files to flat artifact enumeration. Required metadata additions are listed in the contract guide.
 
-Use the README commands to run the app. Complete one bounded ticket, run its checks, update this handoff/status board, then commit and push with a descriptive ordinary message. Do not include tool/model attribution in commit messages or rewrite shared history. Keep raw caches, credentials and local QA outputs outside Git.
+Run ticket checks, update this handoff and the status board, then commit and push each bounded completed feature with a descriptive message. Keep credentials, raw caches and local QA material out of Git.

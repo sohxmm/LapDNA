@@ -1,93 +1,99 @@
 # Data and API contracts
 
-Authoritative source: `services/api/src/lapdna/models.py`. Generated outputs: `packages/contracts/openapi.json`, `comparison.schema.json`, `catalog.schema.json`, and `api.d.ts`. This guide explains semantics; it is not a second hand-maintained type definition.
+Python is authoritative: `services/api/src/lapdna/models.py` and `inventory.py`. Run `npm run contracts` to regenerate OpenAPI, comparison/catalog JSON Schema and TypeScript. Version **1.1.0** replaces the unpublished 1.0 scaffold contract; no real published dataset needs migration.
 
-## API surface that exists now
+## Endpoints implemented in the scaffold
 
-| Method/path | Success | Failure |
-| --- | --- | --- |
-| `GET /api/v1/health` | `Health`: status `ok`, service `lapdna-api`, package version | Process availability only; no data claim |
-| `GET /api/v1/catalog` | `Catalog`: schema version and prepared comparison summaries; empty list is valid | 503 `artifact_invalid` for corrupt/unreadable catalogue artifact |
-| `GET /api/v1/comparisons/{comparison_id}` | One schema-validated `ComparisonArtifact` | 404 unknown; 422 invalid ID; 503 corrupt or quality-blocked |
-| `GET /openapi.json` | FastAPI-generated contract | Framework route |
-| `GET /docs` | Local interactive API documentation | Framework route |
-
-An ID is 1–100 ASCII letters, digits, underscores or hyphens. File extensions and path separators are not accepted. Files are read only from the configured artifact root; symlinks outside it are refused. Reads have a 20 MiB file-size guard. There is no upload, ingestion, arbitrary URL fetch or calculation endpoint.
-
-Application errors use `{"error":{"code":"comparison_not_found","message":"This comparison has not been prepared."}}`. Other application codes are `invalid_request`, `artifact_invalid` and `quality_blocked`. Unknown framework routes may use FastAPI's default 404 body; clients must tolerate an unsuccessful response without assuming a JSON shape. The frontend scaffold reports HTTP failures and permits retry.
-
-The current store enumerates flat `*.json` artifacts and omits intentionally blocked comparisons. T05 replaces discovery with an atomic reviewed catalogue manifest. Until then, **do not place a `catalog.json` manifest in that directory**: the current reader would correctly reject it as a malformed comparison. Empty/missing data directory returns an empty catalogue. This differs from corrupted data, which fails visibly.
-
-## Schema conventions
-
-- Version is currently the literal `1.0.0`. Contract changes regenerate all outputs together and update client compatibility handling. There are no real published v1 datasets yet. Before the first real publication, settle required fields through T01–T05; do not silently mutate previously published artifacts afterward.
-- Unknown properties are forbidden by Python models. Integer fields and booleans are strict. All floating-point values are finite; absent observations are JSON `null`, never NaN/Infinity/zero substitutes.
-- Distance is metres, speed km/h, throttle percent, elapsed/delta/official timing milliseconds. Interpolated timings may be fractional milliseconds. Keep precision internally; display rounding belongs in UI formatters.
-- Every per-sample array is parallel to one `distance_m` array of 2–5000 strictly increasing points starting at zero. The last distance is the canonical approximate lap length. Segment and sector boundaries are inserted into the grid by T03/T04; spacing is otherwise 5 m, so consumers must not assume index × 5.
-- `time_raw_ms` is elapsed time from the official lap-start clock on the normalized distance axis. “Raw” means it is not corrected to match sector times; it has still been interpolated. There is no adjusted-time field or hidden corrected mode.
-- `delta_ms[k] = channels_b.time_raw_ms[k] − channels_a.time_raw_ms[k]`. Positive means A has taken less time. `valid[k]` describes elapsed-time comparison support, not blanket validity of all channels. Optional-channel nulls are independent.
-- Gear is integer 0–8 (0 is neutral) or null. Brake is true/false/null, not 0–100 pressure. Geometry x/y are metres in a display reference system; null coordinates must occur as pairs.
-
-## Comparison structure
-
-| Field/group | Meaning |
+| Endpoint | Behavior |
 | --- | --- |
-| `comparison_id`, `schema_version` | Immutable identity and compatibility |
-| `session` | Season, resolved round, conventional Q, phase, supported circuit key, event name |
-| `lap_a`, `lap_b` | Different driver numbers; explicit lap IDs/numbers, names/codes, official lap and 3 sector durations, compound, tyre age, track-status string |
-| `provenance` | FastF1 version, pipeline version, methodology version, reference/source snapshot hashes, generated UTC, source session, circuit revision, canonical reference lap |
-| `distance_m` | Shared approximate-distance coordinate |
-| `channels_a`, `channels_b` | Equal-length speed, throttle, gear, brake and raw elapsed-time arrays |
-| `geometry` | Reference x/y arrays on the same grid; not either driver's racing line |
-| `delta_ms`, `valid` | Pair elapsed difference and support flags |
-| `sector_boundaries_m` | Fixed reference estimates for the first two official timing lines; not marshal sectors |
-| `quality` | pass/warn/block, warnings, required reconciliation checks, native counts/gaps, integrated lengths and normalization factors |
-| `segments` | Ordered additive partition, IDs/labels/kind/group, boundaries, local gain, sensitivity bounds, quality, evidence references |
-| `evidence` | Metric values/units/range, differences, sample support and optional transition intervals |
-| `observations` | At most three texts with template ID, segment and evidence references |
-| `insufficient_evidence_reason` | Required explanatory text when fewer than three findings exist; null when all three exist |
+| GET /api/v1/health | Process health only |
+| GET /api/v1/catalog | Summaries of schema-valid prepared telemetry and sector-only artifacts |
+| GET /api/v1/comparisons/{id} | Discriminated immutable result |
+| GET /api/v1/sessions | Imported event inventory, initially empty |
+| GET /api/v1/sessions/{id}/laps | Full roster, per-lap phase, timings, capability and reasons |
+| POST /api/v1/compare | Validate selection and return matching cached local artifact plus requested orientation |
+| GET /openapi.json, /docs | Generated API documentation |
 
-The wire `source` is currently `fastf1`. The tiny test factory uses artificial identifiers and a conspicuous synthetic provenance description solely to exercise this wire shape; it must never be copied into served storage. A future visible synthetic demo needs a distinct source enum/schema path and prominent labeling.
+No upstream request is made by these routes. A cache miss is HTTP 409 until the T05 local normalized-data engine is implemented. This is explicit unfinished behavior, not a silently substituted sample.
 
-## Reconciliation records
+POST body:
 
-Each record has `driver` A/B/pair, `metric`, `basis`, official/observed/residual milliseconds and severity. Residual equals observed minus official. Pair values may be negative. Missing observed/residual must both be null and cannot pass.
+```json
+{
+  "session_id": "event-id",
+  "lap_a_id": "lap-id-a",
+  "lap_b_id": "lap-id-b",
+  "allow_cross_phase": false,
+  "detail_level": "auto"
+}
+```
 
-Required set for a usable artifact:
+`detail_level` is auto, telemetry or sector_only. Response is `{artifact: <telemetry-or-sector-only>, swapped: boolean}`. Artifact A/B remains canonical; swapped tells the view to exchange columns/channels and negate differences. Stored text uses actual driver identities and remains unchanged.
 
-| Subject | Metrics | Basis |
-| --- | --- | --- |
-| A and B | `sector_sum`, `sliced_duration` | timing record consistency / timing constraint as defined in methodology |
-| A and B | `cumulative_sector_1`, `cumulative_sector_2` | cross-lap consistency, or calibration for the reference lap |
-| Pair | `cumulative_sector_1`, `cumulative_sector_2` | cross-lap consistency |
-| Pair | `lap_gap` | timing constraint |
+## Inventory and selection
 
-There are 11 required subject/metric pairs. The schema checks completeness, uniqueness, residual arithmetic, and that overall quality is no lower than individual checks. T04 also computes the severities from versioned thresholds, verifies each official/observed value against its actual source arrays/metadata, enforces basis choices and incorporates non-timing flags. A supplied `pass` string is never enough to establish correctness.
+SessionIdentity holds session_id, year, round, Q, circuit key and event name. **Phase belongs to each lap**, not to the event. LapIdentity supplies lap ID, phase, driver code/name/number and lap number. LapMetadata adds recorded duration, three sectors, compound, tyre age and track status.
 
-## Segments and evidence
+SessionLapIndex holds session, source snapshot SHA-256, full driver roster and lap options. A LapOption includes nullable timing, capability telemetry/sector_only/unavailable and reasons. Selectable laps require complete positive recorded timing. Roster drivers with no eligible laps remain visible. Unique driver/lap identity and roster consistency are validated.
 
-Usable artifacts contain an adjacent partition from 0 to lap length; boundaries occur on the shared grid. Each numeric gain requires full elapsed-time support throughout its range and must equal the endpoint delta difference. A sensitivity interval, if present, contains the unshifted gain. Unsupported gains remain null. Wrapped complexes are two non-wrapping partition pieces with the same `group_id`; additive lists use those pieces once each.
+POST checks both lap IDs belong to the index, drivers differ, eligibility/capability permits the request, and cross-phase opt-in is present when needed. Cached artifacts must agree with the event, source digest, identities, phase, lap numbers and all recorded times. Auto prefers telemetry if both laps support it and a valid artifact exists; otherwise a prepared sector-only result may be returned.
 
-Evidence scalar difference is B−A. For onset intervals `[a0,a1]` and `[b0,b1]`, the difference interval is `[b0−a1,b1−a0]` in the same unit. Do not replace uncertain intervals with an exact braking point. Metrics use a fixed code: segment gain, minimum/entry/exit speed, brake onset, throttle pickup, full-throttle fraction or gear at marker. A segment-gain evidence record represents A/B traversal durations, so its B−A difference equals `gain_ms`.
+Application errors use `{error:{code,message}}`. Codes include data_not_imported (409), lap_not_found (404), same_driver (422), cross_phase_not_enabled (422), lap_unavailable (422), telemetry_unavailable (422), comparison_not_prepared (409), artifact_invalid (503), quality_blocked (503) and invalid_request (422). Framework unknown-route errors need not have this envelope.
 
-Schema validation checks references exist and numbers/interval arithmetic are consistent. T05 further checks metric-to-unit compatibility, native support, evidence location relative to its segment, one observation per disjoint interval, template eligibility, text/value correspondence, sensitivity/materiality and publication review. Those are analytical guarantees, not merely shape checks.
+## Shared numerical conventions
 
-## Required pre-publication contract additions
+Distance m, speed km/h, throttle %, time/delta ms. Finite floating values may retain fractional milliseconds; only display rounds them. Null means unsupported. Gear is strict integer 0–8; brake strict boolean/null. No pressure or steering channel exists.
 
-The existing contract is usable for scaffold/API development. These exact additions belong in the responsible ticket before dependent behavior is built; they are already planned, not questions left for implementation brainstorming:
+Telemetry sample arrays match one increasing distance grid, beginning at zero with at most 5000 points. Important boundaries are inserted, so index × 5 is invalid. Delta is B raw elapsed minus A raw elapsed; positive favours A. The raw curve is interpolated but never corrected to fit recorded sector timing. Valid masks concern elapsed-time support; optional-channel holes remain independent.
 
-| Ticket | Extension |
+## Result variants
+
+Both results have schema_version, comparison_id, detail_level, event, lap_a/b and pairing. Pairing mode is same_phase/cross_phase; a cross-phase result requires a warning.
+
+### Telemetry
+
+ComparisonArtifact adds provenance, aligned channels, geometry, raw delta, support mask, reference sector distances, quality, segment partition, turn markers, estimated mini-sectors, class analysis, evidence and observations.
+
+Provenance records source FastF1 version, pipeline/method versions, source snapshot/reference hashes, UTC generation, source session, circuit revision/reference lap. TimingProvenance is the smaller base for sector-only results. Additional source/import/review/config metadata below remains T01–T05 work.
+
+Segments form an additive partition of 0..L. Gain equals endpoint delta difference and needs full timing support. Sensitivity bounds contain the unshifted gain. Wrapped complexes use linked non-wrapping pieces and count once per independent unit.
+
+Corners contain marker_id, number, label, distance_m, segment_id, reference_speed_kph and speed_class. Marker class must match reference thresholds. Segment classes include low/medium/high/mixed/unknown; straights have no speed class.
+
+EstimatedMiniSector has source=derived_telemetry, start_m, end_m and nullable gain_ms. Bins partition 0,100,...,L separately from corner windows. Their bounds must occur on the shared grid, supported gains must equal endpoint changes, and this separate partition reaches the finish. Never add mini-sector totals to corner totals.
+
+AnalysisSummary contains exactly three class rows, the reference classification rule/thresholds, structured pattern, optional pattern driver, text, evidence IDs and limitations. Each row supplies included/excluded segment IDs, independent units, distance coverage, gross gains for A/B, net contribution, material win counts, sensitivity and assessment. Model validators account for linked units and check gross/net arithmetic, coverage and evidence references. Strong high/medium-gain-low-loss patterns require consistent fully covered classes. T05 still computes eligibility, support and templates from actual source arrays.
+
+MetricEvidence retains range, values/units, B−A differences, native support and optional transition intervals. Observations reference evidence and a segment. Zero to three findings are permitted; fewer requires insufficient_evidence_reason.
+
+### Sector-only
+
+SectorComparisonArtifact has TimingProvenance, SectorQuality, fallback_reason, three sector_delta_ms values and three cumulative_delta_ms values. Two per-driver sector-sum checks are required and compared with actual metadata. Deltas must match recorded sectors.
+
+This variant has **no distance array, turn markers, local gains, synthetic geometry or class findings**. Render separate points at Start/S1 end/S2 end/Finish, with an ordinal crossing axis and no joining curve. Timing data alone cannot locate the difference inside a sector.
+
+## Reconciliation and validation boundary
+
+Telemetry requires 11 unique checks: A and B sector_sum, sliced_duration, cumulative_sector_1, cumulative_sector_2; pair cumulative_sector_1, cumulative_sector_2, lap_gap. Checks retain timing_record_consistency, timing_constraint, cross_lap_consistency or calibration basis. Residual is observed minus recorded, and overall severity cannot understate any check.
+
+Wire validators protect shape, arithmetic, partitioning and references. T04/T05 must additionally verify numbers against native data, derive threshold severity, evaluate eligibility/support, check template text, and require a reviewed source/config dataset. A schema-valid artifact alone is not verified science.
+
+## Storage and security
+
+Default directories: data/artifacts and data/sessions, separately overridable by LAPDNA_ARTIFACT_DIR/LAPDNA_SESSION_DIR. IDs permit 1–100 ASCII letters/digits/underscores/hyphens. Local readers enforce root confinement, safe identifiers, matching filename identities and a 20 MiB size limit. Corrupt artifacts/indexes fail visibly; intentionally blocked results are withheld.
+
+The current readers enumerate flat JSON files. T05 introduces a published manifest and changes discovery in that same commit. Do not place catalog.json in the current artifact directory. Production generated-result cache storage is a separate T05/T12 concern.
+
+## Planned additions before publication
+
+| Ticket | Required addition |
 | --- | --- |
-| T01 | `provenance.source_retrieved_at` timezone-aware UTC distinct from generation; snapshot manifest source URLs/terms/access status |
-| T02 | `lap_a/b.lap_start_utc` (nullable only when clock unavailable), `eligibility_summary` with machine-readable flags; retain source values in snapshot even if UI cannot use them |
-| T03 | `provenance.circuit_config_sha256`; `geometry.corners` objects `{marker_id,label,distance_m,x,y,label_x,label_y}` in metres after rotation, derived from reviewed reference; store rotation exactly once in profile |
-| T04 | `provenance.settings_sha256`; `analysis_settings` with grid step, actual gap/residual/scale/observation thresholds; typed quality reasons for independently missing channels and interval flags |
-| T05 | `review` with status `pending/reviewed/rejected`, review timestamp, reviewed dataset ID, official-source URLs and verification scope; `template_version` per observation; catalogue generation/revision and artifact digest fields |
+| T01 | source_retrieved_at, source URLs, adapter/access metadata and source terms scope |
+| T02 | lap_start_utc, eligibility summary and lap-condition context |
+| T03 | circuit_config_sha256; reviewed geometry label positions in the circuit profile |
+| T04 | settings_sha256, actual analysis settings and typed channel/interval quality reasons |
+| T05 | reviewed dataset record, official-source verification scope, observation template_version, publication/cache manifest digest fields |
 
-Any source metadata absence must have a documented null/rejection policy. Do not use `generated_at` as import time or fabricate lap-start UTC. Add sample fixtures, model validation, generated schemas and frontend types in the same ticket. Production catalogue promotion requires `reviewed`; the current test scaffold has no editorial review workflow.
+Add actual fields in Python and regenerate, never derive retrieval time from generation time. User-facing OpenF1 support beyond the availability probe requires a deliberate source adapter/provenance extension; current served sources are FastF1.
 
-## Generate and check
-
-`npm run contracts` runs `scripts/export_contracts.py`, then `openapi-typescript`. The Python interpreter defaults to the root `.venv` (platform-aware) or `python`; `LAPDNA_PYTHON` overrides it. `npm run contracts:check` regenerates and compares all four files, failing on drift. It may leave changed generated files for inspection; CI must commit none of them automatically.
-
-Do not hand-write or copy TypeScript model interfaces. Browser modules import `components['schemas'][...]` from the generated declaration. Unit tests should test meaningful contract invariants and API behavior, not simply assert a field list equals the implementation.
+`npm run contracts:check` regenerates all four files and fails on drift. It may leave changed outputs for review. Browser code imports generated types, never a copied second scientific schema.

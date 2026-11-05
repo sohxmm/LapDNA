@@ -15,10 +15,13 @@ Read `docs/10-handoff.md`, `docs/00-blueprint.md`, and the selected ticket in `d
 - Python owns data selection, alignment, quality, delta, segments and evidence. Browser code renders the supplied results.
 - Pydantic owns the wire schema; regenerate OpenAPI/TypeScript with `npm run contracts`. Do not hand-edit generated files.
 - Delta is B minus A in milliseconds. Positive favours A. A is cyan; B is orange. A/B swap changes signs and labels, never the canonical reference/grid.
+- Import the full session roster and all eligible laps. Phase belongs to each lap; cross-phase comparison requires explicit opt-in and persistent context. No curated driver-pair limit remains.
+- Distinguish telemetry from sector-only results. Estimated 100 m mini-sectors are derived from telemetry; status/color codes are not timing durations. Sector-only mode has discrete crossing deltas, no interpolated corner claims.
+- Corner-speed classes use the frozen reference and versioned thresholds. Retain coverage, gross gains/losses, mixed complexes and uncertainty before producing class conclusions.
 - Unknown numeric data is `null`, never zero. No NaN/Infinity in JSON. Gear and brake are discrete channels.
 - Preserve raw reconciliation errors. Never force curves to agree with timing and then claim independent validation.
 - All three observation slots require evidence; display fewer observations when necessary.
-- UI examples and fixtures must be labelled synthetic. No production fake driver times, maps, claims, or silent fallback data.
+- UI examples and fixtures must be labelled synthetic. The opt-in design preview is isolated from API results and real-data exports. No production fake driver times, maps, claims, or silent fallback data.
 - Keep downloaded data, access tokens and credentials outside Git. A cache is disposable; an exported analysis must carry provenance.
 - Changes in algorithms require methodology version changes and regression checks. Changes in schema require generation and compatibility review.
 
@@ -29,3 +32,5 @@ Run meaningful tests for changed behavior. For contract/API changes run Python t
 ## Current scope
 
 Only the scaffold and blueprint are complete. The first implementation ticket is T01. Follow `docs/06-implementation-plan.md`; do not treat described future features as existing functionality. Public deployment and raw-data redistribution are separate release tasks, not setup prerequisites.
+
+The scaffold already contains session selectors, cached result rendering and a synthetic ECharts preview. Extend those components in T06–T09 instead of rebuilding them. `docs/11-implementation-workflow.md` gives the requested model/effort workflow; it does not replace ticket acceptance checks.
