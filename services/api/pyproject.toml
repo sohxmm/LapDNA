@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=75,<83"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lapdna-api"
+version = "0.1.0"
+description = "Read-only API and validated comparison contracts for LapDNA"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "fastapi>=0.162,<0.163",
+  "pydantic>=2.14,<2.15",
+  "uvicorn>=0.54,<0.55",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=9.2,<9.3", "httpx>=0.28,<0.29"]
+data = ["fastf1==3.9.2", "numpy>=2,<3", "pandas>=2.2,<3", "scipy>=1.13,<2"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
