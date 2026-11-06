@@ -2,6 +2,8 @@
 
 Where did the lap time go? Compare two qualifying laps on a common track-distance axis and connect approximate local gains to observed telemetry.
 
+**Hosted preview:** [LapDNA](https://lapdna.vercel.app) · [Synthetic telemetry demo](https://lapdna.vercel.app/?preview=1). The hosted API has an empty real-session inventory. See [deployment status and limitations](docs/12-hosting.md).
+
 **Status: expanded blueprint and runnable foundation.** The scaffold has a typed local API, full-session driver/lap selection, independent Q1/Q2/Q3 controls, cached comparison delivery, and an opt-in synthetic telemetry preview with turn labels. FastF1 ingestion, the numerical comparison engine, real circuit maps and export remain implementation tickets. No real telemetry is bundled and no real comparison has been validated yet.
 
 ## Start here

@@ -55,6 +55,7 @@ Public channels do not include the reference image's steering trace or brake pre
 9. [Sources](09-sources.md)
 10. [Current handoff](10-handoff.md)
 11. [Implementing with GPT-6.1 Sol](11-implementation-workflow.md)
+12. [Hosted preview and limitations](12-hosting.md)
 
 Python models govern field names; methodology governs numerical meaning; tickets govern current status. Resolve contradictions in one small documented change before dependent implementation.
 

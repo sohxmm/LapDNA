@@ -1,6 +1,8 @@
 # Current handoff
 
-Updated 5 November 2026 · Revision 2. **Blueprint and expanded scaffold complete; real-data implementation starts at T01.**
+Updated 6 November 2026 · Revision 2 plus hosted preview. **Blueprint and expanded scaffold complete; real-data implementation starts at T01.**
+
+Hosted on Vercel at [lapdna.vercel.app](https://lapdna.vercel.app), with the [synthetic demo](https://lapdna.vercel.app/?preview=1) and the existing FastAPI scaffold under `/api/v1`. Real session and comparison catalogues remain empty. See [hosting and limitations](12-hosting.md). This deployment is a preview milestone, not completion of T01–T12.
 
 ## Working folder
 
