@@ -9,7 +9,7 @@
     "dev": "npm run dev --workspace @lapdna/web",
     "build": "npm run build --workspace @lapdna/web",
     "typecheck": "npm run typecheck --workspace @lapdna/web",
-    "test:web": "node --test apps/web/src/features/comparison/*.test.mjs apps/web/src/features/navigation/*.test.mjs",
+    "test:web": "node --test apps/web/src/features/comparison/*.test.mjs apps/web/src/features/navigation/*.test.mjs apps/web/src/features/results/*.test.mjs",
     "contracts": "node scripts/contracts.mjs",
     "contracts:check": "node scripts/contracts.mjs --check"
   },

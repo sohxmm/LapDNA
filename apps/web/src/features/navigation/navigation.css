@@ -79,6 +79,27 @@
   outline: 2px solid var(--a);
   outline-offset: 3px;
 }
+.year-selection.year-selection-compact {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 0 0 16px;
+  margin-bottom: 18px;
+}
+.year-selection.year-selection-compact label {
+  flex-direction: row;
+  align-items: center;
+  margin-top: 0;
+  max-width: none;
+}
+.year-selection.year-selection-compact select {
+  min-height: 40px;
+  font-size: 13px;
+}
+.studio-event h1:focus {
+  outline: none;
+}
 .calendar-section-title {
   display: flex;
   align-items: end;

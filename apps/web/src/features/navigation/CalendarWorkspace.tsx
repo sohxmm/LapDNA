@@ -6,6 +6,7 @@ import type { StudioRoute } from "./routing";
 import "./navigation.css";
 
 const SessionBrowser = lazy(() => import("../comparison/SessionBrowser"));
+const ResultsBrowser = lazy(() => import("../results/ResultsBrowser"));
 type Resource<T> =
   | { status: "loading" }
   | { status: "error"; message: string }
@@ -39,7 +40,7 @@ function qualifyingLabel(race: CalendarRace) {
       ? "Scheduled qualifying start has passed"
       : race.qualifying_date
         ? "Qualifying date published · start time unavailable"
-        : "Qualifying time not published";
+      : "Scheduled qualifying start not published";
 }
 
 function Metadata({ calendar }: { calendar: RaceCalendar }) {
@@ -80,8 +81,8 @@ function RaceCards({
         <span>{calendar.races.length} events in source calendar</span>
       </div>
       <p className="calendar-explanation">
-        Choose a race to enter Telemetry Studio. A calendar entry does not mean
-        its lap data has been imported.
+        Choose a race to compare its recorded qualifying results. Calendar
+        entries may include upcoming events.
       </p>
       {!calendar.races.length ? (
         <div className="calendar-empty">
@@ -111,7 +112,7 @@ function RaceCards({
               </span>
               <span className="race-quali">{qualifyingLabel(race)}</span>
               <span className="race-enter">
-                Open Telemetry Studio <span aria-hidden="true">↗</span>
+                Open qualifying studio <span aria-hidden="true">↗</span>
               </span>
             </button>
           ))}
@@ -131,12 +132,15 @@ function Studio({
   onBack: () => void;
 }) {
   const title = useRef<HTMLHeadingElement>(null);
+  const [showLapWorkspace, setShowLapWorkspace] = useState(false);
   useEffect(() => title.current?.focus({ preventScroll: true }), []);
   return (
     <section className="selected-studio" aria-labelledby="studio-title">
       <div className="studio-event">
-        <p className="eyebrow">03 / TELEMETRY STUDIO</p>
-        <h1 id="studio-title" ref={title} tabIndex={-1}>Telemetry studio</h1>
+        <p className="eyebrow">03 / QUALIFYING STUDIO</p>
+        <h1 id="studio-title" ref={title} tabIndex={-1}>
+          Qualifying studio
+        </h1>
         <h2>
           {race.year} · {race.name}
         </h2>
@@ -147,8 +151,8 @@ function Studio({
           {qualifyingLabel(race)} · {timestamp(race.qualifying_start_at)}
         </p>
         <p className="calendar-explanation">
-          Calendar times are scheduling metadata. Completed qualifying data
-          becomes selectable only after import and validation.
+          Compare imported session and phase-best timings first. Individual runs
+          and distance-aligned telemetry will follow as separate data stages.
         </p>
         <div className="studio-links">
           <button type="button" className="calendar-button" onClick={onBack}>
@@ -162,22 +166,41 @@ function Studio({
       {race.year < 2018 && (
         <p className="calendar-warning">
           This season predates the usual FastF1 telemetry archive. Calendar
-          coverage does not promise car-channel data; available historical
-          timing must be checked separately.
+          coverage does not promise car-channel data. Recorded qualifying
+          classifications can cover earlier years; see imported coverage below.
         </p>
       )}
       <Suspense
-        fallback={
-          <p role="status">Loading this race's comparison workspace…</p>
-        }
+        fallback={<p role="status">Loading this race's recorded results…</p>}
       >
-        <SessionBrowser
+        <ResultsBrowser
           key={race.race_id}
           year={race.year}
           round={race.round}
-          eventName={race.name}
         />
       </Suspense>
+      <details
+        className="results-later"
+        onToggle={(event) => setShowLapWorkspace(event.currentTarget.open)}
+      >
+        <summary>Individual laps and telemetry · next stage</summary>
+        <p>
+          Phase-best classifications do not identify matched run 1 or run 2
+          attempts. The detailed lap workspace remains separate until actual
+          laps and telemetry have been imported and validated.
+        </p>
+        {showLapWorkspace && (
+          <Suspense
+            fallback={<p role="status">Loading detailed lap workspace…</p>}
+          >
+            <SessionBrowser
+              year={race.year}
+              round={race.round}
+              eventName={race.name}
+            />
+          </Suspense>
+        )}
+      </details>
       <Metadata calendar={calendar} />
     </section>
   );
@@ -306,20 +329,26 @@ export default function CalendarWorkspace() {
           </li>
           <li>
             <span aria-current={studio ? "step" : undefined}>
-              03 <span>Telemetry Studio</span>
+              03 <span>Studio</span>
             </span>
           </li>
         </ol>
       </nav>
-      <section className="year-selection">
-        <div>
-          <p className="eyebrow">01 / CHOOSE A YEAR</p>
-          <h1>{studio ? "Your selected season" : "Start with a season."}</h1>
-          <p>
-            The current year is selected by default. Browse that year's
-            calendar, then choose a race.
-          </p>
-        </div>
+      <section
+        className={
+          studio ? "year-selection year-selection-compact" : "year-selection"
+        }
+      >
+        {!studio && (
+          <div>
+            <p className="eyebrow">01 / CHOOSE A YEAR</p>
+            <h1>Start with a season.</h1>
+            <p>
+              The current year is selected by default. Browse that year's
+              calendar, then choose a race.
+            </p>
+          </div>
+        )}
         <label>
           Season
           <select
