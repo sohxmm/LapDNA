@@ -130,11 +130,13 @@ function Studio({
   calendar: RaceCalendar;
   onBack: () => void;
 }) {
+  const title = useRef<HTMLHeadingElement>(null);
+  useEffect(() => title.current?.focus({ preventScroll: true }), []);
   return (
     <section className="selected-studio" aria-labelledby="studio-title">
       <div className="studio-event">
         <p className="eyebrow">03 / TELEMETRY STUDIO</p>
-        <h1 id="studio-title">Telemetry studio</h1>
+        <h1 id="studio-title" ref={title} tabIndex={-1}>Telemetry studio</h1>
         <h2>
           {race.year} · {race.name}
         </h2>
@@ -249,6 +251,7 @@ export default function CalendarWorkspace() {
     setRoute(
       parseRoute(search, seasons.data.current_year, seasons.data.min_year),
     );
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }
   function backToYear() {
     if (route) navigate(route.year);
