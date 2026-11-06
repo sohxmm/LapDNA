@@ -68,6 +68,8 @@
         "car_rows": 306,
         "brake_values": [0, 100],
         "lap_endpoint": "https://api.openf1.org/v1/laps?session_key=9586&driver_number=4&lap_number=11",
+        "window_start_utc": "2024-08-31T15:02:50.589000+00:00",
+        "window_end_utc": "2024-08-31T15:04:09.916000+00:00",
         "limitations": "One historical lap; not full-session phase/validity/alignment validation"
       }
     },
