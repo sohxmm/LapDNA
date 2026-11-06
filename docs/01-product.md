@@ -4,11 +4,13 @@ LapDNA compares two qualifying laps and answers three questions. Where did the t
 
 A reader can choose any two different drivers in an imported event, pick each driver's Q1, Q2 or Q3 lap, and inspect the result by turn. “Any” covers every eligible imported lap, including a slower lap selected explicitly. A driver who did not reach Q3 has no Q3 selection. Each exclusion has a visible reason.
 
+Enter through a year selector, defaulting to the current year. Load that year's actual calendar, choose a race, then open its studio. Preserve the year/race in the URL and browser history. A listed race is scheduling metadata, not a claim that qualifying has completed or its telemetry is ready. Only imported sessions matching that year and round populate the studio. Display source freshness and an honest empty state for unimported races.
+
 ## 1. The analysis readers receive
 
 The opening comparison names both drivers, the phase and lap number on each side, the official lap times and the signed gap. One distance axis then ties together a dominance strip, sector dividers, numbered turns, the speed trace, throttle, gear, brake state and cumulative time delta. Selecting T7 locates that marker on every panel and highlights its analytical region on the reference track map.
 
-The broadcast image establishes how those views relate visually. LapDNA uses its own branding and validated source data. The public car channels support speed, throttle, gear and a brake switch. Leave steering and brake pressure out of the display. Displayed reference distances and local time gains are estimates. Official sector durations retain their source precision. See [telemetry methodology](03-telemetry-methodology.md) and [sources](09-sources.md).
+The broadcast image establishes how those views relate visually. LapDNA uses its own branding and validated source data. The [source audit](13-data-source-audit.md) verifies native speed, throttle, gear and a brake switch, so retain those features. Each factor needs its own source channel and per-lap availability; never infer pedal or gear values from speed. Steering and brake pressure have no verified measured field in the selected feeds. Additional providers require review before either adding or dropping a proposed feature. Preserve the labelled synthetic demo while that review proceeds. Displayed reference distances and local time gains are estimates. Official sector durations retain their source precision. See [telemetry methodology](03-telemetry-methodology.md) and [sources](09-sources.md).
 
 Below the chart, the reader can expand low-, medium- and high-speed corner groups. Each group shows where either selected lap gained or lost time, how much of the class had adequate telemetry, and which turns support the conclusion. An analysis sentence can therefore distinguish a net high-speed advantage from a class where several sizeable gains and losses canceled each other.
 

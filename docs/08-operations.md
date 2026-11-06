@@ -22,7 +22,19 @@ Vite serves the client at `http://127.0.0.1:5173` and proxies `/api` to port 800
 
 Prefer absolute override paths. Relative values use the API process working directory. The example environment file documents settings; set PowerShell variables explicitly when needed. Never place credentials in the repository.
 
-Current GET routes expose health, session inventory, session laps, prepared catalogue and immutable result lookup. `POST /api/v1/compare` validates a request and can return a compatible prepared result, with a swap flag for reverse order. A new uncached selection currently returns `comparison_not_prepared`. A missing selected import returns `data_not_imported`. [The contract](05-contracts.md) distinguishes capability, bad identity and transport failures. T05 replaces the prepared-only miss behavior with bounded local computation.
+Current GET routes expose health, year/calendar metadata, session inventory, session laps, prepared catalogue and immutable result lookup. `POST /api/v1/compare` validates a request and can return a compatible prepared result, with a swap flag for reverse order. A new uncached selection currently returns `comparison_not_prepared`. A missing selected import returns `data_not_imported`. [The contract](05-contracts.md) distinguishes capability, bad identity and transport failures. T05 replaces the prepared-only miss behavior with bounded local computation.
+
+## Calendar metadata
+
+`GET /api/v1/seasons` defaults to the current year in Asia/Kolkata. `GET /api/v1/calendar/{year}` fetches Jolpica metadata with a six-hour warm cache, five-second source timeout, bounded cache and a one-minute outage retry backoff. Source and retrieval UTC stay visible. Qualifying timestamps describe scheduled starts; the service never declares a session completed from time alone.
+
+Committed, source-stamped 2024/2026 fallback calendars live in `services/api/src/lapdna/calendar_snapshots/` and are bundled with the Python package. A fallback is explicitly stale when used after a failed refresh. Other years return an honest unavailable response if the source fails and no warm cache exists. Refresh a fallback deliberately:
+
+```powershell
+.venv\Scripts\python scripts/update_calendar_snapshot.py 2026
+```
+
+This command downloads public calendar metadata, validates complete season/round identities and atomically replaces that year's snapshot. Inspect its diff and retrieval stamp before committing. It never imports telemetry or changes the labelled design fixture. Calendar navigation uses exact year/round matches to select imported sessions; it does not start an import.
 
 ## Planned operator interfaces
 

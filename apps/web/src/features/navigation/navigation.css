@@ -1,0 +1,312 @@
+.calendar-workspace {
+  padding: 26px 0 46px;
+}
+.calendar-progress ol {
+  display: flex;
+  gap: 24px;
+  list-style: none;
+  margin: 0 0 34px;
+  padding: 0;
+  color: #778c9b;
+  font-size: 12px;
+}
+.calendar-progress button {
+  border: 0;
+  background: none;
+  color: #8d9fac;
+  padding: 5px 0;
+  font: inherit;
+  cursor: pointer;
+}
+.calendar-progress li > span {
+  display: block;
+  padding: 5px 0;
+}
+.calendar-progress [aria-current="step"] {
+  color: var(--a);
+}
+.calendar-progress span span,
+.calendar-progress button span {
+  margin-left: 6px;
+}
+.year-selection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 12px 0 32px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 30px;
+}
+.year-selection h1 {
+  font-family: system-ui, sans-serif;
+  font-size: clamp(24px, 4vw, 40px);
+  line-height: 1.15;
+  text-transform: none;
+  font-weight: 600;
+  letter-spacing: -1.4px;
+}
+.year-selection .eyebrow {
+  color: var(--a);
+  margin-bottom: 11px;
+}
+.year-selection p:last-child {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--muted);
+  max-width: 580px;
+  margin-bottom: 0;
+}
+.year-selection label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.year-selection select {
+  font-size: 15px;
+  min-height: 46px;
+  background: #142029;
+  color: #e5eff5;
+  border: 1px solid #455966;
+  padding: 10px 35px 10px 12px;
+  min-width: 175px;
+}
+.year-selection select:focus-visible {
+  outline: 2px solid var(--a);
+  outline-offset: 3px;
+}
+.calendar-section-title {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 10px;
+}
+.calendar-section-title h2 {
+  font-size: 25px;
+  letter-spacing: -0.6px;
+  font-weight: 600;
+  margin: 6px 0;
+}
+.calendar-section-title .eyebrow {
+  margin-bottom: 8px;
+  font-size: 9px;
+}
+.calendar-section-title > span {
+  font-size: 11px;
+  color: var(--muted);
+  padding-bottom: 5px;
+}
+.calendar-explanation {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #9eafba;
+  margin: 10px 0 20px;
+}
+.race-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.race-card {
+  background: #111b22;
+  border: 1px solid #2a3a46;
+  text-align: left;
+  color: #e5edf3;
+  padding: 18px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  min-height: 240px;
+  font: inherit;
+}
+.race-card:hover {
+  border-color: #6299a3;
+  background: #15242c;
+}
+.race-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: #95b0bf;
+  font-size: 10px;
+  letter-spacing: 0.6px;
+}
+.race-card strong {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.3px;
+}
+.race-circuit {
+  font-size: 12px;
+  color: #c3d1db;
+  line-height: 1.5;
+}
+.race-place {
+  font-size: 11px;
+  color: #849caa;
+}
+.race-quali {
+  font-size: 10px;
+  line-height: 1.6;
+  color: #b2c3ce;
+  margin-top: auto;
+}
+.race-enter {
+  font-size: 11px;
+  color: var(--a);
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #2c3e49;
+  padding-top: 11px;
+}
+.calendar-provenance {
+  padding: 20px 0;
+  font-size: 10px;
+  line-height: 1.8;
+  color: #92a5b2;
+}
+.calendar-provenance a {
+  color: #bdcfd9;
+  text-decoration: underline;
+}
+.calendar-provenance strong {
+  color: #f3cf84;
+  font-size: 11px;
+}
+.calendar-warning {
+  border-left: 3px solid #d9b56f;
+  background: #25231d;
+  color: #e5d3ae;
+  font-size: 12px;
+  line-height: 1.7;
+  padding: 12px 15px;
+}
+.calendar-empty,
+.calendar-loading {
+  padding: 30px 22px;
+  border: 1px solid #2b3e4c;
+  background: #111b22;
+  margin: 18px 0;
+  color: #aabecb;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.calendar-empty h1,
+.calendar-empty h2,
+.calendar-empty h3 {
+  font-family: system-ui, sans-serif;
+  text-transform: none;
+  color: #e5eef4;
+  font-size: 23px;
+  line-height: 1.3;
+  letter-spacing: -0.4px;
+  margin: 0 0 12px;
+}
+.calendar-empty a {
+  color: var(--a);
+  text-decoration: underline;
+}
+.calendar-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 13px;
+  border: 1px solid #475e6d;
+  background: #172630;
+  color: #dcebf4;
+  font: 12px system-ui;
+  cursor: pointer;
+}
+.calendar-button:hover {
+  border-color: var(--a);
+  color: var(--a);
+}
+.studio-event {
+  margin: 12px 0 24px;
+}
+.studio-event .eyebrow {
+  color: var(--a);
+  margin-bottom: 12px;
+}
+.studio-event h1 {
+  font-size: clamp(43px, 6vw, 74px);
+}
+.studio-event h2 {
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+  margin: 15px 0 8px;
+}
+.studio-event > p:not(.eyebrow) {
+  font-size: 12px;
+  color: #b0c3ce;
+  line-height: 1.7;
+}
+.studio-event .calendar-quali-context {
+  font-size: 11px;
+  color: #8fa9b8;
+}
+.studio-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 18px 0 24px;
+}
+.studio-event + .calendar-warning {
+  margin: 20px 0;
+}
+@media (max-width: 1000px) {
+  .race-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 650px) {
+  .calendar-workspace {
+    padding-top: 20px;
+  }
+  .calendar-progress ol {
+    gap: 14px;
+    font-size: 10px;
+    margin-bottom: 25px;
+  }
+  .calendar-progress span span,
+  .calendar-progress button span {
+    margin-left: 3px;
+  }
+  .year-selection {
+    display: block;
+    padding-top: 0;
+  }
+  .year-selection label {
+    margin-top: 20px;
+    max-width: 250px;
+  }
+  .year-selection h1 {
+    font-size: 31px;
+    letter-spacing: -1px;
+  }
+  .calendar-section-title {
+    display: block;
+  }
+  .calendar-section-title > span {
+    display: block;
+    margin-top: 8px;
+  }
+  .race-grid {
+    grid-template-columns: 1fr;
+  }
+  .race-card {
+    min-height: 220px;
+  }
+  .calendar-provenance {
+    overflow-wrap: anywhere;
+  }
+}

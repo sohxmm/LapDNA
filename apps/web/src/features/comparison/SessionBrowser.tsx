@@ -5,6 +5,7 @@ import ComparisonResult from './ComparisonResult';
 import type { PairResponse } from './resultView';
 import { available, changeDriver, changeMode, changePhase, initialDraft, lapTime, phases } from './selection';
 import type { Draft, Index, Phase, SlotName } from './selection';
+import { sessionsForRace } from '../navigation/routing';
 import './comparison.css';
 
 type Resource<T> = { state: 'loading' } | { state: 'error'; message: string } | { state: 'ready'; data: T };
@@ -138,13 +139,13 @@ function SessionLaps({ sessionId }: { sessionId: string }) {
   return <ComparisonForm index={resource.data}/>;
 }
 
-export default function SessionBrowser() {
+export default function SessionBrowser({year,round,eventName}: {year?:number;round?:number;eventName?:string} = {}) {
   const { resource, retry } = useLoad(loadSessions);
   const [sessionId, setSessionId] = useState('');
   if (resource.state === 'loading') return <section className="session-browser"><p role="status">Loading qualifying sessions…</p></section>;
   if (resource.state === 'error') return <section className="session-browser"><h2>Session inventory unavailable</h2><p role="alert">{resource.message}</p><button type="button" className="secondary-button" onClick={retry}>Retry connection</button></section>;
-  const sessions = resource.data.sessions;
-  if (!sessions.length) return <section className="session-browser"><h2>No qualifying sessions imported yet</h2><p>Imported sessions will list each driver's available Q1, Q2 and Q3 laps here.</p><button type="button" className="secondary-button" onClick={retry}>Refresh sessions</button></section>;
+  const sessions = sessionsForRace(resource.data.sessions,year,round);
+  if (!sessions.length) return <section className="session-browser"><h2>{eventName?'No qualifying data imported for this race':'No qualifying sessions imported yet'}</h2><p>{eventName?`${year} ${eventName}: `:''}Imported sessions will list each driver's available Q1, Q2 and Q3 laps here. Calendar selection does not start a telemetry download.</p><button type="button" className="secondary-button" onClick={retry}>Refresh sessions</button></section>;
   const selected = sessions.find(entry => entry.session.session_id === sessionId) ?? sessions[0];
   return <section className="session-browser"><h2>Compare qualifying laps</h2>
     <label className="sc-session">Qualifying session<select aria-label="Qualifying session" value={selected.session.session_id}
