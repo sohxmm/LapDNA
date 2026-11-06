@@ -355,6 +355,11 @@ function EventResults({ event }: { event: ClassificationEvent }) {
     });
   }
   const label = phaseLabel(selected.phase);
+  const notices = [...new Set([...event.warnings, ...session.warnings])]
+    .filter((text) => !text.startsWith("F1DB ") && text !== "Published classification facts; individual laps and runs are not imported.")
+    .map((text) => text.includes("native exclusion/disqualification status")
+      ? "Disqualified and excluded results remain visible in the table but cannot be selected for comparison."
+      : text);
   return (
     <section
       className="recorded-results"
@@ -434,7 +439,7 @@ function EventResults({ event }: { event: ClassificationEvent }) {
           {selected.warning}
         </p>
       )}
-      {[...new Set([...event.warnings, ...session.warnings])].map((text, i) => (
+      {notices.map((text, i) => (
         <p className="results-warning" key={i}>
           {text}
         </p>
