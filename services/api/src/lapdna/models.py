@@ -1,5 +1,6 @@
 """Wire contracts. Units and delta orientation are part of the public API."""
 
+from bisect import bisect_left, bisect_right
 from datetime import datetime
 from math import isclose
 from typing import Annotated, Literal, Self
@@ -15,7 +16,7 @@ QualityStatus = Literal["pass", "warn", "block"]
 DriverSlot = Literal["A", "B"]
 Phase = Literal["Q1", "Q2", "Q3"]
 SpeedClass = Literal["low", "medium", "high"]
-SchemaVersion = Literal["1.1.0"]
+SchemaVersion = Literal["1.2.0"]
 Count = Annotated[int, Field(ge=0)]
 ShortText = Annotated[str, Field(min_length=1, max_length=600)]
 
@@ -93,7 +94,7 @@ class PairingContext(Contract):
 
 
 class ArtifactHeader(Contract):
-    schema_version: SchemaVersion = "1.1.0"
+    schema_version: SchemaVersion = "1.2.0"
     comparison_id: Identifier
     session: SessionIdentity
     lap_a: LapMetadata
@@ -120,6 +121,29 @@ class DriverChannels(Contract):
     gear: list[Annotated[int, Field(strict=True, ge=0, le=8)] | None]
     brake: list[StrictBool | None]
     time_raw_ms: list[Nonnegative | None]
+
+
+class ChannelProvenance(Contract):
+    """An aligned display signal must originate in its named native source channel."""
+
+    status: Literal["measured", "missing"]
+    source_channel: ShortText | None
+    reason: ShortText | None
+
+    @model_validator(mode="after")
+    def require_source_or_reason(self) -> Self:
+        if self.status == "measured" and (self.source_channel is None or self.reason is not None):
+            raise ValueError("measured channels require their native source field and no missing-data reason")
+        if self.status == "missing" and (self.source_channel is not None or self.reason is None):
+            raise ValueError("missing channels require an explanation and no claimed source field")
+        return self
+
+
+class ChannelProvenanceSet(Contract):
+    speed_kph: ChannelProvenance
+    throttle_pct: ChannelProvenance
+    gear: ChannelProvenance
+    brake: ChannelProvenance
 
 
 class TrackGeometry(Contract):
@@ -353,6 +377,8 @@ class ComparisonArtifact(ArtifactHeader):
     distance_m: Annotated[list[Nonnegative], Field(min_length=2, max_length=5000)]
     channels_a: DriverChannels
     channels_b: DriverChannels
+    channel_provenance_a: ChannelProvenanceSet
+    channel_provenance_b: ChannelProvenanceSet
     geometry: TrackGeometry
     delta_ms: list[Finite | None]
     valid: list[StrictBool]
@@ -377,6 +403,20 @@ class ComparisonArtifact(ArtifactHeader):
             arrays.extend(getattr(channels, name) for name in type(channels).model_fields)
         if any(len(values) != size for values in arrays):
             raise ValueError("all sample arrays must match distance_m length")
+        native_fields = {
+            "speed_kph": {"Speed"}, "throttle_pct": {"Throttle"},
+            "gear": {"nGear"}, "brake": {"Brake"},
+        }
+        for channels, provenance in ((self.channels_a, self.channel_provenance_a),
+                                     (self.channels_b, self.channel_provenance_b)):
+            for name, recognized_fields in native_fields.items():
+                signal = getattr(provenance, name)
+                values = getattr(channels, name)
+                has_data = any(value is not None for value in values)
+                if signal.status == "missing" and has_data:
+                    raise ValueError("missing channels must contain only null samples")
+                if signal.status == "measured" and (not has_data or signal.source_channel not in recognized_fields):
+                    raise ValueError("measured signals require supported samples from a recognized native channel")
         if not 0 < self.sector_boundaries_m[0] < self.sector_boundaries_m[1] < grid[-1]:
             raise ValueError("sector boundaries must be increasing and internal to the lap")
         if self.lap_a.driver_number == self.lap_b.driver_number:
@@ -435,6 +475,37 @@ class ComparisonArtifact(ArtifactHeader):
         for evidence in self.evidence:
             if evidence.end_m > grid[-1]:
                 raise ValueError("evidence must lie within the lap")
+            channel = {
+                "minimum_speed": "speed_kph", "entry_speed": "speed_kph", "exit_speed": "speed_kph",
+                "brake_onset": "brake", "throttle_pickup": "throttle_pct",
+                "full_throttle_fraction": "throttle_pct", "gear_at_marker": "gear",
+            }.get(evidence.metric)
+            if channel:
+                for provenance, channels, value, interval, native_samples in (
+                    (self.channel_provenance_a, self.channels_a, evidence.value_a,
+                     evidence.interval_a, evidence.native_samples_a),
+                    (self.channel_provenance_b, self.channels_b, evidence.value_b,
+                     evidence.interval_b, evidence.native_samples_b),
+                ):
+                    if value is None and interval is None:
+                        continue
+                    if getattr(provenance, channel).status != "measured":
+                        raise ValueError("channel evidence requires that driver's measured source signal")
+                    if native_samples == 0:
+                        raise ValueError("channel evidence requires positive native sample support")
+                    values = getattr(channels, channel)
+                    first = bisect_left(grid, evidence.start_m)
+                    after = bisect_right(grid, evidence.end_m)
+                    # Display support is only a consistency check; native counts
+                    # must still come from the original source observations.
+                    if first < after:
+                        local_support = any(value is not None for value in values[first:after])
+                    else:
+                        # A narrow window may lie between display-grid samples.
+                        local_support = (0 < first < size and values[first - 1] is not None
+                                         and values[first] is not None)
+                    if not local_support:
+                        raise ValueError("channel evidence requires local display support within or bracketing its window")
         for observation in self.observations:
             if observation.segment_id not in segment_id_set:
                 raise ValueError("observation references unknown segment")
@@ -607,5 +678,5 @@ class ComparisonSummary(Contract):
 
 
 class Catalog(Contract):
-    schema_version: SchemaVersion = "1.1.0"
+    schema_version: SchemaVersion = "1.2.0"
     comparisons: list[ComparisonSummary]

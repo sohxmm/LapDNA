@@ -8,7 +8,7 @@ export async function fetchCatalog(signal: AbortSignal): Promise<Catalog> {
   const data: unknown = await response.json();
   // Full telemetry validation stays on the API. Guard the shell against an incompatible server.
   if (!data || typeof data !== 'object' || !('schema_version' in data)
-    || data.schema_version !== '1.1.0' || !('comparisons' in data)
+    || data.schema_version !== '1.2.0' || !('comparisons' in data)
     || !Array.isArray(data.comparisons)) {
     throw new Error('The API returned an unsupported catalogue.');
   }

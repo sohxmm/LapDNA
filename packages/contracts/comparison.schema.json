@@ -89,11 +89,89 @@
       "title": "AnalysisSummary",
       "type": "object"
     },
+    "ChannelProvenance": {
+      "additionalProperties": false,
+      "description": "An aligned display signal must originate in its named native source channel.",
+      "properties": {
+        "reason": {
+          "anyOf": [
+            {
+              "maxLength": 600,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "source_channel": {
+          "anyOf": [
+            {
+              "maxLength": 600,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Channel"
+        },
+        "status": {
+          "enum": [
+            "measured",
+            "missing"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "source_channel",
+        "reason"
+      ],
+      "title": "ChannelProvenance",
+      "type": "object"
+    },
+    "ChannelProvenanceSet": {
+      "additionalProperties": false,
+      "properties": {
+        "brake": {
+          "$ref": "#/$defs/ChannelProvenance"
+        },
+        "gear": {
+          "$ref": "#/$defs/ChannelProvenance"
+        },
+        "speed_kph": {
+          "$ref": "#/$defs/ChannelProvenance"
+        },
+        "throttle_pct": {
+          "$ref": "#/$defs/ChannelProvenance"
+        }
+      },
+      "required": [
+        "speed_kph",
+        "throttle_pct",
+        "gear",
+        "brake"
+      ],
+      "title": "ChannelProvenanceSet",
+      "type": "object"
+    },
     "ComparisonArtifact": {
       "additionalProperties": false,
       "properties": {
         "analysis": {
           "$ref": "#/$defs/AnalysisSummary"
+        },
+        "channel_provenance_a": {
+          "$ref": "#/$defs/ChannelProvenanceSet"
+        },
+        "channel_provenance_b": {
+          "$ref": "#/$defs/ChannelProvenanceSet"
         },
         "channels_a": {
           "$ref": "#/$defs/DriverChannels"
@@ -194,8 +272,8 @@
           "$ref": "#/$defs/QualityReport"
         },
         "schema_version": {
-          "const": "1.1.0",
-          "default": "1.1.0",
+          "const": "1.2.0",
+          "default": "1.2.0",
           "title": "Schema Version",
           "type": "string"
         },
@@ -244,6 +322,8 @@
         "distance_m",
         "channels_a",
         "channels_b",
+        "channel_provenance_a",
+        "channel_provenance_b",
         "geometry",
         "delta_ms",
         "valid",
@@ -1252,8 +1332,8 @@
           "$ref": "#/$defs/SectorQuality"
         },
         "schema_version": {
-          "const": "1.1.0",
-          "default": "1.1.0",
+          "const": "1.2.0",
+          "default": "1.2.0",
           "title": "Schema Version",
           "type": "string"
         },

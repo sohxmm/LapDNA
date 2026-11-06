@@ -1,12 +1,14 @@
 # Data and API contracts
 
-Python is authoritative: `services/api/src/lapdna/models.py` and `inventory.py`. Run `npm run contracts` to regenerate OpenAPI, comparison/catalog JSON Schema and TypeScript. Version **1.1.0** replaces the unpublished 1.0 scaffold contract; no real published dataset needs migration.
+Python is authoritative: `services/api/src/lapdna/models.py`, `inventory.py` and `calendar.py`. Run `npm run contracts` to regenerate OpenAPI, comparison/catalog JSON Schema and TypeScript. Comparison/inventory version **1.2.0** adds required per-driver channel provenance to the unpublished 1.1 scaffold contract. No real published dataset needs migration. Calendar/seasons use their own version **1.0.0**.
 
 ## Endpoints implemented in the scaffold
 
 | Endpoint | Behavior |
 | --- | --- |
 | GET /api/v1/health | Process health only |
+| GET /api/v1/seasons | Current year and selectable calendar years, 1950–current |
+| GET /api/v1/calendar/{year} | Sourced race calendar, retrieval timestamp, freshness and scheduled qualifying status |
 | GET /api/v1/catalog | Summaries of schema-valid prepared telemetry and sector-only artifacts |
 | GET /api/v1/comparisons/{id} | Discriminated immutable result |
 | GET /api/v1/sessions | Imported event inventory, initially empty |
@@ -14,7 +16,13 @@ Python is authoritative: `services/api/src/lapdna/models.py` and `inventory.py`.
 | POST /api/v1/compare | Validate selection and return matching cached local artifact plus requested orientation |
 | GET /openapi.json, /docs | Generated API documentation |
 
-No upstream request is made by these routes. A cache miss is HTTP 409 until the T05 local normalized-data engine is implemented. This is explicit unfinished behavior, not a silently substituted sample.
+Only the calendar route requests upstream metadata, through a bounded cache. Comparison/session routes do not fetch telemetry. A comparison cache miss is HTTP 409 until the T05 local normalized-data engine is implemented. This is explicit unfinished behavior, not a silently substituted sample.
+
+## Calendar navigation
+
+Choose year first, then a returned race, then its studio. A race identity is `{year}-{round}` and is validated against that calendar before selecting an imported session by year and round. Do not guess the event from circuit name; a circuit may host multiple rounds. URL state uses `year`, `race` and `view=studio`; `preview=1` remains the separate synthetic example.
+
+CalendarSeason records source, source URL, retrieved_at, stale, warnings and races. Qualifying status is upcoming/start_time_passed/time_unknown; it never asserts completion based on a clock. A cold Jolpica failure uses a provenance-stamped bundled snapshot for 2024/2026 if available, otherwise returns 503. Warm metadata is cached for six hours with bounded year count and outage retry backoff. Historical calendar availability does not promise telemetry before 2018 or any particular imported session.
 
 POST body:
 
@@ -53,6 +61,8 @@ Both results have schema_version, comparison_id, detail_level, event, lap_a/b an
 ### Telemetry
 
 ComparisonArtifact adds provenance, aligned channels, geometry, raw delta, support mask, reference sector distances, quality, segment partition, turn markers, estimated mini-sectors, class analysis, evidence and observations.
+
+`channel_provenance_a` and `channel_provenance_b` each require speed_kph, throttle_pct, gear and brake records. A record has measured/missing status, source_channel and reason. Measured channels require a recognized native source field and supported samples. Missing channels require a reason and entirely null values. Synthetic is a renderer-only preview status, never a production measured claim. These channel-level declarations do not replace sample-level gap/interpolation masks or native-data checks in T01/T04. Both sides may have different availability; render supported data only and disclose the reason for each absent side. Channel-dependent evidence is rejected when the required channel is missing.
 
 Provenance records source FastF1 version, pipeline/method versions, source snapshot/reference hashes, UTC generation, source session, circuit revision/reference lap. TimingProvenance is the smaller base for sector-only results. Additional source/import/review/config metadata below remains T01–T05 work.
 

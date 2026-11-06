@@ -35,7 +35,7 @@ def artifact_payload():
         })
 
     return {
-        "schema_version": "1.1.0", "comparison_id": "synthetic-contract-test",
+        "schema_version": "1.2.0", "comparison_id": "synthetic-contract-test",
         "detail_level": "telemetry", "pairing": {"mode": "same_phase", "warnings": []},
         "provenance": {
             "source": "fastf1", "fastf1_version": "test", "pipeline_version": "test",
@@ -54,6 +54,12 @@ def artifact_payload():
         "distance_m": [0.0, 1.0, 2.0],
         "channels_a": channels([0.0, 500.0, 1000.0]),
         "channels_b": channels([0.0, 550.0, 1100.0]),
+        "channel_provenance_a": {key: {"status": "measured", "source_channel": source, "reason": None}
+                                 for key, source in (("speed_kph", "Speed"), ("throttle_pct", "Throttle"),
+                                                     ("gear", "nGear"), ("brake", "Brake"))},
+        "channel_provenance_b": {key: {"status": "measured", "source_channel": source, "reason": None}
+                                 for key, source in (("speed_kph", "Speed"), ("throttle_pct", "Throttle"),
+                                                     ("gear", "nGear"), ("brake", "Brake"))},
         "geometry": {"x": [0.0, 1.0, 0.0], "y": [0.0, 0.0, 1.0]},
         "delta_ms": [0.0, 50.0, 100.0], "valid": [True, True, True],
         "sector_boundaries_m": [0.5, 1.5],
@@ -98,7 +104,7 @@ def index_payload(artifact_payload):
         laps.append({key: value for key, value in item.items() if key not in ("tyre_life_laps", "compound", "track_status")})
         laps[-1].update(capability="telemetry", reasons=[])
     return {
-        "schema_version": "1.1.0", "session": payload["session"],
+        "schema_version": "1.2.0", "session": payload["session"],
         "source_snapshot_sha256": payload["provenance"]["source_snapshot_sha256"],
         "drivers": drivers, "laps": laps,
     }

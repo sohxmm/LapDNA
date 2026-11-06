@@ -36,7 +36,7 @@ class LapOption(LapIdentity):
 
 
 class SessionLapIndex(Contract):
-    schema_version: SchemaVersion = "1.1.0"
+    schema_version: SchemaVersion = "1.2.0"
     session: SessionIdentity
     source_snapshot_sha256: Sha256
     drivers: list[DriverEntry]
@@ -61,7 +61,7 @@ class SessionSummary(Contract):
 
 
 class SessionInventory(Contract):
-    schema_version: SchemaVersion = "1.1.0"
+    schema_version: SchemaVersion = "1.2.0"
     sessions: list[SessionSummary]
 
 

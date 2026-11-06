@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from lapdna import __version__
+from lapdna.calendar import CalendarSeason, CalendarService, CalendarUnavailable, Seasons
 from lapdna.inventory import (
     CompareRequest, CompareResponse, SelectionError, SessionInventory, SessionLapIndex, SessionStore,
 )
@@ -16,8 +17,10 @@ from lapdna.models import Artifact, Catalog, ErrorResponse, Health
 from lapdna.store import ArtifactNotFound, ArtifactStore, InvalidArtifact, QualityBlocked
 
 
-def create_app(artifact_dir: Path | None = None, session_dir: Path | None = None) -> FastAPI:
+def create_app(artifact_dir: Path | None = None, session_dir: Path | None = None,
+               calendar_service: CalendarService | None = None) -> FastAPI:
     application = FastAPI(title="LapDNA API", version=__version__)
+    calendars = calendar_service or CalendarService()
     default_dir = Path(__file__).resolve().parents[4] / "data" / "artifacts"
     directory = artifact_dir or Path(os.getenv("LAPDNA_ARTIFACT_DIR", str(default_dir)))
     store = ArtifactStore(directory)
@@ -66,6 +69,22 @@ def create_app(artifact_dir: Path | None = None, session_dir: Path | None = None
     @application.get("/api/v1/health", response_model=Health)
     def health() -> Health:
         return Health(version=__version__)
+
+    @application.exception_handler(CalendarUnavailable)
+    async def unavailable_calendar(_request, error: CalendarUnavailable):
+        return JSONResponse(status_code=error.status, content={"error": {
+            "code": error.code, "message": error.message,
+        }})
+
+    @application.get("/api/v1/seasons", response_model=Seasons)
+    def seasons() -> Seasons:
+        return calendars.seasons()
+
+    @application.get("/api/v1/calendar/{year}", response_model=CalendarSeason, responses={
+        422: {"model": ErrorResponse}, 503: {"model": ErrorResponse},
+    })
+    def calendar(year: int = ApiPath(ge=1950, le=2100)) -> CalendarSeason:
+        return calendars.get(year)
 
     @application.get("/api/v1/catalog", response_model=Catalog, responses={
         503: {"model": ErrorResponse},

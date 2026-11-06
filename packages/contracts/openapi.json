@@ -90,6 +90,171 @@
         "title": "AnalysisSummary",
         "type": "object"
       },
+      "CalendarRace": {
+        "additionalProperties": false,
+        "properties": {
+          "circuit_id": {
+            "title": "Circuit Id",
+            "type": "string"
+          },
+          "circuit_name": {
+            "title": "Circuit Name",
+            "type": "string"
+          },
+          "country": {
+            "title": "Country",
+            "type": "string"
+          },
+          "locality": {
+            "title": "Locality",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "qualifying_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qualifying Date"
+          },
+          "qualifying_start_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qualifying Start At"
+          },
+          "qualifying_status": {
+            "enum": [
+              "upcoming",
+              "start_time_passed",
+              "time_unknown"
+            ],
+            "title": "Qualifying Status",
+            "type": "string"
+          },
+          "race_date": {
+            "format": "date",
+            "title": "Race Date",
+            "type": "string"
+          },
+          "race_id": {
+            "title": "Race Id",
+            "type": "string"
+          },
+          "race_start_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Race Start At"
+          },
+          "round": {
+            "maximum": 30.0,
+            "minimum": 1.0,
+            "title": "Round",
+            "type": "integer"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "race_id",
+          "year",
+          "round",
+          "name",
+          "circuit_id",
+          "circuit_name",
+          "country",
+          "locality",
+          "race_date",
+          "race_start_at",
+          "qualifying_date",
+          "qualifying_start_at",
+          "qualifying_status"
+        ],
+        "title": "CalendarRace",
+        "type": "object"
+      },
+      "CalendarSeason": {
+        "additionalProperties": false,
+        "properties": {
+          "races": {
+            "items": {
+              "$ref": "#/components/schemas/CalendarRace"
+            },
+            "title": "Races",
+            "type": "array"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "source": {
+            "const": "jolpica",
+            "default": "jolpica",
+            "title": "Source",
+            "type": "string"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "stale": {
+            "title": "Stale",
+            "type": "boolean"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          },
+          "year": {
+            "minimum": 1950.0,
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "year",
+          "source_url",
+          "retrieved_at",
+          "stale",
+          "warnings",
+          "races"
+        ],
+        "title": "CalendarSeason",
+        "type": "object"
+      },
       "Catalog": {
         "additionalProperties": false,
         "properties": {
@@ -101,8 +266,8 @@
             "type": "array"
           },
           "schema_version": {
-            "const": "1.1.0",
-            "default": "1.1.0",
+            "const": "1.2.0",
+            "default": "1.2.0",
             "title": "Schema Version",
             "type": "string"
           }
@@ -111,6 +276,78 @@
           "comparisons"
         ],
         "title": "Catalog",
+        "type": "object"
+      },
+      "ChannelProvenance": {
+        "additionalProperties": false,
+        "description": "An aligned display signal must originate in its named native source channel.",
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 600,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "source_channel": {
+            "anyOf": [
+              {
+                "maxLength": 600,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Channel"
+          },
+          "status": {
+            "enum": [
+              "measured",
+              "missing"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "source_channel",
+          "reason"
+        ],
+        "title": "ChannelProvenance",
+        "type": "object"
+      },
+      "ChannelProvenanceSet": {
+        "additionalProperties": false,
+        "properties": {
+          "brake": {
+            "$ref": "#/components/schemas/ChannelProvenance"
+          },
+          "gear": {
+            "$ref": "#/components/schemas/ChannelProvenance"
+          },
+          "speed_kph": {
+            "$ref": "#/components/schemas/ChannelProvenance"
+          },
+          "throttle_pct": {
+            "$ref": "#/components/schemas/ChannelProvenance"
+          }
+        },
+        "required": [
+          "speed_kph",
+          "throttle_pct",
+          "gear",
+          "brake"
+        ],
+        "title": "ChannelProvenanceSet",
         "type": "object"
       },
       "CompareRequest": {
@@ -193,6 +430,12 @@
         "properties": {
           "analysis": {
             "$ref": "#/components/schemas/AnalysisSummary"
+          },
+          "channel_provenance_a": {
+            "$ref": "#/components/schemas/ChannelProvenanceSet"
+          },
+          "channel_provenance_b": {
+            "$ref": "#/components/schemas/ChannelProvenanceSet"
           },
           "channels_a": {
             "$ref": "#/components/schemas/DriverChannels"
@@ -293,8 +536,8 @@
             "$ref": "#/components/schemas/QualityReport"
           },
           "schema_version": {
-            "const": "1.1.0",
-            "default": "1.1.0",
+            "const": "1.2.0",
+            "default": "1.2.0",
             "title": "Schema Version",
             "type": "string"
           },
@@ -343,6 +586,8 @@
           "distance_m",
           "channels_a",
           "channels_b",
+          "channel_provenance_a",
+          "channel_provenance_b",
           "geometry",
           "delta_ms",
           "valid",
@@ -1553,6 +1798,40 @@
         "title": "ReconciliationCheck",
         "type": "object"
       },
+      "Seasons": {
+        "additionalProperties": false,
+        "properties": {
+          "current_year": {
+            "title": "Current Year",
+            "type": "integer"
+          },
+          "min_year": {
+            "const": 1950,
+            "default": 1950,
+            "title": "Min Year",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "years": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Years",
+            "type": "array"
+          }
+        },
+        "required": [
+          "current_year",
+          "years"
+        ],
+        "title": "Seasons",
+        "type": "object"
+      },
       "SectorComparisonArtifact": {
         "additionalProperties": false,
         "properties": {
@@ -1605,8 +1884,8 @@
             "$ref": "#/components/schemas/SectorQuality"
           },
           "schema_version": {
-            "const": "1.1.0",
-            "default": "1.1.0",
+            "const": "1.2.0",
+            "default": "1.2.0",
             "title": "Schema Version",
             "type": "string"
           },
@@ -1862,8 +2141,8 @@
         "additionalProperties": false,
         "properties": {
           "schema_version": {
-            "const": "1.1.0",
-            "default": "1.1.0",
+            "const": "1.2.0",
+            "default": "1.2.0",
             "title": "Schema Version",
             "type": "string"
           },
@@ -1899,8 +2178,8 @@
             "type": "array"
           },
           "schema_version": {
-            "const": "1.1.0",
-            "default": "1.1.0",
+            "const": "1.2.0",
+            "default": "1.2.0",
             "title": "Schema Version",
             "type": "string"
           },
@@ -2042,6 +2321,57 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/calendar/{year}": {
+      "get": {
+        "operationId": "calendar_api_v1_calendar__year__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "year",
+            "required": true,
+            "schema": {
+              "maximum": 2100,
+              "minimum": 1950,
+              "title": "Year",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarSeason"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Calendar"
+      }
+    },
     "/api/v1/catalog": {
       "get": {
         "operationId": "catalog_api_v1_catalog_get",
@@ -2229,6 +2559,24 @@
           }
         },
         "summary": "Health"
+      }
+    },
+    "/api/v1/seasons": {
+      "get": {
+        "operationId": "seasons_api_v1_seasons_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Seasons"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Seasons"
       }
     },
     "/api/v1/sessions": {

@@ -19,13 +19,13 @@ async function request(path: string, init: RequestInit): Promise<JsonObject> {
 
 export async function loadSessions(signal: AbortSignal): Promise<Schema['SessionInventory']> {
   const body = await request('sessions', { signal });
-  if (body.schema_version !== '1.1.0' || !Array.isArray(body.sessions)) throw new Error('Unsupported session inventory.');
+  if (body.schema_version !== '1.2.0' || !Array.isArray(body.sessions)) throw new Error('Unsupported session inventory.');
   return body as Schema['SessionInventory'];
 }
 
 export async function loadLaps(sessionId: string, signal: AbortSignal): Promise<Schema['SessionLapIndex']> {
   const body = await request('sessions/' + encodeURIComponent(sessionId) + '/laps', { signal });
-  if (body.schema_version !== '1.1.0' || !Array.isArray(body.drivers) || !Array.isArray(body.laps)
+  if (body.schema_version !== '1.2.0' || !Array.isArray(body.drivers) || !Array.isArray(body.laps)
     || !object(body.session) || body.session.session_id !== sessionId) throw new Error('Unsupported lap inventory.');
   return body as Schema['SessionLapIndex'];
 }
@@ -33,7 +33,7 @@ export async function loadLaps(sessionId: string, signal: AbortSignal): Promise<
 export async function compareLaps(input: Schema['CompareRequest'], signal: AbortSignal): Promise<Schema['CompareResponse']> {
   const body = await request('compare', { signal, method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(input) });
   const artifact = body.artifact;
-  if (typeof body.swapped !== 'boolean' || !object(artifact) || artifact.schema_version !== '1.1.0'
+  if (typeof body.swapped !== 'boolean' || !object(artifact) || artifact.schema_version !== '1.2.0'
     || !['telemetry','sector_only'].includes(String(artifact.detail_level)) || !object(artifact.lap_a) || !object(artifact.lap_b)
     || !object(artifact.session) || artifact.session.session_id !== input.session_id
     || (body.swapped ? artifact.lap_b : artifact.lap_a).lap_id !== input.lap_a_id

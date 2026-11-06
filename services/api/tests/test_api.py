@@ -10,7 +10,7 @@ def test_health_and_missing_artifact_directory(tmp_path):
     client = TestClient(create_app(tmp_path / "missing"))
     assert client.get("/api/v1/health").json()["status"] == "ok"
     assert client.get("/api/v1/catalog").json() == {
-        "schema_version": "1.1.0", "comparisons": [],
+        "schema_version": "1.2.0", "comparisons": [],
     }
 
 

@@ -48,6 +48,112 @@ def test_nullable_channels_preserve_gaps(artifact_payload):
     assert comparison.delta_ms[1] is None
 
 
+def test_measured_brake_preserves_switch_and_unknown_samples(artifact_payload):
+    artifact_payload["channels_a"]["brake"] = [True, False, None]
+    comparison = validate(artifact_payload)
+    assert comparison.channels_a.brake == [True, False, None]
+
+
+def test_missing_brake_is_null_and_cannot_carry_inferred_values(artifact_payload):
+    artifact_payload["channel_provenance_a"]["brake"] = {
+        "status": "missing", "source_channel": None, "reason": "No native brake channel was returned",
+    }
+    artifact_payload["channels_a"]["brake"] = [None, None, None]
+    assert validate(artifact_payload).channel_provenance_a.brake.status == "missing"
+    artifact_payload["channels_a"]["brake"][0] = False
+    with pytest.raises(ValidationError, match="only null"):
+        validate(artifact_payload)
+
+
+@pytest.mark.parametrize("source", ["inferred_from_speed", "Throttle", None])
+def test_brake_cannot_claim_another_channel_as_its_source(artifact_payload, source):
+    artifact_payload["channel_provenance_a"]["brake"]["source_channel"] = source
+    with pytest.raises(ValidationError):
+        validate(artifact_payload)
+
+
+def test_channel_evidence_cannot_claim_missing_brake(artifact_payload):
+    artifact_payload["channels_a"]["brake"] = [None, None, None]
+    artifact_payload["channel_provenance_a"]["brake"] = {
+        "status": "missing", "source_channel": None, "reason": "No source brake signal",
+    }
+    artifact_payload["evidence"] = [{
+        "evidence_id": "invented-brake", "metric": "brake_onset", "unit": "m", "start_m": 0.0, "end_m": 1.0,
+        "value_a": 0.5, "value_b": None, "difference_b_minus_a": None,
+        "native_samples_a": 0, "native_samples_b": 0,
+        "max_support_span_ms_a": 0.0, "max_support_span_ms_b": 0.0,
+    }]
+    with pytest.raises(ValidationError, match="measured source signal"):
+        validate(artifact_payload)
+
+
+def channel_evidence(metric="brake_onset", unit="m", **updates):
+    evidence = {
+        "evidence_id": "channel-support", "metric": metric, "unit": unit,
+        "start_m": 0.0, "end_m": 1.0, "value_a": None, "value_b": None,
+        "difference_b_minus_a": None, "native_samples_a": 1, "native_samples_b": 1,
+        "max_support_span_ms_a": 0.0, "max_support_span_ms_b": 0.0,
+    }
+    return evidence | updates
+
+
+@pytest.mark.parametrize("metric,unit", [
+    ("minimum_speed", "km/h"), ("brake_onset", "m"),
+    ("throttle_pickup", "m"), ("gear_at_marker", "gear"),
+])
+@pytest.mark.parametrize("driver", ["a", "b"])
+@pytest.mark.parametrize("claim", ["value", "interval"])
+def test_channel_claims_require_that_drivers_native_samples(artifact_payload, metric, unit, driver, claim):
+    evidence = channel_evidence(metric, unit, **{f"native_samples_{driver}": 0})
+    evidence[f"{claim}_{driver}"] = 0.5 if claim == "value" else [0.4, 0.6]
+    artifact_payload["evidence"] = [evidence]
+    with pytest.raises(ValidationError, match="positive native sample support"):
+        validate(artifact_payload)
+
+
+@pytest.mark.parametrize("metric,unit,channel,known_value", [
+    ("minimum_speed", "km/h", "speed_kph", 3.0),
+    ("brake_onset", "m", "brake", False),
+    ("throttle_pickup", "m", "throttle_pct", 100.0),
+    ("gear_at_marker", "gear", "gear", 2),
+])
+@pytest.mark.parametrize("driver", ["a", "b"])
+def test_distant_channel_sample_cannot_support_a_local_claim(artifact_payload, metric, unit, channel, known_value, driver):
+    artifact_payload[f"channels_{driver}"][channel] = [None, None, known_value]
+    artifact_payload["evidence"] = [channel_evidence(metric, unit, **{f"value_{driver}": 0.5})]
+    with pytest.raises(ValidationError, match="local display support"):
+        validate(artifact_payload)
+
+
+def test_unsupported_brake_claim_cannot_reach_observations(artifact_payload):
+    artifact_payload["channels_a"]["brake"] = [None, None, False]
+    evidence = channel_evidence(value_a=0.5, native_samples_a=0)
+    artifact_payload["evidence"] = [evidence]
+    artifact_payload["observations"] = [{
+        "observation_id": "unsupported-claim", "template_id": "control_pattern",
+        "segment_id": "test-segment", "text": "A applied the brake at 0.5 m.",
+        "evidence_ids": [evidence["evidence_id"]],
+    }]
+    with pytest.raises(ValidationError, match="positive native sample support"):
+        validate(artifact_payload)
+
+
+def test_narrow_window_can_use_known_bracketing_display_samples(artifact_payload):
+    artifact_payload["channels_a"]["brake"] = [False, False, None]
+    artifact_payload["evidence"] = [channel_evidence(start_m=0.25, end_m=0.75, value_a=0.5)]
+    assert validate(artifact_payload).evidence[0].value_a == 0.5
+    artifact_payload["channels_a"]["brake"][1] = None
+    with pytest.raises(ValidationError, match="local display support"):
+        validate(artifact_payload)
+
+
+def test_transition_bracket_may_extend_outside_analysis_window(artifact_payload):
+    artifact_payload["evidence"] = [channel_evidence(
+        start_m=0.95, end_m=1.05, interval_a=[0.9, 1.1], native_samples_b=0,
+    )]
+    assert validate(artifact_payload).evidence[0].interval_a == (0.9, 1.1)
+
+
 def test_contract_accepts_negative_delta_with_matching_elapsed_times(artifact_payload):
     artifact_payload["lap_a"], artifact_payload["lap_b"] = artifact_payload["lap_b"], artifact_payload["lap_a"]
     artifact_payload["channels_a"], artifact_payload["channels_b"] = artifact_payload["channels_b"], artifact_payload["channels_a"]
