@@ -89,3 +89,13 @@ Use the actual source and capability on exported cards. A telemetry example cred
 5. Record source terms and artifact distribution scope before public deployment.
 
 These follow-ups are expected implementation work, not completed evidence and not new feature ideas for the workhorse to brainstorm.
+
+## Expanded source survey — 6 November 2026
+
+The [recurring qualifying source audit](13-data-source-audit.md) now covers maintained telemetry feeds/archives, official timing, historical datasets, commercial API candidates, geometry and game-data false matches. Its [machine-readable registry](../config/data-sources.json) distinguishes documented fields from tested samples and future adapter work. It records a finite practical survey, not a claim that every internet dataset or private contract has been exhausted.
+
+The refreshed historical OpenF1 probe returned the same 306-row Monza lap window with actual brake states `{0,100}`, native gear values 2–8, 31 distinct throttle values and 165 distinct speed values. This supports retaining the four telemetry panels with explicit per-channel availability. No channel should be inferred from speed. The synthetic design preview remains labelled and preserved while the real-data path is implemented. [Source field definitions](https://openf1.org/docs/#car-data)
+
+The newly reviewed [TracingInsights archive](https://tracinginsights.com/data/) is a practical maintained backfill candidate, with publisher-described post-session updates. Its [dictionary](https://github.com/TracingInsights/2026/blob/main/DATA_REFERENCE.md) distinguishes computed acceleration from native channels. Commercial timing products and processed chart APIs require their own field/coverage/terms checks; their existence does not establish a measured steering or pressure feed. See the audit before making further feature decisions.
+
+T01 must preserve native missing-value masks: the [pinned FastF1 parser](https://github.com/theOehrly/Fast-F1/blob/v3.9.2/fastf1/_api.py) can fill missing driver rows with zeros/`False`, and defaults absent DRS channel 45 to zero while noting its absence in 2026. Those defaults are not measured pedal or DRS states.

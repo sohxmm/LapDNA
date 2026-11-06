@@ -1,0 +1,238 @@
+{
+  "registry_version": "1.0.0",
+  "reviewed_on": "2026-11-06",
+  "scope": "Finite practical source survey; not an exhaustive internet or private-contract inventory",
+  "integration_status": "Research inventory; full telemetry import not implemented",
+  "audit_document": "docs/13-data-source-audit.md",
+  "feature_policy": {
+    "preserve_labelled_synthetic_demo": true,
+    "native_channel_required": ["speed", "throttle", "gear", "brake"],
+    "never_infer_brake_throttle_or_gear_from_speed": true,
+    "missing_channel": "unavailable; never substitute an inferred measurement",
+    "mini_sector_status_codes_are_durations": false,
+    "derived_outputs_require_labels": true,
+    "calendar_coverage_implies_telemetry_coverage": false
+  },
+  "sources": [
+    {
+      "id": "fastf1",
+      "role": "primary_planned_session_adapter",
+      "documentation": "https://github.com/theOehrly/Fast-F1/blob/v3.9.2/docs/data_reference/index.rst",
+      "schema": "https://github.com/theOehrly/Fast-F1/blob/v3.9.2/fastf1/core.py",
+      "library_version": "3.9.2",
+      "upstream_family": "formula1_livetiming",
+      "telemetry_from_year": 2018,
+      "coverage_guaranteed": false,
+      "native_car_sample_interval_ms_approx": 240,
+      "access": "supported Formula 1 account adapter; actual access path requires T01 verification",
+      "post_session_availability": "Documentation describes usual 30-120 minutes; exceptions/outages possible",
+      "channels": {
+        "speed": {"field": "Speed", "unit": "km/h", "evidence": "native_schema"},
+        "throttle": {"field": "Throttle", "unit": "percent", "evidence": "native_schema"},
+        "gear": {"field": "nGear", "unit": "integer_state", "evidence": "native_schema"},
+        "brake": {"field": "Brake", "unit": "boolean", "evidence": "native_schema"},
+        "rpm": {"field": "RPM", "unit": "rev/min", "evidence": "native_schema"},
+        "drs": {"field": "DRS", "unit": "raw_state_code", "evidence": "native_schema"}
+      },
+      "parser_missing_value_hazards": [
+        "Incomplete driver rows can be extended and numeric channels filled with zero, Brake with False; preserve missing-row masks",
+        "Missing raw DRS channel 45 defaults to zero; pinned parser notes DRS absent in 2026; inspect raw channel presence"
+      ],
+      "parser_evidence": "https://github.com/theOehrly/Fast-F1/blob/v3.9.2/fastf1/_api.py",
+      "implementation_gate": "T01 real full-session import, auth, native clocks, native-versus-filled masks, coverage and sanitized manifest",
+      "terms": "Software licence and underlying data distribution rights require separate review"
+    },
+    {
+      "id": "openf1",
+      "role": "alternative_planned_session_adapter",
+      "documentation": "https://openf1.org/docs/",
+      "upstream_family": "formula1_livetiming_community_api",
+      "telemetry_from_year": 2023,
+      "coverage_guaranteed": false,
+      "native_car_sample_hz_approx": 3.7,
+      "access": "historical free without authentication; real-time subscription",
+      "channels": {
+        "speed": {"field": "speed", "unit": "km/h", "evidence": "schema_and_sample"},
+        "throttle": {"field": "throttle", "unit": "percent", "evidence": "schema_and_sample"},
+        "gear": {"field": "n_gear", "unit": "integer_state", "evidence": "schema_and_sample"},
+        "brake": {"field": "brake", "unit": "binary_0_100", "evidence": "schema_and_sample"},
+        "rpm": {"field": "rpm", "unit": "rev/min", "evidence": "schema_and_sample"},
+        "drs": {"field": "drs", "unit": "raw_state_code", "evidence": "schema_and_sample; year-specific availability must be checked"}
+      },
+      "mini_sector_fields": "segments_sector_1/2/3 are categorical status arrays, not durations",
+      "sample_probe": {
+        "checked_on": "2026-11-06",
+        "session_key": 9586,
+        "driver_number": 4,
+        "lap_number": 11,
+        "car_rows": 306,
+        "brake_values": [0, 100],
+        "lap_endpoint": "https://api.openf1.org/v1/laps?session_key=9586&driver_number=4&lap_number=11",
+        "limitations": "One historical lap; not full-session phase/validity/alignment validation"
+      }
+    },
+    {
+      "id": "tracinginsights",
+      "role": "maintained_archive_backfill_candidate",
+      "documentation": "https://tracinginsights.com/data/",
+      "schema": "https://github.com/TracingInsights/2026/blob/main/DATA_REFERENCE.md",
+      "download": "https://github.com/TracingInsights/2026",
+      "mirror": "https://huggingface.co/buckets/tracinginsights/2026/tree/README.md",
+      "upstream_family": "processed_fastf1_openf1_jolpica_multiviewer",
+      "linked_telemetry_years": [2018, 2026],
+      "documented_channels": ["speed", "throttle", "brake_binary", "gear", "rpm", "drs_processed"],
+      "derived_not_measured": ["acceleration", "distance", "processed_position_metrics"],
+      "post_session_availability": "Publisher says typically 30 minutes; no SLA",
+      "access": "public archive; no API key documented",
+      "implementation_gate": "Inspect real files, timestamp/resampling semantics, version and terms"
+    },
+    {
+      "id": "jolpica",
+      "role": "calendar_and_classification",
+      "documentation": "https://github.com/jolpica/jolpica-f1/blob/main/docs/README.md",
+      "coverage_kind": "historical metadata, not car telemetry",
+      "access": "public API with required User-Agent and pagination",
+      "direct_documented_limits": {"requests_per_second": 4, "requests_per_hour": 500},
+      "qualifying_results": "Q1/Q2/Q3 classification bests; not all laps",
+      "native_car_channels": false
+    },
+    {
+      "id": "fia_timing_documents",
+      "role": "official_external_timing_review",
+      "documentation": "https://www.fia.com/sites/default/files/2026_01_aus_f1_q0_timing_qualifyingsessionsectoranalysis_v01.pdf",
+      "documented_fields": ["individual_lap_sectors", "lap_times", "speed_traps"],
+      "native_car_channels": false,
+      "access": "published reports; stable bulk API and redistribution rights not established",
+      "implementation_gate": "Exact lap/document/revision match and permitted publication scope"
+    },
+    {
+      "id": "formula1_livetiming",
+      "role": "underlying_feed_dependency",
+      "documentation": "https://github.com/theOehrly/Fast-F1/blob/v3.9.2/fastf1/req.py",
+      "independent_of_fastf1": false,
+      "access": "use supported authentication; do not bypass restrictions",
+      "implementation_gate": "Library adapter preferred; no independent service or licence guarantee"
+    },
+    {
+      "id": "livef1",
+      "role": "alternative_parser_candidate",
+      "documentation": "https://github.com/GoktugOcal/LiveF1",
+      "upstream_family": "formula1_livetiming",
+      "independent_measurement_source": false,
+      "implementation_gate": "Demonstrated parser need and full field/access validation"
+    },
+    {
+      "id": "multiviewer",
+      "role": "viewer_and_approximate_markers",
+      "documentation": "https://multiviewer.dev/docs/getting-started/understanding-telemetry",
+      "markers": "https://github.com/theOehrly/Fast-F1/blob/v3.9.2/fastf1/mvapi/data.py",
+      "access": "F1 streaming requires relevant F1 TV subscription",
+      "bulk_telemetry_export_verified": false,
+      "marker_quality": "manually authored approximate annotations; reference/layout review required"
+    },
+    {
+      "id": "f1db",
+      "role": "metadata_backfill_candidate",
+      "documentation": "https://github.com/f1db/f1db",
+      "metadata_from_year": 1950,
+      "formats": ["JSON", "CSV", "SQL", "SQLite"],
+      "publisher_data_licence": "CC-BY-4.0",
+      "native_car_channels_verified": false,
+      "post_qualifying_turnaround_guaranteed": false
+    },
+    {
+      "id": "f1_circuits_geojson",
+      "role": "background_geometry_candidate",
+      "documentation": "https://github.com/bacinger/f1-circuits",
+      "native_car_channels": false,
+      "implementation_gate": "Layout/date/terms review; not per-lap reference geometry"
+    },
+    {
+      "id": "kaggle_historical_championship",
+      "role": "static_archive_candidate",
+      "documentation": "https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020",
+      "files_inspected": false,
+      "native_car_channels_verified": false,
+      "recurring_import_contract_verified": false
+    },
+    {
+      "id": "zenodo_2024_curated",
+      "role": "fixed_reproducibility_archive",
+      "documentation": "https://zenodo.org/records/20061496",
+      "version": "v1.0.0-is547-final",
+      "season": 2024,
+      "upstream_family": "processed_fastf1_jolpica",
+      "documented_fields": ["lap_timing", "sectors", "tyres", "results", "weather"],
+      "native_car_files_verified": false,
+      "recurring_import_contract_verified": false
+    },
+    {
+      "id": "sportmonks",
+      "role": "commercial_timing_context_candidate",
+      "documentation": "https://www.sportmonks.com/formula-one-api/",
+      "documented_results": ["position", "gap", "interval", "lap_time", "compound"],
+      "access": "token and vendor plan",
+      "native_pedal_schema_verified": false,
+      "authenticated_sample_tested": false
+    },
+    {
+      "id": "sportradar",
+      "role": "commercial_timing_loops_and_positions_candidate",
+      "documentation": "https://developer.sportradar.com/racing/docs/f1-ig-api-basics",
+      "live_product": "https://docs.sportradar.com/live-data/introduction/information-per-sport/f1",
+      "access": "authenticated REST and separate licensed live-data products",
+      "numeric_minisector_contract_verified": false,
+      "native_pedal_schema_verified": false,
+      "authenticated_sample_tested": false,
+      "note": "Do not infer absence from every private vendor product"
+    },
+    {
+      "id": "api_sports",
+      "role": "commercial_api_candidate",
+      "documentation": "https://api-sports.io/documentation/formula-1/v1",
+      "provider": "https://api-sports.io/sports/formula-1",
+      "access": "API key; documented free and paid tiers",
+      "native_car_schema_verified": false,
+      "authenticated_sample_tested": false
+    },
+    {
+      "id": "t1api",
+      "role": "processed_analysis_service_candidate",
+      "documentation": "https://docs.t1f1.com/",
+      "access": "key for analysis endpoints; public static reference endpoints",
+      "outputs": ["JSON", "CSV", "PNG"],
+      "native_sensor_independence_verified": false,
+      "authenticated_sample_tested": false,
+      "note": "Future years accepted as parameters are not future data; derived energy estimates are not sensors"
+    },
+    {
+      "id": "joj_blacktop",
+      "role": "additional_commercial_telemetry_lead",
+      "documentation": "https://jojapi.com/hub/api/formula-1/about",
+      "access": "authenticated API",
+      "claim": "post-session telemetry",
+      "native_channel_schema_verified": false,
+      "authenticated_sample_tested": false
+    },
+    {
+      "id": "sportsapi_race_laps",
+      "role": "reviewed_not_suitable_for_qualifying_telemetry",
+      "documentation": "https://sportsapi.app/docs/races/laps",
+      "documented_limitation": "Race position/tyre/pit chart; qualifying empty; no lap times/gaps on this endpoint"
+    },
+    {
+      "id": "krok_odds",
+      "role": "reviewed_not_dependable_for_event_import",
+      "documentation": "https://krokodds.com.au/api-docs/other-sports",
+      "documented_limitation": "Provider documents season/round filters not narrowing sample archive",
+      "authenticated_sample_tested": false
+    },
+    {
+      "id": "f1laps_game",
+      "role": "excluded_different_domain",
+      "documentation": "https://www.f1laps.com/",
+      "domain": "EA/Codemasters F1 game UDP telemetry",
+      "real_grand_prix_measurements": false
+    }
+  ]
+}
