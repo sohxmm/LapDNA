@@ -1,8 +1,10 @@
 # LapDNA implementation blueprint
 
-Revision 2 · 5 November 2026. Status: **expanded blueprint and runnable scaffold**. Real-session processing remains implementation work. The user's reference image defines the visual direction: stacked synchronized traces, sector dividers, a local-performance strip, turn numbers, and a cumulative delta.
+Revision 3 · 6 November 2026. Status: **expanded blueprint, calendar navigation and runnable scaffold**. Real-session processing remains implementation work. The user's reference image defines the visual direction: stacked synchronized traces, sector dividers, a local-performance strip, turn numbers, and a cumulative delta.
 
 ## The product
+
+Start with the current year, choose a race from that year's sourced calendar, then enter its telemetry studio. Historical calendar coverage is broader than telemetry coverage. A scheduled qualifying start does not prove session completion or imported data availability.
 
 Choose any two different drivers from an imported qualifying session, choose each driver's Q1/Q2/Q3 phase independently, and select eligible laps. The app explains where their elapsed-time difference developed and which supported telemetry patterns accompany it. Same-phase selection is the default; cross-phase comparisons require explicit opt-in and persistent context warnings.
 
@@ -23,7 +25,7 @@ Corner classes use the frozen reference lap's reviewed apex windows, with initia
 
 FastF1 is the primary ingestion target. An actual historical OpenF1 probe retrieved recorded sectors and 306 car samples for one Monza qualifying lap; this verifies availability, not a completed comparison. Source definitions and FIA per-lap sector report links are in [sources](09-sources.md).
 
-Public channels do not include the reference image's steering trace or brake pressure. OpenF1's mini-sector arrays contain status/color codes rather than measured durations. LapDNA therefore labels its 100 m splits **estimated mini-sectors**. If only recorded sectors are available, show a sector table and separate cumulative-gap points at crossings; do not invent a continuous curve, turn attribution or corner-class analysis.
+The [20-source survey](13-data-source-audit.md) confirms native speed, throttle, gear and binary brake, so preserve all four features and the labelled synthetic preview. The selected public feeds do not establish a measured steering-angle or brake-pressure channel. Missing channels stay unavailable; never derive pedal or gear states from speed. FastF1's inserted zero/False defaults must retain missing-data masks. OpenF1's mini-sector arrays contain status/color codes rather than measured durations. LapDNA therefore labels its 100 m splits **estimated mini-sectors**. If only recorded sectors are available, show a sector table and separate cumulative-gap points at crossings; do not invent a continuous curve, turn attribution or corner-class analysis.
 
 ## Frozen decisions
 
@@ -37,9 +39,9 @@ Public channels do not include the reference image's steering trace or brake pre
 | Scope | Two drivers, all eligible imported laps, independent Q phases, three starting circuits |
 | Alignment | Frozen session reference, integrated-speed normalized distance, nominal 5 m display grid |
 | Delta | B elapsed minus A elapsed, milliseconds; positive favours A |
-| Observations | Deterministic evidence templates; no runtime LLM dependency |
+| Observations | Deterministic evidence first; optional validated LLM narrative after the evidence engine |
 | Quality | pass / warn / block with raw residuals preserved |
-| Contracts | Version 1.1.0; telemetry and sector-only result variants |
+| Contracts | Comparison/inventory 1.2.0 with per-driver native-channel provenance; calendar/seasons 1.0.0 |
 | Persistence | Local normalized datasets and immutable artifacts; no database in the initial release |
 
 ## Read in order
@@ -56,6 +58,8 @@ Public channels do not include the reference image's steering trace or brake pre
 10. [Current handoff](10-handoff.md)
 11. [Implementing with GPT-6.1 Sol](11-implementation-workflow.md)
 12. [Hosted preview and limitations](12-hosting.md)
+13. [Recurring qualifying data-source audit](13-data-source-audit.md)
+14. [Analysis generation and optional LLM layer](14-analysis-generation.md)
 
 Python models govern field names; methodology governs numerical meaning; tickets govern current status. Resolve contradictions in one small documented change before dependent implementation.
 

@@ -22,6 +22,7 @@ function TelemetryAnalysis({ artifact, swapped }: { artifact: Telemetry; swapped
     <section className="sc-analysis" aria-label="Corner-speed analysis">
       <h3>Where each lap gained by corner speed</h3>
       <p>{artifact.analysis.text}</p>
+      <details className="sc-muted"><summary>How this analysis is generated</summary><p>This is the saved evidence summary for these selected laps. The app renders its recorded metrics and observations; it does not currently call an LLM. Optional AI wording can be added after the numerical evidence is validated.</p></details>
       <p className="sc-muted">Reference speed bands · Low below {artifact.analysis.medium_from_kph} km/h · Medium below {artifact.analysis.high_from_kph} km/h · High from {artifact.analysis.high_from_kph} km/h</p>
       {artifact.analysis.categories.map(category => {
         const assessment = category.assessment === 'a_advantage' ? driverA + ' advantage'

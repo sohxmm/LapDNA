@@ -1,6 +1,6 @@
 # Current handoff
 
-Updated 6 November 2026 · Revision 2 plus hosted preview. **Blueprint and expanded scaffold complete; real-data implementation starts at T01.**
+Updated 7 November 2026 · Revision 3 with source audit and calendar navigation. **Blueprint and expanded scaffold complete; real-data implementation starts at T01.**
 
 Hosted on Vercel at [lapdna.vercel.app](https://lapdna.vercel.app), with the [synthetic demo](https://lapdna.vercel.app/?preview=1) and the existing FastAPI scaffold under `/api/v1`. Real session and comparison catalogues remain empty. See [hosting and limitations](12-hosting.md). This deployment is a preview milestone, not completion of T01–T12.
 
@@ -10,24 +10,27 @@ Use the Desktop LapDNA checkout selected by the user. It has the original Git hi
 
 ## Implemented and checked
 
-- Pydantic/OpenAPI/TypeScript contract 1.1.0, with per-lap Q1/Q2/Q3 identity, explicit cross-phase context, telemetry and sector-only result variants.
+- Pydantic/OpenAPI/TypeScript comparison/inventory contract 1.2.0, with per-lap Q1/Q2/Q3 identity, explicit cross-phase context, telemetry and sector-only result variants, and required native channel provenance per driver. Missing channels stay null. Channel-backed claims require positive native sample counts and local displayed support; these structural checks do not prove the native-data computation.
+- Separate 1.0.0 calendar contract, Jolpica adapter with bounded cache/timeouts/backoff, and source-stamped 2024/2026 fallback snapshots. Current year first, actual race calendar next, then the selected race's studio; URL/back/refresh support and exact year/round session filtering.
 - Session roster and lap inventory endpoints, strict local selection validation, cached compare POST, canonical storage ordering and swapped view indication. Cache misses return an honest 409.
 - Session browser with full imported roster, phase/lap choices, fastest eligible common-phase defaults, excluded-lap reasons, explicit cross-phase opt-in, aborted stale requests, result invalidation on changed selection and cached result rendering.
 - Lazy-loaded ECharts Canvas trace stack: speed, throttle, gear, binary brake and raw cumulative delta; aligned sector/turn rails, estimated mini-sector strip, turn-window selection and shared numeric cursor.
 - Actual result adapter for stored telemetry, class summaries and observations; recorded sector table and separate boundary delta points for both tiers.
 - Opt-in synthetic design preview at `?preview=1`, using a fictional loop and Sample A/B. It demonstrates a high/medium-gain versus low-speed-loss profile. The default application remains empty until a real dataset is imported.
 - Source availability probe, research, revised numerical methodology, full implementation tickets, verification/operations guides and GPT-6.1 Sol workflow.
+- [20-source audit](13-data-source-audit.md) plus a machine-readable registry. Actual native speed, throttle, gear and binary brake are verified, so no demo channel was removed. Trace rows/readouts follow per-driver source availability, with synthetic provenance for all four unchanged preview channels.
+- [Analysis generation specification](14-analysis-generation.md). Current preview prose is fixed; cached real results render saved evidence text. Optional fresh LLM wording is specified after the numerical evidence engine, with no configured provider or runtime model calls today.
 
 ## Verification
 
 | Check | Recorded result |
 | --- | --- |
-| Python API/contract/selection suite | 44 passed; one upstream TestClient deprecation warning |
-| `npm run test:web` | 3 passed: eligible/common-phase defaults, independent overrides, reversed result orientation |
+| Python API/contract/selection/calendar suite | 89 passed; one upstream TestClient deprecation warning |
+| `npm run test:web` | 8 passed: selection/orientation/channel support and year/race route validation |
 | `npm run contracts:check` | Passed |
 | `npm run typecheck` | Passed |
 | `npm run build` | Passed; lazy chart chunk produces a non-fatal size advisory |
-| Browser preview | Desktop/mobile inspected; turn selection, keyboard cursor and sector-only mode checked |
+| Browser preview | Desktop/mobile inspected; year default, historical calendar, race studio/refresh, turn selection, keyboard cursor, source labels and sector-only mode checked |
 | Isolated UI fixture | Full roster, unavailable phase/driver, cached sector-only output, swap, cross-phase warning and cache miss checked |
 | Empty production-data folders | No sessions imported; synthetic QA indexes remain outside default data paths |
 | GitHub CI on integrated scaffold 8af7d3b | [Passed on Ubuntu](https://github.com/sohxmm/LapDNA/actions/runs/42069714006) |
@@ -46,6 +49,7 @@ The narrowly scoped OpenF1 probe retrieved one historical sample and complete re
 6. Sector-only results provide recorded timing and discrete cumulative boundary deltas. They cannot support turn-level or class findings.
 7. Python generates supported facts and driver-identity-based text. React/ECharts renders them; the synthetic fixture generator is isolated.
 8. Three circuits remain the target; no fixed four-driver or 18-artifact cap remains. Validate complete per-lap accounting and representative pair/phase matrices.
+9. Source audit precedes dropping a feature. Preserve the labelled demo; production data needs the actual native channel. FastF1's inserted numeric zero/brake False and absent 2026 DRS defaults are missing-data hazards, not measured states. T01 must retain raw masks and per-source presence before normalization.
 
 ## Next implementation gate
 
