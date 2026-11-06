@@ -21,7 +21,7 @@ data = ["fastf1==3.9.2", "numpy>=2,<3", "pandas>=2.2,<3", "scipy>=1.13,<2"]
 where = ["src"]
 
 [tool.setuptools.package-data]
-lapdna = ["calendar_snapshots/*.json"]
+lapdna = ["calendar_snapshots/*.json", "classification_snapshots/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

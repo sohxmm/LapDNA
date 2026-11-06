@@ -10,6 +10,9 @@ from fastapi.responses import JSONResponse
 
 from lapdna import __version__
 from lapdna.calendar import CalendarSeason, CalendarService, CalendarUnavailable, Seasons
+from lapdna.classifications import (
+    ClassificationCoverage, ClassificationEvent, ClassificationStore, ClassificationsUnavailable,
+)
 from lapdna.inventory import (
     CompareRequest, CompareResponse, SelectionError, SessionInventory, SessionLapIndex, SessionStore,
 )
@@ -18,9 +21,13 @@ from lapdna.store import ArtifactNotFound, ArtifactStore, InvalidArtifact, Quali
 
 
 def create_app(artifact_dir: Path | None = None, session_dir: Path | None = None,
-               calendar_service: CalendarService | None = None) -> FastAPI:
+               calendar_service: CalendarService | None = None,
+               classification_dir: Path | None = None) -> FastAPI:
     application = FastAPI(title="LapDNA API", version=__version__)
     calendars = calendar_service or CalendarService()
+    classifications = ClassificationStore(classification_dir or (
+        Path(os.environ["LAPDNA_CLASSIFICATION_DIR"]) if "LAPDNA_CLASSIFICATION_DIR" in os.environ else None
+    ))
     default_dir = Path(__file__).resolve().parents[4] / "data" / "artifacts"
     directory = artifact_dir or Path(os.getenv("LAPDNA_ARTIFACT_DIR", str(default_dir)))
     store = ArtifactStore(directory)
@@ -91,6 +98,23 @@ def create_app(artifact_dir: Path | None = None, session_dir: Path | None = None
     })
     def catalog() -> Catalog:
         return store.catalog()
+
+    @application.exception_handler(ClassificationsUnavailable)
+    async def unavailable_classifications(_request, error: ClassificationsUnavailable):
+        return JSONResponse(status_code=error.status, content={"error": {
+            "code": error.code, "message": error.message,
+        }})
+
+    @application.get("/api/v1/classifications/coverage", response_model=ClassificationCoverage,
+                     responses={503: {"model": ErrorResponse}})
+    def classification_coverage() -> ClassificationCoverage:
+        return classifications.coverage()
+
+    @application.get("/api/v1/classifications/{year}/{round}", response_model=ClassificationEvent,
+                     responses={422: {"model": ErrorResponse}, 503: {"model": ErrorResponse}})
+    def classification_event(year: int = ApiPath(ge=1950, le=2100),
+                             round: int = ApiPath(ge=1, le=30)) -> ClassificationEvent:
+        return classifications.event(year, round)
 
     @application.get("/api/v1/comparisons/{comparison_id}", response_model=Artifact, responses={
         404: {"model": ErrorResponse}, 422: {"model": ErrorResponse}, 503: {"model": ErrorResponse},

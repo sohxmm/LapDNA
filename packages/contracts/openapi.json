@@ -350,6 +350,454 @@
         "title": "ChannelProvenanceSet",
         "type": "object"
       },
+      "ClassificationCoverage": {
+        "additionalProperties": false,
+        "properties": {
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "qualifying_years": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Qualifying Years",
+            "type": "array"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "seasons": {
+            "items": {
+              "$ref": "#/components/schemas/CoverageSeason"
+            },
+            "title": "Seasons",
+            "type": "array"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ClassificationSource"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "sprint_qualifying_years": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Sprint Qualifying Years",
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          },
+          "years": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Years",
+            "type": "array"
+          }
+        },
+        "required": [
+          "generated_at",
+          "years",
+          "qualifying_years",
+          "sprint_qualifying_years",
+          "seasons",
+          "sources",
+          "warnings"
+        ],
+        "title": "ClassificationCoverage",
+        "type": "object"
+      },
+      "ClassificationDriver": {
+        "additionalProperties": false,
+        "properties": {
+          "driver_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Driver Code"
+          },
+          "driver_id": {
+            "maxLength": 250,
+            "minLength": 1,
+            "title": "Driver Id",
+            "type": "string"
+          },
+          "driver_name": {
+            "maxLength": 250,
+            "minLength": 1,
+            "title": "Driver Name",
+            "type": "string"
+          },
+          "driver_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Driver Number"
+          },
+          "latest_time_ms": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "maximum": 1800000.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Time Ms"
+          },
+          "latest_timed_phase": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Q1",
+                  "Q2",
+                  "Q3",
+                  "SQ1",
+                  "SQ2",
+                  "SQ3",
+                  "QUALIFYING",
+                  "QUALIFYING_1",
+                  "QUALIFYING_2"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Timed Phase"
+          },
+          "phase_times_ms": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "exclusiveMinimum": 0.0,
+                  "maximum": 1800000.0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "propertyNames": {
+              "enum": [
+                "Q1",
+                "Q2",
+                "Q3",
+                "SQ1",
+                "SQ2",
+                "SQ3",
+                "QUALIFYING",
+                "QUALIFYING_1",
+                "QUALIFYING_2"
+              ]
+            },
+            "title": "Phase Times Ms",
+            "type": "object"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "status": {
+            "enum": [
+              "timed",
+              "no_time",
+              "disqualified",
+              "did_not_start"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "team_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Id"
+          },
+          "team_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Name"
+          }
+        },
+        "required": [
+          "driver_id",
+          "driver_number",
+          "driver_code",
+          "driver_name",
+          "team_id",
+          "team_name",
+          "position",
+          "phase_times_ms",
+          "latest_timed_phase",
+          "latest_time_ms",
+          "status",
+          "reason"
+        ],
+        "title": "ClassificationDriver",
+        "type": "object"
+      },
+      "ClassificationEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "circuit_id": {
+            "anyOf": [
+              {
+                "maxLength": 250,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Circuit Id"
+          },
+          "event_name": {
+            "anyOf": [
+              {
+                "maxLength": 250,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Name"
+          },
+          "round": {
+            "maximum": 30.0,
+            "minimum": 1.0,
+            "title": "Round",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/ClassificationSession"
+            },
+            "title": "Sessions",
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          },
+          "year": {
+            "maximum": 2100.0,
+            "minimum": 1950.0,
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "year",
+          "round",
+          "event_name",
+          "circuit_id",
+          "sessions",
+          "warnings"
+        ],
+        "title": "ClassificationEvent",
+        "type": "object"
+      },
+      "ClassificationSession": {
+        "additionalProperties": false,
+        "properties": {
+          "drivers": {
+            "items": {
+              "$ref": "#/components/schemas/ClassificationDriver"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Drivers",
+            "type": "array"
+          },
+          "label": {
+            "maxLength": 250,
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          },
+          "phases": {
+            "items": {
+              "enum": [
+                "Q1",
+                "Q2",
+                "Q3",
+                "SQ1",
+                "SQ2",
+                "SQ3",
+                "QUALIFYING",
+                "QUALIFYING_1",
+                "QUALIFYING_2"
+              ],
+              "type": "string"
+            },
+            "maxItems": 3,
+            "minItems": 1,
+            "title": "Phases",
+            "type": "array"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "session_id": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "session_type": {
+            "enum": [
+              "qualifying",
+              "sprint_qualifying"
+            ],
+            "title": "Session Type",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "jolpica",
+              "openf1",
+              "f1db"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "source_url": {
+            "pattern": "^https://",
+            "title": "Source Url",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "completed",
+              "partial"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "session_id",
+          "label",
+          "session_type",
+          "phases",
+          "source",
+          "source_url",
+          "retrieved_at",
+          "status",
+          "drivers",
+          "warnings"
+        ],
+        "title": "ClassificationSession",
+        "type": "object"
+      },
+      "ClassificationSource": {
+        "additionalProperties": false,
+        "properties": {
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "jolpica",
+              "openf1",
+              "f1db"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "source_url": {
+            "pattern": "^https://",
+            "title": "Source Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "source_url",
+          "retrieved_at"
+        ],
+        "title": "ClassificationSource",
+        "type": "object"
+      },
       "CompareRequest": {
         "additionalProperties": false,
         "properties": {
@@ -850,6 +1298,64 @@
           "speed_class"
         ],
         "title": "CornerMarker",
+        "type": "object"
+      },
+      "CoverageSeason": {
+        "additionalProperties": false,
+        "properties": {
+          "calendar_events": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calendar Events"
+          },
+          "driver_results": {
+            "minimum": 0.0,
+            "title": "Driver Results",
+            "type": "integer"
+          },
+          "event_count": {
+            "minimum": 0.0,
+            "title": "Event Count",
+            "type": "integer"
+          },
+          "qualifying_sessions": {
+            "minimum": 0.0,
+            "title": "Qualifying Sessions",
+            "type": "integer"
+          },
+          "sprint_qualifying_sessions": {
+            "minimum": 0.0,
+            "title": "Sprint Qualifying Sessions",
+            "type": "integer"
+          },
+          "timed_results": {
+            "minimum": 0.0,
+            "title": "Timed Results",
+            "type": "integer"
+          },
+          "year": {
+            "maximum": 2100.0,
+            "minimum": 1950.0,
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "year",
+          "event_count",
+          "qualifying_sessions",
+          "sprint_qualifying_sessions",
+          "driver_results",
+          "timed_results"
+        ],
+        "title": "CoverageSeason",
         "type": "object"
       },
       "DistanceScale": {
@@ -2398,6 +2904,96 @@
           }
         },
         "summary": "Catalog"
+      }
+    },
+    "/api/v1/classifications/coverage": {
+      "get": {
+        "operationId": "classification_coverage_api_v1_classifications_coverage_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationCoverage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Classification Coverage"
+      }
+    },
+    "/api/v1/classifications/{year}/{round}": {
+      "get": {
+        "operationId": "classification_event_api_v1_classifications__year___round__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "year",
+            "required": true,
+            "schema": {
+              "maximum": 2100,
+              "minimum": 1950,
+              "title": "Year",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "round",
+            "required": true,
+            "schema": {
+              "maximum": 30,
+              "minimum": 1,
+              "title": "Round",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationEvent"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Classification Event"
       }
     },
     "/api/v1/compare": {

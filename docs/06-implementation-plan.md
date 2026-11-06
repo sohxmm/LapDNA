@@ -2,6 +2,8 @@
 
 T00 is the runnable scaffold. T01–T12 are implementation work. Take the first unfinished ticket whose prerequisites passed, run its checks and record actual results in the [handoff](10-handoff.md). A ticket may contain multiple small verified features. Commit and push each independently usable change as it passes. The two-week schedule assumes source access and suitable real sessions.
 
+**User priority update, 7 November:** [R01 recorded results first](16-results-first-milestone.md) precedes the telemetry tickets. It imports final phase/session bests, event-specific driver/team records and same-phase comparisons across available years. Individual runs/laps are explicitly deferred to R02, which resumes T01/T02 before numerical telemetry work. Do not mistake classification ingestion for completion of T01.
+
 ## Status board
 
 | Ticket | Deliverable | Requires | Day | Status |

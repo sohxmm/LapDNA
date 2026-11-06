@@ -91,6 +91,19 @@ def test_snapshot_fallback_is_marked_stale_and_preserves_retrieval(tmp_path):
     assert result.source == "jolpica" and "last saved" in result.warnings[0]
 
 
+def test_recent_bundled_calendar_uses_the_same_freshness_window_without_a_network_call(tmp_path):
+    stamp = NOW - timedelta(hours=1)
+    (tmp_path / "2026.json").write_text(normalize(source(), 2026, stamp).model_dump_json(), encoding="utf-8")
+    calls = []
+    def fail(year):
+        calls.append(year)
+        raise OSError("unavailable")
+    service = CalendarService(fetch=fail, now=lambda: NOW, snapshot_dir=tmp_path)
+    result = service.get(2026)
+    assert result.retrieved_at == stamp
+    assert not result.stale and calls == []
+
+
 def test_old_warm_cache_can_be_used_after_source_failure(tmp_path):
     clock = [NOW]
     service = CalendarService(fetch=source, now=lambda: clock[0], snapshot_dir=tmp_path)

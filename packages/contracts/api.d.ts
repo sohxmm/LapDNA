@@ -34,6 +34,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/classifications/coverage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Classification Coverage */
+        get: operations["classification_coverage_api_v1_classifications_coverage_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/classifications/{year}/{round}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Classification Event */
+        get: operations["classification_event_api_v1_classifications__year___round__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/compare": {
         parameters: {
             query?: never;
@@ -265,6 +299,135 @@ export interface components {
             speed_kph: components["schemas"]["ChannelProvenance"];
             throttle_pct: components["schemas"]["ChannelProvenance"];
         };
+        /** ClassificationCoverage */
+        ClassificationCoverage: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Qualifying Years */
+            qualifying_years: number[];
+            /**
+             * Schema Version
+             * @default 1.0.0
+             * @constant
+             */
+            schema_version: "1.0.0";
+            /** Seasons */
+            seasons: components["schemas"]["CoverageSeason"][];
+            /** Sources */
+            sources: components["schemas"]["ClassificationSource"][];
+            /** Sprint Qualifying Years */
+            sprint_qualifying_years: number[];
+            /** Warnings */
+            warnings: string[];
+            /** Years */
+            years: number[];
+        };
+        /** ClassificationDriver */
+        ClassificationDriver: {
+            /** Driver Code */
+            driver_code: string | null;
+            /** Driver Id */
+            driver_id: string;
+            /** Driver Name */
+            driver_name: string;
+            /** Driver Number */
+            driver_number: string | null;
+            /** Latest Time Ms */
+            latest_time_ms: number | null;
+            /** Latest Timed Phase */
+            latest_timed_phase: ("Q1" | "Q2" | "Q3" | "SQ1" | "SQ2" | "SQ3" | "QUALIFYING" | "QUALIFYING_1" | "QUALIFYING_2") | null;
+            /** Phase Times Ms */
+            phase_times_ms: {
+                [key: string]: number | null;
+            };
+            /** Position */
+            position: number | null;
+            /** Reason */
+            reason: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "timed" | "no_time" | "disqualified" | "did_not_start";
+            /** Team Id */
+            team_id: string | null;
+            /** Team Name */
+            team_name: string | null;
+        };
+        /** ClassificationEvent */
+        ClassificationEvent: {
+            /** Circuit Id */
+            circuit_id: string | null;
+            /** Event Name */
+            event_name: string | null;
+            /** Round */
+            round: number;
+            /**
+             * Schema Version
+             * @default 1.0.0
+             * @constant
+             */
+            schema_version: "1.0.0";
+            /** Sessions */
+            sessions: components["schemas"]["ClassificationSession"][];
+            /** Warnings */
+            warnings: string[];
+            /** Year */
+            year: number;
+        };
+        /** ClassificationSession */
+        ClassificationSession: {
+            /** Drivers */
+            drivers: components["schemas"]["ClassificationDriver"][];
+            /** Label */
+            label: string;
+            /** Phases */
+            phases: ("Q1" | "Q2" | "Q3" | "SQ1" | "SQ2" | "SQ3" | "QUALIFYING" | "QUALIFYING_1" | "QUALIFYING_2")[];
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /** Session Id */
+            session_id: string;
+            /**
+             * Session Type
+             * @enum {string}
+             */
+            session_type: "qualifying" | "sprint_qualifying";
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "jolpica" | "openf1" | "f1db";
+            /** Source Url */
+            source_url: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "completed" | "partial";
+            /** Warnings */
+            warnings: string[];
+        };
+        /** ClassificationSource */
+        ClassificationSource: {
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "jolpica" | "openf1" | "f1db";
+            /** Source Url */
+            source_url: string;
+        };
         /** CompareRequest */
         CompareRequest: {
             /**
@@ -416,6 +579,23 @@ export interface components {
              * @enum {string}
              */
             speed_class: "low" | "medium" | "high" | "unknown";
+        };
+        /** CoverageSeason */
+        CoverageSeason: {
+            /** Calendar Events */
+            calendar_events?: number | null;
+            /** Driver Results */
+            driver_results: number;
+            /** Event Count */
+            event_count: number;
+            /** Qualifying Sessions */
+            qualifying_sessions: number;
+            /** Sprint Qualifying Sessions */
+            sprint_qualifying_sessions: number;
+            /** Timed Results */
+            timed_results: number;
+            /** Year */
+            year: number;
         };
         /** DistanceScale */
         DistanceScale: {
@@ -974,6 +1154,76 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Catalog"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    classification_coverage_api_v1_classifications_coverage_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassificationCoverage"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    classification_event_api_v1_classifications__year___round__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                year: number;
+                round: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassificationEvent"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Service Unavailable */

@@ -167,6 +167,12 @@ class CalendarService:
         # Serializes cold loads and makes repeated concurrent requests share the cache.
         with self.lock:
             previous = self.cache.get(year)
+            if previous is None:
+                saved = self._snapshot(year)
+                if saved is not None and timedelta(0) <= self.now() - saved.retrieved_at < TTL:
+                    self.cache[year] = previous = saved
+                    while len(self.cache) > MAX_CACHED_YEARS:
+                        self.cache.popitem(last=False)
             if self.now() < self.retry_after.get(year, datetime.min.replace(tzinfo=UTC)):
                 fallback = previous or self._snapshot(year)
                 if fallback is not None:

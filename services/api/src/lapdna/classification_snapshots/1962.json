@@ -1,0 +1,3419 @@
+{
+  "schema_version": "1.0.0",
+  "year": 1962,
+  "events": [
+    {
+      "schema_version": "1.0.0",
+      "year": 1962,
+      "round": 1,
+      "event_name": "Grote Prijs van Nederland 1962",
+      "circuit_id": "zandvoort",
+      "sessions": [
+        {
+          "session_id": "1962-1-qualifying",
+          "label": "Qualifying",
+          "session_type": "qualifying",
+          "phases": [
+            "QUALIFYING"
+          ],
+          "source": "f1db",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "status": "completed",
+          "drivers": [
+            {
+              "driver_id": "f1db_john-surtees",
+              "driver_number": "19",
+              "driver_code": "SUR",
+              "driver_name": "John Surtees",
+              "team_id": "lola",
+              "team_name": "Lola",
+              "position": 1,
+              "phase_times_ms": {
+                "QUALIFYING": 92500
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 92500,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_graham-hill",
+              "driver_number": "17",
+              "driver_code": "HIL",
+              "driver_name": "Graham Hill",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 2,
+              "phase_times_ms": {
+                "QUALIFYING": 92600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 92600,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jim-clark",
+              "driver_number": "4",
+              "driver_code": "CLA",
+              "driver_name": "Jim Clark",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 3,
+              "phase_times_ms": {
+                "QUALIFYING": 93200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 93200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jack-brabham",
+              "driver_number": "8",
+              "driver_code": "BRA",
+              "driver_name": "Jack Brabham",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 4,
+              "phase_times_ms": {
+                "QUALIFYING": 93300
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 93300,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_bruce-mclaren",
+              "driver_number": "6",
+              "driver_code": "MCL",
+              "driver_name": "Bruce McLaren",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 5,
+              "phase_times_ms": {
+                "QUALIFYING": 93900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 93900,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_innes-ireland",
+              "driver_number": "9",
+              "driver_code": "IRE",
+              "driver_name": "Innes Ireland",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 6,
+              "phase_times_ms": {
+                "QUALIFYING": 94100
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 94100,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_richie-ginther",
+              "driver_number": "18",
+              "driver_code": "GIN",
+              "driver_name": "Richie Ginther",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 7,
+              "phase_times_ms": {
+                "QUALIFYING": 94500
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 94500,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_dan-gurney",
+              "driver_number": "12",
+              "driver_code": "GUR",
+              "driver_name": "Dan Gurney",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 8,
+              "phase_times_ms": {
+                "QUALIFYING": 94700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 94700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_phil-hill",
+              "driver_number": "1",
+              "driver_code": "HIL",
+              "driver_name": "Phil Hill",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 9,
+              "phase_times_ms": {
+                "QUALIFYING": 95000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 95000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_trevor-taylor",
+              "driver_number": "5",
+              "driver_code": "TAY",
+              "driver_name": "Trevor Taylor",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 10,
+              "phase_times_ms": {
+                "QUALIFYING": 95400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 95400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_ricardo-rodriguez",
+              "driver_number": "3",
+              "driver_code": "ROD",
+              "driver_name": "Ricardo Rodríguez",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 11,
+              "phase_times_ms": {
+                "QUALIFYING": 96100
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 96100,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_giancarlo-baghetti",
+              "driver_number": "2",
+              "driver_code": "BAG",
+              "driver_name": "Giancarlo Baghetti",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 12,
+              "phase_times_ms": {
+                "QUALIFYING": 96300
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 96300,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jo-bonnier",
+              "driver_number": "11",
+              "driver_code": "BON",
+              "driver_name": "Jo Bonnier",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 13,
+              "phase_times_ms": {
+                "QUALIFYING": 97000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 97000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_carel-godin-de-beaufort",
+              "driver_number": "14",
+              "driver_code": "DEB",
+              "driver_name": "Carel Godin de Beaufort",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 14,
+              "phase_times_ms": {
+                "QUALIFYING": 97400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 97400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_tony-maggs",
+              "driver_number": "7",
+              "driver_code": "MAG",
+              "driver_name": "Tony Maggs",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 15,
+              "phase_times_ms": {
+                "QUALIFYING": 97500
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 97500,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_masten-gregory",
+              "driver_number": "10",
+              "driver_code": "GRE",
+              "driver_name": "Masten Gregory",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 16,
+              "phase_times_ms": {
+                "QUALIFYING": 98000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 98000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_roy-salvadori",
+              "driver_number": "20",
+              "driver_code": "SAL",
+              "driver_name": "Roy Salvadori",
+              "team_id": "lola",
+              "team_name": "Lola",
+              "position": 17,
+              "phase_times_ms": {
+                "QUALIFYING": 98800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 98800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_ben-pon",
+              "driver_number": "15",
+              "driver_code": "PON",
+              "driver_name": "Ben Pon",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 18,
+              "phase_times_ms": {
+                "QUALIFYING": 100900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 100900,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jackie-lewis",
+              "driver_number": "21",
+              "driver_code": "LEW",
+              "driver_name": "Jackie Lewis",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 19,
+              "phase_times_ms": {
+                "QUALIFYING": 103200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 103200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_wolfgang-seidel",
+              "driver_number": "16",
+              "driver_code": "SEI",
+              "driver_name": "Wolfgang Seidel",
+              "team_id": "emeryson",
+              "team_name": "Emeryson",
+              "position": 20,
+              "phase_times_ms": {
+                "QUALIFYING": 106000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 106000,
+              "status": "timed",
+              "reason": null
+            }
+          ],
+          "warnings": [
+            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "Published classification facts; individual laps and runs are not imported.",
+            "Historical qualifying format: two session. This is not modern Q1/Q2/Q3."
+          ]
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "schema_version": "1.0.0",
+      "year": 1962,
+      "round": 2,
+      "event_name": "Grand Prix de Monaco 1962",
+      "circuit_id": "monaco",
+      "sessions": [
+        {
+          "session_id": "1962-2-qualifying",
+          "label": "Qualifying",
+          "session_type": "qualifying",
+          "phases": [
+            "QUALIFYING"
+          ],
+          "source": "f1db",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "status": "completed",
+          "drivers": [
+            {
+              "driver_id": "f1db_jim-clark",
+              "driver_number": "18",
+              "driver_code": "CLA",
+              "driver_name": "Jim Clark",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 1,
+              "phase_times_ms": {
+                "QUALIFYING": 95400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 95400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_graham-hill",
+              "driver_number": "10",
+              "driver_code": "HIL",
+              "driver_name": "Graham Hill",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 2,
+              "phase_times_ms": {
+                "QUALIFYING": 95800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 95800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_bruce-mclaren",
+              "driver_number": "14",
+              "driver_code": "MCL",
+              "driver_name": "Bruce McLaren",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 3,
+              "phase_times_ms": {
+                "QUALIFYING": 96400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 96400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_willy-mairesse",
+              "driver_number": "40",
+              "driver_code": "MAI",
+              "driver_name": "Willy Mairesse",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 4,
+              "phase_times_ms": {
+                "QUALIFYING": 96400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 96400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_dan-gurney",
+              "driver_number": "4",
+              "driver_code": "GUR",
+              "driver_name": "Dan Gurney",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 5,
+              "phase_times_ms": {
+                "QUALIFYING": 96400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 96400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jack-brabham",
+              "driver_number": "22",
+              "driver_code": "BRA",
+              "driver_name": "Jack Brabham",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 6,
+              "phase_times_ms": {
+                "QUALIFYING": 96500
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 96500,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_maurice-trintignant",
+              "driver_number": "30",
+              "driver_code": "TRI",
+              "driver_name": "Maurice Trintignant",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 7,
+              "phase_times_ms": {
+                "QUALIFYING": 96800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 96800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_innes-ireland",
+              "driver_number": "34",
+              "driver_code": "IRE",
+              "driver_name": "Innes Ireland",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 8,
+              "phase_times_ms": {
+                "QUALIFYING": 97000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 97000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_phil-hill",
+              "driver_number": "36",
+              "driver_code": "HIL",
+              "driver_name": "Phil Hill",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 9,
+              "phase_times_ms": {
+                "QUALIFYING": 97100
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 97100,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_lorenzo-bandini",
+              "driver_number": "38",
+              "driver_code": "BAN",
+              "driver_name": "Lorenzo Bandini",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 10,
+              "phase_times_ms": {
+                "QUALIFYING": 97200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 97200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_john-surtees",
+              "driver_number": "28",
+              "driver_code": "SUR",
+              "driver_name": "John Surtees",
+              "team_id": "lola",
+              "team_name": "Lola",
+              "position": 11,
+              "phase_times_ms": {
+                "QUALIFYING": 97900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 97900,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_roy-salvadori",
+              "driver_number": "26",
+              "driver_code": "SAL",
+              "driver_name": "Roy Salvadori",
+              "team_id": "lola",
+              "team_name": "Lola",
+              "position": 12,
+              "phase_times_ms": {
+                "QUALIFYING": 98500
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 98500,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_richie-ginther",
+              "driver_number": "8",
+              "driver_code": "GIN",
+              "driver_name": "Richie Ginther",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 13,
+              "phase_times_ms": {
+                "QUALIFYING": 99000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 99000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_trevor-taylor",
+              "driver_number": "20",
+              "driver_code": "TAY",
+              "driver_name": "Trevor Taylor",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 14,
+              "phase_times_ms": {
+                "QUALIFYING": 100000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 100000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_ricardo-rodriguez",
+              "driver_number": "38",
+              "driver_code": "ROD",
+              "driver_name": "Ricardo Rodríguez",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 15,
+              "phase_times_ms": {
+                "QUALIFYING": 100100
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 100100,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jo-bonnier",
+              "driver_number": "2",
+              "driver_code": "BON",
+              "driver_name": "Jo Bonnier",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 16,
+              "phase_times_ms": {
+                "QUALIFYING": 102400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 102400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_tony-maggs",
+              "driver_number": "16",
+              "driver_code": "MAG",
+              "driver_name": "Tony Maggs",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 17,
+              "phase_times_ms": {
+                "QUALIFYING": 102700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 102700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jo-siffert",
+              "driver_number": "46",
+              "driver_code": "SIF",
+              "driver_name": "Jo Siffert",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 18,
+              "phase_times_ms": {
+                "QUALIFYING": 98900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 98900,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jackie-lewis",
+              "driver_number": "24",
+              "driver_code": "LEW",
+              "driver_name": "Jackie Lewis",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 19,
+              "phase_times_ms": {
+                "QUALIFYING": 99000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 99000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_masten-gregory",
+              "driver_number": "32",
+              "driver_code": "GRE",
+              "driver_name": "Masten Gregory",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 20,
+              "phase_times_ms": {
+                "QUALIFYING": 99200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 99200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_carel-godin-de-beaufort",
+              "driver_number": "44",
+              "driver_code": "DEB",
+              "driver_name": "Carel Godin de Beaufort",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 21,
+              "phase_times_ms": {
+                "QUALIFYING": 104400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 104400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_nino-vaccarella",
+              "driver_number": "42",
+              "driver_code": "VAC",
+              "driver_name": "Nino Vaccarella",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 22,
+              "phase_times_ms": {
+                "QUALIFYING": 121800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 121800,
+              "status": "timed",
+              "reason": null
+            }
+          ],
+          "warnings": [
+            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "Published classification facts; individual laps and runs are not imported.",
+            "Historical qualifying format: two session. This is not modern Q1/Q2/Q3."
+          ]
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "schema_version": "1.0.0",
+      "year": 1962,
+      "round": 3,
+      "event_name": "1962 Belgian Grand Prix",
+      "circuit_id": "spa-francorchamps",
+      "sessions": [
+        {
+          "session_id": "1962-3-qualifying",
+          "label": "Qualifying",
+          "session_type": "qualifying",
+          "phases": [
+            "QUALIFYING"
+          ],
+          "source": "f1db",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "status": "completed",
+          "drivers": [
+            {
+              "driver_id": "f1db_graham-hill",
+              "driver_number": "1",
+              "driver_code": "HIL",
+              "driver_name": "Graham Hill",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 1,
+              "phase_times_ms": {
+                "QUALIFYING": 237000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 237000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_bruce-mclaren",
+              "driver_number": "25",
+              "driver_code": "MCL",
+              "driver_name": "Bruce McLaren",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 2,
+              "phase_times_ms": {
+                "QUALIFYING": 238800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 238800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_trevor-taylor",
+              "driver_number": "17",
+              "driver_code": "TAY",
+              "driver_name": "Trevor Taylor",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 3,
+              "phase_times_ms": {
+                "QUALIFYING": 239300
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 239300,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_phil-hill",
+              "driver_number": "9",
+              "driver_code": "HIL",
+              "driver_name": "Phil Hill",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 4,
+              "phase_times_ms": {
+                "QUALIFYING": 239600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 239600,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_innes-ireland",
+              "driver_number": "20",
+              "driver_code": "IRE",
+              "driver_name": "Innes Ireland",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 5,
+              "phase_times_ms": {
+                "QUALIFYING": 239800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 239800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_willy-mairesse",
+              "driver_number": "10",
+              "driver_code": "MAI",
+              "driver_name": "Willy Mairesse",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 6,
+              "phase_times_ms": {
+                "QUALIFYING": 241000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 241000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_ricardo-rodriguez",
+              "driver_number": "12",
+              "driver_code": "ROD",
+              "driver_name": "Ricardo Rodríguez",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 7,
+              "phase_times_ms": {
+                "QUALIFYING": 241000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 241000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_masten-gregory",
+              "driver_number": "21",
+              "driver_code": "GRE",
+              "driver_name": "Masten Gregory",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 8,
+              "phase_times_ms": {
+                "QUALIFYING": 241000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 241000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_richie-ginther",
+              "driver_number": "2",
+              "driver_code": "GIN",
+              "driver_name": "Richie Ginther",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 9,
+              "phase_times_ms": {
+                "QUALIFYING": 241400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 241400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_tony-maggs",
+              "driver_number": "26",
+              "driver_code": "MAG",
+              "driver_name": "Tony Maggs",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 10,
+              "phase_times_ms": {
+                "QUALIFYING": 243600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 243600,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_john-surtees",
+              "driver_number": "5",
+              "driver_code": "SUR",
+              "driver_name": "John Surtees",
+              "team_id": "lola",
+              "team_name": "Lola",
+              "position": 11,
+              "phase_times_ms": {
+                "QUALIFYING": 244400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 244400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jim-clark",
+              "driver_number": "16",
+              "driver_code": "CLA",
+              "driver_name": "Jim Clark",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 12,
+              "phase_times_ms": {
+                "QUALIFYING": 244900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 244900,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_carel-godin-de-beaufort",
+              "driver_number": "7",
+              "driver_code": "DEB",
+              "driver_name": "Carel Godin de Beaufort",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 13,
+              "phase_times_ms": {
+                "QUALIFYING": 247700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 247700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_giancarlo-baghetti",
+              "driver_number": "11",
+              "driver_code": "BAG",
+              "driver_name": "Giancarlo Baghetti",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 14,
+              "phase_times_ms": {
+                "QUALIFYING": 248000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 248000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jack-brabham",
+              "driver_number": "15",
+              "driver_code": "BRA",
+              "driver_name": "Jack Brabham",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 15,
+              "phase_times_ms": {
+                "QUALIFYING": 248200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 248200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_maurice-trintignant",
+              "driver_number": "18",
+              "driver_code": "TRI",
+              "driver_name": "Maurice Trintignant",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 16,
+              "phase_times_ms": {
+                "QUALIFYING": 249200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 249200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jo-siffert",
+              "driver_number": "22",
+              "driver_code": "SIF",
+              "driver_name": "Jo Siffert",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 17,
+              "phase_times_ms": {
+                "QUALIFYING": 251600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 251600,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_lucien-bianchi",
+              "driver_number": "19",
+              "driver_code": "BIA",
+              "driver_name": "Lucien Bianchi",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 18,
+              "phase_times_ms": {
+                "QUALIFYING": 258000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 258000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_john-campbell-jones",
+              "driver_number": "4",
+              "driver_code": "CAM",
+              "driver_name": "John Campbell-Jones",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 19,
+              "phase_times_ms": {
+                "QUALIFYING": 266900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 266900,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_dan-gurney",
+              "driver_number": "23",
+              "driver_code": "GUR",
+              "driver_name": "Dan Gurney",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 20,
+              "phase_times_ms": {
+                "QUALIFYING": 402200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 402200,
+              "status": "timed",
+              "reason": null
+            }
+          ],
+          "warnings": [
+            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "Published classification facts; individual laps and runs are not imported.",
+            "Historical qualifying format: two session. This is not modern Q1/Q2/Q3."
+          ]
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "schema_version": "1.0.0",
+      "year": 1962,
+      "round": 4,
+      "event_name": "Grand Prix de France 1962",
+      "circuit_id": "rouen",
+      "sessions": [
+        {
+          "session_id": "1962-4-qualifying",
+          "label": "Qualifying",
+          "session_type": "qualifying",
+          "phases": [
+            "QUALIFYING"
+          ],
+          "source": "f1db",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "status": "completed",
+          "drivers": [
+            {
+              "driver_id": "f1db_jim-clark",
+              "driver_number": "12",
+              "driver_code": "CLA",
+              "driver_name": "Jim Clark",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 1,
+              "phase_times_ms": {
+                "QUALIFYING": 134800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 134800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_graham-hill",
+              "driver_number": "8",
+              "driver_code": "HIL",
+              "driver_name": "Graham Hill",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 2,
+              "phase_times_ms": {
+                "QUALIFYING": 135000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 135000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_bruce-mclaren",
+              "driver_number": "22",
+              "driver_code": "MCL",
+              "driver_name": "Bruce McLaren",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 3,
+              "phase_times_ms": {
+                "QUALIFYING": 135400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 135400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jack-brabham",
+              "driver_number": "26",
+              "driver_code": "BRA",
+              "driver_name": "Jack Brabham",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 4,
+              "phase_times_ms": {
+                "QUALIFYING": 136100
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 136100,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_john-surtees",
+              "driver_number": "18",
+              "driver_code": "SUR",
+              "driver_name": "John Surtees",
+              "team_id": "lola",
+              "team_name": "Lola",
+              "position": 5,
+              "phase_times_ms": {
+                "QUALIFYING": 136300
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 136300,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_dan-gurney",
+              "driver_number": "30",
+              "driver_code": "GUR",
+              "driver_name": "Dan Gurney",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 6,
+              "phase_times_ms": {
+                "QUALIFYING": 136500
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 136500,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_masten-gregory",
+              "driver_number": "34",
+              "driver_code": "GRE",
+              "driver_name": "Masten Gregory",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 7,
+              "phase_times_ms": {
+                "QUALIFYING": 137300
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 137300,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_innes-ireland",
+              "driver_number": "36",
+              "driver_code": "IRE",
+              "driver_name": "Innes Ireland",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 8,
+              "phase_times_ms": {
+                "QUALIFYING": 137500
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 137500,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jo-bonnier",
+              "driver_number": "32",
+              "driver_code": "BON",
+              "driver_name": "Jo Bonnier",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 9,
+              "phase_times_ms": {
+                "QUALIFYING": 137900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 137900,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_richie-ginther",
+              "driver_number": "10",
+              "driver_code": "GIN",
+              "driver_name": "Richie Ginther",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 10,
+              "phase_times_ms": {
+                "QUALIFYING": 138200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 138200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_tony-maggs",
+              "driver_number": "24",
+              "driver_code": "MAG",
+              "driver_name": "Tony Maggs",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 11,
+              "phase_times_ms": {
+                "QUALIFYING": 138600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 138600,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_trevor-taylor",
+              "driver_number": "14",
+              "driver_code": "TAY",
+              "driver_name": "Trevor Taylor",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 12,
+              "phase_times_ms": {
+                "QUALIFYING": 139100
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 139100,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_maurice-trintignant",
+              "driver_number": "28",
+              "driver_code": "TRI",
+              "driver_name": "Maurice Trintignant",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 13,
+              "phase_times_ms": {
+                "QUALIFYING": 140800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 140800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_roy-salvadori",
+              "driver_number": "20",
+              "driver_code": "SAL",
+              "driver_name": "Roy Salvadori",
+              "team_id": "lola",
+              "team_name": "Lola",
+              "position": 14,
+              "phase_times_ms": {
+                "QUALIFYING": 141300
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 141300,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jo-siffert",
+              "driver_number": "40",
+              "driver_code": "SIF",
+              "driver_name": "Jo Siffert",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 15,
+              "phase_times_ms": {
+                "QUALIFYING": 143400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 143400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jackie-lewis",
+              "driver_number": "42",
+              "driver_code": "LEW",
+              "driver_name": "Jackie Lewis",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 16,
+              "phase_times_ms": {
+                "QUALIFYING": 145500
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 145500,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_carel-godin-de-beaufort",
+              "driver_number": "38",
+              "driver_code": "DEB",
+              "driver_name": "Carel Godin de Beaufort",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 17,
+              "phase_times_ms": {
+                "QUALIFYING": 146500
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 146500,
+              "status": "timed",
+              "reason": null
+            }
+          ],
+          "warnings": [
+            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "Published classification facts; individual laps and runs are not imported.",
+            "Historical qualifying format: two session. This is not modern Q1/Q2/Q3."
+          ]
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "schema_version": "1.0.0",
+      "year": 1962,
+      "round": 5,
+      "event_name": "1962 RAC British Grand Prix",
+      "circuit_id": "aintree",
+      "sessions": [
+        {
+          "session_id": "1962-5-qualifying",
+          "label": "Qualifying",
+          "session_type": "qualifying",
+          "phases": [
+            "QUALIFYING"
+          ],
+          "source": "f1db",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "status": "completed",
+          "drivers": [
+            {
+              "driver_id": "f1db_jim-clark",
+              "driver_number": "20",
+              "driver_code": "CLA",
+              "driver_name": "Jim Clark",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 1,
+              "phase_times_ms": {
+                "QUALIFYING": 113600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 113600,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_john-surtees",
+              "driver_number": "24",
+              "driver_code": "SUR",
+              "driver_name": "John Surtees",
+              "team_id": "lola",
+              "team_name": "Lola",
+              "position": 2,
+              "phase_times_ms": {
+                "QUALIFYING": 114200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 114200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_innes-ireland",
+              "driver_number": "32",
+              "driver_code": "IRE",
+              "driver_name": "Innes Ireland",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 3,
+              "phase_times_ms": {
+                "QUALIFYING": 114400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 114400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_bruce-mclaren",
+              "driver_number": "16",
+              "driver_code": "MCL",
+              "driver_name": "Bruce McLaren",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 4,
+              "phase_times_ms": {
+                "QUALIFYING": 114600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 114600,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_graham-hill",
+              "driver_number": "12",
+              "driver_code": "HIL",
+              "driver_name": "Graham Hill",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 5,
+              "phase_times_ms": {
+                "QUALIFYING": 114600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 114600,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_dan-gurney",
+              "driver_number": "8",
+              "driver_code": "GUR",
+              "driver_name": "Dan Gurney",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 6,
+              "phase_times_ms": {
+                "QUALIFYING": 114800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 114800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jo-bonnier",
+              "driver_number": "10",
+              "driver_code": "BON",
+              "driver_name": "Jo Bonnier",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 7,
+              "phase_times_ms": {
+                "QUALIFYING": 115200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 115200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_richie-ginther",
+              "driver_number": "14",
+              "driver_code": "GIN",
+              "driver_name": "Richie Ginther",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 8,
+              "phase_times_ms": {
+                "QUALIFYING": 115200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 115200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jack-brabham",
+              "driver_number": "30",
+              "driver_code": "BRA",
+              "driver_name": "Jack Brabham",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 9,
+              "phase_times_ms": {
+                "QUALIFYING": 115400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 115400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_trevor-taylor",
+              "driver_number": "22",
+              "driver_code": "TAY",
+              "driver_name": "Trevor Taylor",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 10,
+              "phase_times_ms": {
+                "QUALIFYING": 116000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 116000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_roy-salvadori",
+              "driver_number": "26",
+              "driver_code": "SAL",
+              "driver_name": "Roy Salvadori",
+              "team_id": "lola",
+              "team_name": "Lola",
+              "position": 11,
+              "phase_times_ms": {
+                "QUALIFYING": 116200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 116200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_phil-hill",
+              "driver_number": "2",
+              "driver_code": "HIL",
+              "driver_name": "Phil Hill",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 12,
+              "phase_times_ms": {
+                "QUALIFYING": 116200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 116200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_tony-maggs",
+              "driver_number": "18",
+              "driver_code": "MAG",
+              "driver_name": "Tony Maggs",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 13,
+              "phase_times_ms": {
+                "QUALIFYING": 117000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 117000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_masten-gregory",
+              "driver_number": "34",
+              "driver_code": "GRE",
+              "driver_name": "Masten Gregory",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 14,
+              "phase_times_ms": {
+                "QUALIFYING": 117200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 117200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jackie-lewis",
+              "driver_number": "42",
+              "driver_code": "LEW",
+              "driver_name": "Jackie Lewis",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 15,
+              "phase_times_ms": {
+                "QUALIFYING": 119400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 119400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_ian-burgess",
+              "driver_number": "36",
+              "driver_code": "BUR",
+              "driver_name": "Ian Burgess",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 16,
+              "phase_times_ms": {
+                "QUALIFYING": 120600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 120600,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_carel-godin-de-beaufort",
+              "driver_number": "54",
+              "driver_code": "DEB",
+              "driver_name": "Carel Godin de Beaufort",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 17,
+              "phase_times_ms": {
+                "QUALIFYING": 121400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 121400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_tony-shelly",
+              "driver_number": "48",
+              "driver_code": "SHE",
+              "driver_name": "Tony Shelly",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 18,
+              "phase_times_ms": {
+                "QUALIFYING": 122400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 122400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_tony-settember",
+              "driver_number": "40",
+              "driver_code": "SET",
+              "driver_name": "Tony Settember",
+              "team_id": "emeryson",
+              "team_name": "Emeryson",
+              "position": 19,
+              "phase_times_ms": {
+                "QUALIFYING": 122400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 122400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jay-chamberlain",
+              "driver_number": "46",
+              "driver_code": "CHA",
+              "driver_name": "Jay Chamberlain",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 20,
+              "phase_times_ms": {
+                "QUALIFYING": 123400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 123400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_wolfgang-seidel",
+              "driver_number": "44",
+              "driver_code": "SEI",
+              "driver_name": "Wolfgang Seidel",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 21,
+              "phase_times_ms": {
+                "QUALIFYING": 131600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 131600,
+              "status": "timed",
+              "reason": null
+            }
+          ],
+          "warnings": [
+            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "Published classification facts; individual laps and runs are not imported.",
+            "Historical qualifying format: two session. This is not modern Q1/Q2/Q3."
+          ]
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "schema_version": "1.0.0",
+      "year": 1962,
+      "round": 6,
+      "event_name": "Grosser Preis von Deutschland 1962",
+      "circuit_id": "nurburgring",
+      "sessions": [
+        {
+          "session_id": "1962-6-qualifying",
+          "label": "Qualifying",
+          "session_type": "qualifying",
+          "phases": [
+            "QUALIFYING"
+          ],
+          "source": "f1db",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "status": "completed",
+          "drivers": [
+            {
+              "driver_id": "f1db_dan-gurney",
+              "driver_number": "7",
+              "driver_code": "GUR",
+              "driver_name": "Dan Gurney",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 1,
+              "phase_times_ms": {
+                "QUALIFYING": 527200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 527200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_graham-hill",
+              "driver_number": "11",
+              "driver_code": "HIL",
+              "driver_name": "Graham Hill",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 2,
+              "phase_times_ms": {
+                "QUALIFYING": 530200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 530200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jim-clark",
+              "driver_number": "5",
+              "driver_code": "CLA",
+              "driver_name": "Jim Clark",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 3,
+              "phase_times_ms": {
+                "QUALIFYING": 531200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 531200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_john-surtees",
+              "driver_number": "14",
+              "driver_code": "SUR",
+              "driver_name": "John Surtees",
+              "team_id": "lola",
+              "team_name": "Lola",
+              "position": 4,
+              "phase_times_ms": {
+                "QUALIFYING": 537500
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 537500,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_bruce-mclaren",
+              "driver_number": "9",
+              "driver_code": "MCL",
+              "driver_name": "Bruce McLaren",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 5,
+              "phase_times_ms": {
+                "QUALIFYING": 540700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 540700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jo-bonnier",
+              "driver_number": "8",
+              "driver_code": "BON",
+              "driver_name": "Jo Bonnier",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 6,
+              "phase_times_ms": {
+                "QUALIFYING": 544000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 544000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_richie-ginther",
+              "driver_number": "12",
+              "driver_code": "GIN",
+              "driver_name": "Richie Ginther",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 7,
+              "phase_times_ms": {
+                "QUALIFYING": 545900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 545900,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_carel-godin-de-beaufort",
+              "driver_number": "18",
+              "driver_code": "DEB",
+              "driver_name": "Carel Godin de Beaufort",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 8,
+              "phase_times_ms": {
+                "QUALIFYING": 552900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 552900,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_roy-salvadori",
+              "driver_number": "15",
+              "driver_code": "SAL",
+              "driver_name": "Roy Salvadori",
+              "team_id": "lola",
+              "team_name": "Lola",
+              "position": 9,
+              "phase_times_ms": {
+                "QUALIFYING": 554100
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 554100,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_ricardo-rodriguez",
+              "driver_number": "3",
+              "driver_code": "ROD",
+              "driver_name": "Ricardo Rodríguez",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 10,
+              "phase_times_ms": {
+                "QUALIFYING": 554200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 554200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_maurice-trintignant",
+              "driver_number": "17",
+              "driver_code": "TRI",
+              "driver_name": "Maurice Trintignant",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 11,
+              "phase_times_ms": {
+                "QUALIFYING": 559000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 559000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_phil-hill",
+              "driver_number": "1",
+              "driver_code": "HIL",
+              "driver_name": "Phil Hill",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 12,
+              "phase_times_ms": {
+                "QUALIFYING": 564700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 564700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_giancarlo-baghetti",
+              "driver_number": "2",
+              "driver_code": "BAG",
+              "driver_name": "Giancarlo Baghetti",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 13,
+              "phase_times_ms": {
+                "QUALIFYING": 568100
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 568100,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_heini-walter",
+              "driver_number": "32",
+              "driver_code": "WAL",
+              "driver_name": "Heini Walter",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 14,
+              "phase_times_ms": {
+                "QUALIFYING": 570000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 570000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_nino-vaccarella",
+              "driver_number": "26",
+              "driver_code": "VAC",
+              "driver_name": "Nino Vaccarella",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 15,
+              "phase_times_ms": {
+                "QUALIFYING": 573800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 573800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_ian-burgess",
+              "driver_number": "25",
+              "driver_code": "BUR",
+              "driver_name": "Ian Burgess",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 16,
+              "phase_times_ms": {
+                "QUALIFYING": 579200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 579200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jo-siffert",
+              "driver_number": "19",
+              "driver_code": "SIF",
+              "driver_name": "Jo Siffert",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 17,
+              "phase_times_ms": {
+                "QUALIFYING": 579300
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 579300,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_lorenzo-bandini",
+              "driver_number": "4",
+              "driver_code": "BAN",
+              "driver_name": "Lorenzo Bandini",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 18,
+              "phase_times_ms": {
+                "QUALIFYING": 579700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 579700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_keith-greene",
+              "driver_number": "27",
+              "driver_code": "GRE",
+              "driver_name": "Keith Greene",
+              "team_id": "gilby",
+              "team_name": "Gilby",
+              "position": 19,
+              "phase_times_ms": {
+                "QUALIFYING": 587100
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 587100,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_heinz-schiller",
+              "driver_number": "28",
+              "driver_code": "SCH",
+              "driver_name": "Heinz Schiller",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 20,
+              "phase_times_ms": {
+                "QUALIFYING": 591900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 591900,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jackie-lewis",
+              "driver_number": "20",
+              "driver_code": "LEW",
+              "driver_name": "Jackie Lewis",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 21,
+              "phase_times_ms": {
+                "QUALIFYING": 598000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 598000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_bernard-collomb",
+              "driver_number": "31",
+              "driver_code": "COL",
+              "driver_name": "Bernard Collomb",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 22,
+              "phase_times_ms": {
+                "QUALIFYING": 609700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 609700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_tony-maggs",
+              "driver_number": "10",
+              "driver_code": "MAG",
+              "driver_name": "Tony Maggs",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 23,
+              "phase_times_ms": {
+                "QUALIFYING": 621200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 621200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jack-brabham",
+              "driver_number": "16",
+              "driver_code": "BRA",
+              "driver_name": "Jack Brabham",
+              "team_id": "brabham",
+              "team_name": "Brabham",
+              "position": 24,
+              "phase_times_ms": {
+                "QUALIFYING": 621600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 621600,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_lucien-bianchi",
+              "driver_number": "21",
+              "driver_code": "BIA",
+              "driver_name": "Lucien Bianchi",
+              "team_id": "enb",
+              "team_name": "ENB",
+              "position": 25,
+              "phase_times_ms": {
+                "QUALIFYING": 640700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 640700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_trevor-taylor",
+              "driver_number": "6",
+              "driver_code": "TAY",
+              "driver_name": "Trevor Taylor",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 26,
+              "phase_times_ms": {
+                "QUALIFYING": 597000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 597000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_tony-shelly",
+              "driver_number": "29",
+              "driver_code": "SHE",
+              "driver_name": "Tony Shelly",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 27,
+              "phase_times_ms": {
+                "QUALIFYING": 618600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 618600,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_wolfgang-seidel",
+              "driver_number": "34",
+              "driver_code": "SEI",
+              "driver_name": "Wolfgang Seidel",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 28,
+              "phase_times_ms": {
+                "QUALIFYING": 638200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 638200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jay-chamberlain",
+              "driver_number": "30",
+              "driver_code": "CHA",
+              "driver_name": "Jay Chamberlain",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 29,
+              "phase_times_ms": {
+                "QUALIFYING": 672900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 672900,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_gunther-seiffert",
+              "driver_number": "34",
+              "driver_code": "SEI",
+              "driver_name": "Günther Seiffert",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 30,
+              "phase_times_ms": {
+                "QUALIFYING": 698900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 698900,
+              "status": "timed",
+              "reason": null
+            }
+          ],
+          "warnings": [
+            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "Published classification facts; individual laps and runs are not imported.",
+            "Historical qualifying format: two session. This is not modern Q1/Q2/Q3."
+          ]
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "schema_version": "1.0.0",
+      "year": 1962,
+      "round": 7,
+      "event_name": "Gran Premio d'Italia 1962",
+      "circuit_id": "monza",
+      "sessions": [
+        {
+          "session_id": "1962-7-qualifying",
+          "label": "Qualifying",
+          "session_type": "qualifying",
+          "phases": [
+            "QUALIFYING"
+          ],
+          "source": "f1db",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "status": "completed",
+          "drivers": [
+            {
+              "driver_id": "f1db_jim-clark",
+              "driver_number": "20",
+              "driver_code": "CLA",
+              "driver_name": "Jim Clark",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 1,
+              "phase_times_ms": {
+                "QUALIFYING": 100350
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 100350,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_graham-hill",
+              "driver_number": "14",
+              "driver_code": "HIL",
+              "driver_name": "Graham Hill",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 2,
+              "phase_times_ms": {
+                "QUALIFYING": 100380
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 100380,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_richie-ginther",
+              "driver_number": "12",
+              "driver_code": "GIN",
+              "driver_name": "Richie Ginther",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 3,
+              "phase_times_ms": {
+                "QUALIFYING": 101100
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 101100,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_bruce-mclaren",
+              "driver_number": "28",
+              "driver_code": "MCL",
+              "driver_name": "Bruce McLaren",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 4,
+              "phase_times_ms": {
+                "QUALIFYING": 101800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 101800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_innes-ireland",
+              "driver_number": "40",
+              "driver_code": "IRE",
+              "driver_name": "Innes Ireland",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 5,
+              "phase_times_ms": {
+                "QUALIFYING": 101800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 101800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_masten-gregory",
+              "driver_number": "38",
+              "driver_code": "GRE",
+              "driver_name": "Masten Gregory",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 6,
+              "phase_times_ms": {
+                "QUALIFYING": 101900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 101900,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_dan-gurney",
+              "driver_number": "16",
+              "driver_code": "GUR",
+              "driver_name": "Dan Gurney",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 7,
+              "phase_times_ms": {
+                "QUALIFYING": 101900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 101900,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_john-surtees",
+              "driver_number": "46",
+              "driver_code": "SUR",
+              "driver_name": "John Surtees",
+              "team_id": "lola",
+              "team_name": "Lola",
+              "position": 8,
+              "phase_times_ms": {
+                "QUALIFYING": 102400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 102400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jo-bonnier",
+              "driver_number": "18",
+              "driver_code": "BON",
+              "driver_name": "Jo Bonnier",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 9,
+              "phase_times_ms": {
+                "QUALIFYING": 102600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 102600,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_willy-mairesse",
+              "driver_number": "8",
+              "driver_code": "MAI",
+              "driver_name": "Willy Mairesse",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 10,
+              "phase_times_ms": {
+                "QUALIFYING": 102800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 102800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_ricardo-rodriguez",
+              "driver_number": "4",
+              "driver_code": "ROD",
+              "driver_name": "Ricardo Rodríguez",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 11,
+              "phase_times_ms": {
+                "QUALIFYING": 103100
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 103100,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_tony-maggs",
+              "driver_number": "30",
+              "driver_code": "MAG",
+              "driver_name": "Tony Maggs",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 12,
+              "phase_times_ms": {
+                "QUALIFYING": 103200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 103200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_roy-salvadori",
+              "driver_number": "44",
+              "driver_code": "SAL",
+              "driver_name": "Roy Salvadori",
+              "team_id": "lola",
+              "team_name": "Lola",
+              "position": 13,
+              "phase_times_ms": {
+                "QUALIFYING": 103300
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 103300,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_nino-vaccarella",
+              "driver_number": "24",
+              "driver_code": "VAC",
+              "driver_name": "Nino Vaccarella",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 14,
+              "phase_times_ms": {
+                "QUALIFYING": 103400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 103400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_phil-hill",
+              "driver_number": "10",
+              "driver_code": "HIL",
+              "driver_name": "Phil Hill",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 15,
+              "phase_times_ms": {
+                "QUALIFYING": 103400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 103400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_trevor-taylor",
+              "driver_number": "22",
+              "driver_code": "TAY",
+              "driver_name": "Trevor Taylor",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 16,
+              "phase_times_ms": {
+                "QUALIFYING": 104200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 104200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_lorenzo-bandini",
+              "driver_number": "6",
+              "driver_code": "BAN",
+              "driver_name": "Lorenzo Bandini",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 17,
+              "phase_times_ms": {
+                "QUALIFYING": 104300
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 104300,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_giancarlo-baghetti",
+              "driver_number": "2",
+              "driver_code": "BAG",
+              "driver_name": "Giancarlo Baghetti",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 18,
+              "phase_times_ms": {
+                "QUALIFYING": 104400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 104400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_maurice-trintignant",
+              "driver_number": "36",
+              "driver_code": "TRI",
+              "driver_name": "Maurice Trintignant",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 19,
+              "phase_times_ms": {
+                "QUALIFYING": 104400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 104400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_carel-godin-de-beaufort",
+              "driver_number": "32",
+              "driver_code": "DEB",
+              "driver_name": "Carel Godin de Beaufort",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 20,
+              "phase_times_ms": {
+                "QUALIFYING": 106800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 106800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_tony-settember",
+              "driver_number": "48",
+              "driver_code": "SET",
+              "driver_name": "Tony Settember",
+              "team_id": "emeryson",
+              "team_name": "Emeryson",
+              "position": 21,
+              "phase_times_ms": {
+                "QUALIFYING": 109100
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 109100,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_tony-shelly",
+              "driver_number": "60",
+              "driver_code": "SHE",
+              "driver_name": "Tony Shelly",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 22,
+              "phase_times_ms": {
+                "QUALIFYING": 111600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 111600,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_keith-greene",
+              "driver_number": "56",
+              "driver_code": "GRE",
+              "driver_name": "Keith Greene",
+              "team_id": "gilby",
+              "team_name": "Gilby",
+              "position": 23,
+              "phase_times_ms": {
+                "QUALIFYING": 112000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 112000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_gerry-ashmore",
+              "driver_number": "52",
+              "driver_code": "ASH",
+              "driver_name": "Gerry Ashmore",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 24,
+              "phase_times_ms": {
+                "QUALIFYING": 112900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 112900,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_ian-burgess",
+              "driver_number": "62",
+              "driver_code": "BUR",
+              "driver_name": "Ian Burgess",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 25,
+              "phase_times_ms": {
+                "QUALIFYING": 113100
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 113100,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jo-siffert",
+              "driver_number": "42",
+              "driver_code": "SIF",
+              "driver_name": "Jo Siffert",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 26,
+              "phase_times_ms": {
+                "QUALIFYING": 115800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 115800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_ernesto-prinoth",
+              "driver_number": "54",
+              "driver_code": "PRI",
+              "driver_name": "Ernesto Prinoth",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 27,
+              "phase_times_ms": {
+                "QUALIFYING": 117700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 117700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_roberto-lippi",
+              "driver_number": "50",
+              "driver_code": "LIP",
+              "driver_name": "Roberto Lippi",
+              "team_id": "de-tomaso",
+              "team_name": "De Tomaso",
+              "position": 28,
+              "phase_times_ms": {
+                "QUALIFYING": 118600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 118600,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jay-chamberlain",
+              "driver_number": "26",
+              "driver_code": "CHA",
+              "driver_name": "Jay Chamberlain",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 29,
+              "phase_times_ms": {
+                "QUALIFYING": 119700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 119700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_nasif-estefano",
+              "driver_number": "34",
+              "driver_code": "EST",
+              "driver_name": "Nasif Estéfano",
+              "team_id": "de-tomaso",
+              "team_name": "De Tomaso",
+              "position": 30,
+              "phase_times_ms": {
+                "QUALIFYING": 378400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 378400,
+              "status": "timed",
+              "reason": null
+            }
+          ],
+          "warnings": [
+            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "Published classification facts; individual laps and runs are not imported.",
+            "Historical qualifying format: two session. This is not modern Q1/Q2/Q3."
+          ]
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "schema_version": "1.0.0",
+      "year": 1962,
+      "round": 8,
+      "event_name": "1962 United States Grand Prix",
+      "circuit_id": "watkins-glen",
+      "sessions": [
+        {
+          "session_id": "1962-8-qualifying",
+          "label": "Qualifying",
+          "session_type": "qualifying",
+          "phases": [
+            "QUALIFYING"
+          ],
+          "source": "f1db",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "status": "completed",
+          "drivers": [
+            {
+              "driver_id": "f1db_jim-clark",
+              "driver_number": "8",
+              "driver_code": "CLA",
+              "driver_name": "Jim Clark",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 1,
+              "phase_times_ms": {
+                "QUALIFYING": 75800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 75800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_richie-ginther",
+              "driver_number": "5",
+              "driver_code": "GIN",
+              "driver_name": "Richie Ginther",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 2,
+              "phase_times_ms": {
+                "QUALIFYING": 76600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 76600,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_graham-hill",
+              "driver_number": "4",
+              "driver_code": "HIL",
+              "driver_name": "Graham Hill",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 3,
+              "phase_times_ms": {
+                "QUALIFYING": 76700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 76700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_dan-gurney",
+              "driver_number": "10",
+              "driver_code": "GUR",
+              "driver_name": "Dan Gurney",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 4,
+              "phase_times_ms": {
+                "QUALIFYING": 76900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 76900,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jack-brabham",
+              "driver_number": "17",
+              "driver_code": "BRA",
+              "driver_name": "Jack Brabham",
+              "team_id": "brabham",
+              "team_name": "Brabham",
+              "position": 5,
+              "phase_times_ms": {
+                "QUALIFYING": 76900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 76900,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_bruce-mclaren",
+              "driver_number": "21",
+              "driver_code": "MCL",
+              "driver_name": "Bruce McLaren",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 6,
+              "phase_times_ms": {
+                "QUALIFYING": 77300
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 77300,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_masten-gregory",
+              "driver_number": "16",
+              "driver_code": "GRE",
+              "driver_name": "Masten Gregory",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 7,
+              "phase_times_ms": {
+                "QUALIFYING": 77900
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 77900,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_trevor-taylor",
+              "driver_number": "9",
+              "driver_code": "TAY",
+              "driver_name": "Trevor Taylor",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 8,
+              "phase_times_ms": {
+                "QUALIFYING": 78000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 78000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jo-bonnier",
+              "driver_number": "11",
+              "driver_code": "BON",
+              "driver_name": "Jo Bonnier",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 9,
+              "phase_times_ms": {
+                "QUALIFYING": 79000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 79000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_tony-maggs",
+              "driver_number": "22",
+              "driver_code": "MAG",
+              "driver_name": "Tony Maggs",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 10,
+              "phase_times_ms": {
+                "QUALIFYING": 79700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 79700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_roy-salvadori",
+              "driver_number": "19",
+              "driver_code": "SAL",
+              "driver_name": "Roy Salvadori",
+              "team_id": "lola",
+              "team_name": "Lola",
+              "position": 11,
+              "phase_times_ms": {
+                "QUALIFYING": 79800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 79800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_timmy-mayer",
+              "driver_number": "23",
+              "driver_code": "MAY",
+              "driver_name": "Timmy Mayer",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 12,
+              "phase_times_ms": {
+                "QUALIFYING": 80700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 80700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_roger-penske",
+              "driver_number": "14",
+              "driver_code": "PEN",
+              "driver_name": "Roger Penske",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 13,
+              "phase_times_ms": {
+                "QUALIFYING": 81300
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 81300,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_carel-godin-de-beaufort",
+              "driver_number": "12",
+              "driver_code": "DEB",
+              "driver_name": "Carel Godin de Beaufort",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 14,
+              "phase_times_ms": {
+                "QUALIFYING": 81800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 81800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_hap-sharp",
+              "driver_number": "24",
+              "driver_code": "SHA",
+              "driver_name": "Hap Sharp",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 15,
+              "phase_times_ms": {
+                "QUALIFYING": 82400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 82400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_innes-ireland",
+              "driver_number": "15",
+              "driver_code": "IRE",
+              "driver_name": "Innes Ireland",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 16,
+              "phase_times_ms": {
+                "QUALIFYING": 84000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 84000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_rob-schroeder",
+              "driver_number": "26",
+              "driver_code": "SCH",
+              "driver_name": "Rob Schroeder",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 17,
+              "phase_times_ms": {
+                "QUALIFYING": 84000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 84000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jim-hall",
+              "driver_number": "25",
+              "driver_code": "HAL",
+              "driver_name": "Jim Hall",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 18,
+              "phase_times_ms": {
+                "QUALIFYING": 84700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 84700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_maurice-trintignant",
+              "driver_number": "6",
+              "driver_code": "TRI",
+              "driver_name": "Maurice Trintignant",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 19,
+              "phase_times_ms": {
+                "QUALIFYING": 85800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 85800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_john-surtees",
+              "driver_number": "18",
+              "driver_code": "SUR",
+              "driver_name": "John Surtees",
+              "team_id": "lola",
+              "team_name": "Lola",
+              "position": 20,
+              "phase_times_ms": {
+                "QUALIFYING": 89200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 89200,
+              "status": "timed",
+              "reason": null
+            }
+          ],
+          "warnings": [
+            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "Published classification facts; individual laps and runs are not imported.",
+            "Historical qualifying format: two session. This is not modern Q1/Q2/Q3."
+          ]
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "schema_version": "1.0.0",
+      "year": 1962,
+      "round": 9,
+      "event_name": "South African Grand Prix 1962",
+      "circuit_id": "east-london",
+      "sessions": [
+        {
+          "session_id": "1962-9-qualifying",
+          "label": "Qualifying",
+          "session_type": "qualifying",
+          "phases": [
+            "QUALIFYING"
+          ],
+          "source": "f1db",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "status": "completed",
+          "drivers": [
+            {
+              "driver_id": "f1db_jim-clark",
+              "driver_number": "1",
+              "driver_code": "CLA",
+              "driver_name": "Jim Clark",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 1,
+              "phase_times_ms": {
+                "QUALIFYING": 89300
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 89300,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_graham-hill",
+              "driver_number": "3",
+              "driver_code": "HIL",
+              "driver_name": "Graham Hill",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 2,
+              "phase_times_ms": {
+                "QUALIFYING": 89600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 89600,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_jack-brabham",
+              "driver_number": "10",
+              "driver_code": "BRA",
+              "driver_name": "Jack Brabham",
+              "team_id": "brabham",
+              "team_name": "Brabham",
+              "position": 3,
+              "phase_times_ms": {
+                "QUALIFYING": 91000
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 91000,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_innes-ireland",
+              "driver_number": "11",
+              "driver_code": "IRE",
+              "driver_name": "Innes Ireland",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 4,
+              "phase_times_ms": {
+                "QUALIFYING": 91100
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 91100,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_john-surtees",
+              "driver_number": "6",
+              "driver_code": "SUR",
+              "driver_name": "John Surtees",
+              "team_id": "lola",
+              "team_name": "Lola",
+              "position": 5,
+              "phase_times_ms": {
+                "QUALIFYING": 91500
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 91500,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_tony-maggs",
+              "driver_number": "9",
+              "driver_code": "MAG",
+              "driver_name": "Tony Maggs",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 6,
+              "phase_times_ms": {
+                "QUALIFYING": 91700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 91700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_richie-ginther",
+              "driver_number": "4",
+              "driver_code": "GIN",
+              "driver_name": "Richie Ginther",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 7,
+              "phase_times_ms": {
+                "QUALIFYING": 91700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 91700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_bruce-mclaren",
+              "driver_number": "8",
+              "driver_code": "MCL",
+              "driver_name": "Bruce McLaren",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 8,
+              "phase_times_ms": {
+                "QUALIFYING": 91700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 91700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_trevor-taylor",
+              "driver_number": "2",
+              "driver_code": "TAY",
+              "driver_name": "Trevor Taylor",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 9,
+              "phase_times_ms": {
+                "QUALIFYING": 92700
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 92700,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_neville-lederle",
+              "driver_number": "20",
+              "driver_code": "LED",
+              "driver_name": "Neville Lederle",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 10,
+              "phase_times_ms": {
+                "QUALIFYING": 93600
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 93600,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_roy-salvadori",
+              "driver_number": "7",
+              "driver_code": "SAL",
+              "driver_name": "Roy Salvadori",
+              "team_id": "lola",
+              "team_name": "Lola",
+              "position": 11,
+              "phase_times_ms": {
+                "QUALIFYING": 95400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 95400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_john-love",
+              "driver_number": "18",
+              "driver_code": "LOV",
+              "driver_name": "John Love",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 12,
+              "phase_times_ms": {
+                "QUALIFYING": 96400
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 96400,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_ernie-pieterse",
+              "driver_number": "14",
+              "driver_code": "PIE",
+              "driver_name": "Ernie Pieterse",
+              "team_id": "lotus",
+              "team_name": "Lotus",
+              "position": 13,
+              "phase_times_ms": {
+                "QUALIFYING": 96800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 96800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_doug-serrurier",
+              "driver_number": "21",
+              "driver_code": "SER",
+              "driver_name": "Doug Serrurier",
+              "team_id": "lds",
+              "team_name": "LDS",
+              "position": 14,
+              "phase_times_ms": {
+                "QUALIFYING": 96800
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 96800,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_mike-harris",
+              "driver_number": "22",
+              "driver_code": "HAR",
+              "driver_name": "Mike Harris",
+              "team_id": "cooper",
+              "team_name": "Cooper",
+              "position": 15,
+              "phase_times_ms": {
+                "QUALIFYING": 99100
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 99100,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_carel-godin-de-beaufort",
+              "driver_number": "15",
+              "driver_code": "DEB",
+              "driver_name": "Carel Godin de Beaufort",
+              "team_id": "porsche",
+              "team_name": "Porsche",
+              "position": 16,
+              "phase_times_ms": {
+                "QUALIFYING": 99200
+              },
+              "latest_timed_phase": "QUALIFYING",
+              "latest_time_ms": 99200,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_bruce-johnstone",
+              "driver_number": "5",
+              "driver_code": "JOH",
+              "driver_name": "Bruce Johnstone",
+              "team_id": "brm",
+              "team_name": "BRM",
+              "position": 17,
+              "phase_times_ms": {
+                "QUALIFYING": null
+              },
+              "latest_timed_phase": null,
+              "latest_time_ms": null,
+              "status": "no_time",
+              "reason": "No recorded timing value is available for this driver in the source."
+            }
+          ],
+          "warnings": [
+            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "Published classification facts; individual laps and runs are not imported.",
+            "Historical qualifying format: two session. This is not modern Q1/Q2/Q3."
+          ]
+        }
+      ],
+      "warnings": []
+    }
+  ]
+}

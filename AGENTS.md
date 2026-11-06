@@ -31,6 +31,6 @@ Run meaningful tests for changed behavior. For contract/API changes run Python t
 
 ## Current scope
 
-Only the scaffold and blueprint are complete. The first implementation ticket is T01. Follow `docs/06-implementation-plan.md`; do not treat described future features as existing functionality. Public deployment and raw-data redistribution are separate release tasks, not setup prerequisites.
+The user has prioritized recorded session/phase-best results before individual laps and telemetry. Follow `docs/16-results-first-milestone.md`: R01 imports classifications and event-specific rosters/teams; R02 later adds actual run/lap selection through the existing T01–T12 gates. R01 is not completion of real telemetry ingestion. Preserve the synthetic preview and never infer distance traces or corner claims from classification bests alone.
 
 The scaffold already contains session selectors, cached result rendering and a synthetic ECharts preview. Extend those components in T06–T09 instead of rebuilding them. `docs/11-implementation-workflow.md` gives the requested model/effort workflow; it does not replace ticket acceptance checks.
