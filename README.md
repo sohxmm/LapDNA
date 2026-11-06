@@ -13,6 +13,7 @@ Where did the lap time go? Compare two qualifying laps on a common track-distanc
 - [Current handoff](docs/10-handoff.md)
 - [Implementing with GPT-6.1 Sol](docs/11-implementation-workflow.md)
 - [20-source qualifying data audit](docs/13-data-source-audit.md)
+- [Detailed data-point inventory and rollout](docs/15-data-points-and-rollout.md)
 - [Analysis generation and optional LLM wording](docs/14-analysis-generation.md)
 - [Contributor rules](AGENTS.md)
 

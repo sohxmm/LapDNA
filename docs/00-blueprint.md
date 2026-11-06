@@ -60,6 +60,7 @@ The [20-source survey](13-data-source-audit.md) confirms native speed, throttle,
 12. [Hosted preview and limitations](12-hosting.md)
 13. [Recurring qualifying data-source audit](13-data-source-audit.md)
 14. [Analysis generation and optional LLM layer](14-analysis-generation.md)
+15. [Data-point inventory and implementation rollout](15-data-points-and-rollout.md)
 
 Python models govern field names; methodology governs numerical meaning; tickets govern current status. Resolve contradictions in one small documented change before dependent implementation.
 

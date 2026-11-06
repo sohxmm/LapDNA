@@ -1,6 +1,6 @@
 {
-  "registry_version": "1.0.0",
-  "reviewed_on": "2026-11-06",
+  "registry_version": "1.0.1",
+  "reviewed_on": "2026-11-07",
   "scope": "Finite practical source survey; not an exhaustive internet or private-contract inventory",
   "integration_status": "Research inventory; full telemetry import not implemented",
   "audit_document": "docs/13-data-source-audit.md",
@@ -36,7 +36,12 @@
       },
       "parser_missing_value_hazards": [
         "Incomplete driver rows can be extended and numeric channels filled with zero, Brake with False; preserve missing-row masks",
-        "Missing raw DRS channel 45 defaults to zero; pinned parser notes DRS absent in 2026; inspect raw channel presence"
+        "Missing position rows can be filled with XYZ zero and Status OffTrack; preserve masks to avoid false geometry or off-track claims",
+        "Missing raw DRS channel 45 defaults to zero; pinned parser notes DRS absent in 2026; inspect raw channel presence",
+        "Weather parser substitutes zero or False for absent or malformed fields; retain raw presence before interpreting values or no-rain state",
+        "Core processing forward-fills speed-trap fields; a populated field alone does not establish a fresh per-lap observation",
+        "Throttle 104 is documented as erroneous or unavailable; mask rather than clamp to 100",
+        "Raw position parser documents tenths-of-a-metre coordinates from 2020; verify provider/year units for older seasons"
       ],
       "parser_evidence": "https://github.com/theOehrly/Fast-F1/blob/v3.9.2/fastf1/_api.py",
       "implementation_gate": "T01 real full-session import, auth, native clocks, native-versus-filled masks, coverage and sanitized manifest",

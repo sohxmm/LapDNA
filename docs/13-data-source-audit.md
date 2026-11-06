@@ -1,6 +1,6 @@
 # Recurring qualifying data source audit
 
-Reviewed 6 November 2026. This is a finite survey of practical public feeds, maintained archives, official timing publications and commercial APIs. It cannot establish that every dataset on the internet or every private vendor contract has been examined. A documented field, a successful sample request and a validated whole-session import are separate evidence levels.
+Reviewed 6 November 2026; field-semantics follow-up 7 November. This is a finite survey of practical public feeds, maintained archives, official timing publications and commercial APIs. It cannot establish that every dataset on the internet or every private vendor contract has been examined. A documented field, a successful sample request and a validated whole-session import are separate evidence levels.
 
 ## Finding and feature decision
 
@@ -58,6 +58,10 @@ Channel capabilities should be per dataset/lap with coverage diagnostics, not a 
 **Pinned-parser checks for T01:** FastF1 3.9.2 can extend incomplete driver records and fill missing numeric values with zero and brake with `False`. Those inserted values must stay masked as unavailable, not become measured coasting or brake-off intervals. The same parser defaults missing raw DRS channel 45 to zero and explicitly notes its absence in 2026. A resulting `DRS=0` alone does not prove a recorded closed state. Inspect raw-channel presence and source-row provenance before normalization; add offline fixtures for both cases. The parser describes usual native car cadence around 240 ms, rather than a guaranteed uniform grid. [Pinned parser implementation](https://github.com/theOehrly/Fast-F1/blob/v3.9.2/fastf1/_api.py)
 
 ## Repeatable post-qualifying workflow
+
+The [detailed field inventory and rollout](15-data-points-and-rollout.md) maps each useful input and derived output to the existing tickets. The 7 November follow-up verified additional hazards: missing/malformed weather can become zero/False in the pinned parser, trap values can be carried forward by core processing, and throttle 104 is documented as erroneous/unavailable. Preserve raw presence/update lineage rather than using a populated cell as proof. The position parser specifically documents tenths-of-a-metre units from 2020 onward; older provider/year units need review. [Parser](https://github.com/theOehrly/Fast-F1/blob/v3.9.2/fastf1/_api.py), [core processing](https://github.com/theOehrly/Fast-F1/blob/v3.9.2/fastf1/core.py).
+
+Missing position rows can also receive XYZ=0 and Status=OffTrack defaults. Mask them before drawing geometry or interpreting track status; a generated origin point is not a measured excursion.
 
 1. Discover the selected season's calendar and event identity. Resolve the actual qualifying session rather than assuming a fixed round count, race date or weekend format. A future scheduled event and an imported qualifying dataset are different states.
 2. Operator starts an import after session completion. Mark it waiting when data has not been published. Use bounded retries with increasing delay and the provider's Retry-After; stop and report authentication/permission failures. Do not repeatedly retry a permanent missing-data response.

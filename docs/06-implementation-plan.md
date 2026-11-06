@@ -28,15 +28,17 @@ The [historical source probe](09-sources.md) checked OpenF1 availability for one
 
 ## T01 — Import one supported session
 
-Read [methodology §§2–4](03-telemetry-methodology.md), the [source register](09-sources.md), [20-source audit](13-data-source-audit.md) and [operations](08-operations.md). Implement `ingestion/{adapter,snapshot}.py`, `cli.py`, the data dependency lock and offline adapter tests in the API package.
+Read [methodology §§2–4](03-telemetry-methodology.md), the [source register](09-sources.md), [20-source audit](13-data-source-audit.md), [field inventory](15-data-points-and-rollout.md) and [operations](08-operations.md). Implement `ingestion/{adapter,snapshot}.py`, `cli.py`, the data dependency lock and offline adapter tests in the API package.
 
 1. Resolve the candidate 2024 Italian Grand Prix conventional qualifying session from the schedule. Persist the actual round, layout and source identity. Implement `load_session(spec, cache_dir) -> SessionSnapshot` and the documented `import-session` command.
 2. Verify the installed FastF1 3.9.2 cache configuration, supported authentication flow and load APIs. Pin compatible optional dependencies, including a parquet engine, in a separate data lock. Keep credentials and raw caches outside Git.
 3. Load all participants and laps, phase/session status, timing/validity fields, native car and position streams, circuit markers, weather and race-control data. Preserve native clocks, ordering, units and nullable fields.
 4. Write an immutable snapshot and manifest atomically. Include source version, resolved event, fields, counts, UTC, digests and sanitized access status. Reuse a valid matching snapshot; an explicit refresh creates a revision. Distinguish authentication, unsupported/missing data, transient service and filesystem errors.
 5. Preserve raw field presence and native missing-row masks before accepting library-filled zeros/False. Pinned FastF1 can fill absent car rows and default absent DRS channel 45 to zero; such values are unavailable, not measured off states. Test these cases. Never infer throttle, gear or brake from speed. Populate per-driver channel provenance only after these checks.
+6. Preserve weather-field presence and speed-trap update/fill lineage; missing weather can become zero/False and trap fields can be carried forward. Mask documented throttle sentinel 104 instead of clamping it. Verify coordinate units per provider/year, including older seasons. Retain optional source fields without promising a new public graph. If freshness/presence cannot be established, disclose it rather than infer it from plausible values.
+7. Preserve the position stream's native missing-row mask: the pinned parser can insert XYZ=0 and Status=OffTrack for absent records. These must not become geometry points or an actual off-track claim. Test the map-origin-jump and default-status cases separately from legitimate source coordinates/statuses.
 
-**Gate.** Offline tests cover success, missing channels, auth failure, duplicate import and interrupted write. Perform one real import and inspect its secret-free manifest. An access failure leaves T01 open with the exact blocker and reproducible command. The OpenF1 availability probe cannot close this gate. Suggested commit `Add cached qualifying session import`.
+**Gate.** Offline tests cover success, missing/defaulted car and weather fields, inherited trap values, throttle sentinel, unit handling, auth failure, duplicate import and interrupted write. Perform one real import and inspect its secret-free manifest with actual field coverage. An access failure leaves T01 open with the exact blocker and reproducible command. The OpenF1 availability probe cannot close this gate. Suggested commit `Add cached qualifying session import`.
 
 ## T02 — Index drivers, phases and actual laps
 

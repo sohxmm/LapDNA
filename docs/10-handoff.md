@@ -20,6 +20,7 @@ Use the Desktop LapDNA checkout selected by the user. It has the original Git hi
 - Source availability probe, research, revised numerical methodology, full implementation tickets, verification/operations guides and GPT-6.1 Sol workflow.
 - [20-source audit](13-data-source-audit.md) plus a machine-readable registry. Actual native speed, throttle, gear and binary brake are verified, so no demo channel was removed. Trace rows/readouts follow per-driver source availability, with synthetic provenance for all four unchanged preview channels.
 - [Analysis generation specification](14-analysis-generation.md). Current preview prose is fixed; cached real results render saved evidence text. Optional fresh LLM wording is specified after the numerical evidence engine, with no configured provider or runtime model calls today.
+- [Field-by-field inventory and rollout](15-data-points-and-rollout.md), reviewed 7 November. It distinguishes recorded inputs, provider processing, reference annotations, derived estimates and optional fields. T01 now explicitly checks defaulted weather, inherited trap values, throttle 104 and provider/year coordinate units. No new runtime panels or importer were added by this planning update.
 
 ## Verification
 
