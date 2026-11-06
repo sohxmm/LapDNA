@@ -27,6 +27,8 @@ npx --yes vercel@65.12.1 deploy --prod --yes --scope sohxm44s-projects
 
 The stable production alias is used for this preview. Provider preview URLs may require the owner's Vercel sign-in; the stable alias was verified by unauthenticated HTTP. GitHub push and hosting deployment are separate steps until a Git integration is configured.
 
+The current deployed application code is commit `5e6e7d1`, deployment `dpl_2qNVQQcEmiNpFP5Zqy394pdYC1HB`. Later documentation-only commits do not require redeployment. [Deployment inspection](https://vercel.com/sohxm44s-projects/lapdna/2qNVQQcEmiNpFP5Zqy394pdYC1HB).
+
 ## Verification
 
 Local checks: 89 Python tests, 8 client tests, generated-contract checking, TypeScript checking and the production build passed. The chart chunk retains a non-fatal size advisory. The serverless entrypoint also returned the expected local health/inventory/missing-data responses.

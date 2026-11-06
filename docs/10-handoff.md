@@ -33,7 +33,7 @@ Use the Desktop LapDNA checkout selected by the user. It has the original Git hi
 | Browser preview | Desktop/mobile inspected; year default, historical calendar, race studio/refresh, turn selection, keyboard cursor, source labels and sector-only mode checked |
 | Isolated UI fixture | Full roster, unavailable phase/driver, cached sector-only output, swap, cross-phase warning and cache miss checked |
 | Empty production-data folders | No sessions imported; synthetic QA indexes remain outside default data paths |
-| GitHub CI on integrated scaffold 8af7d3b | [Passed on Ubuntu](https://github.com/sohxmm/LapDNA/actions/runs/42069714006) |
+| GitHub CI on deployed code 5e6e7d1 | [Passed on Ubuntu](https://github.com/sohxmm/LapDNA/actions/runs/42279132624) |
 
 Local preview used port 5273 because 5173 was unavailable. Override with `npm run dev --workspace @lapdna/web -- --port 5273` when needed; same-origin proxy behavior is unchanged.
 
