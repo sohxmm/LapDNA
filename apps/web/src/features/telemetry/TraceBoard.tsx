@@ -4,8 +4,8 @@ import type {EChartsCoreOption, EChartsType} from 'echarts/core';
 import {LineChart} from 'echarts/charts';
 import {GridComponent, TooltipComponent, MarkLineComponent, AxisPointerComponent} from 'echarts/components';
 import {CanvasRenderer} from 'echarts/renderers';
-import {nearest, signed} from './view';
-import type {TraceView} from './view';
+import {availableSignals, hasSupportedSignal, nearest, signalLabels, signalOrder, signed, supportedSample} from './view';
+import type {SignalName, TraceView} from './view';
 
 use([LineChart, GridComponent, TooltipComponent, MarkLineComponent, AxisPointerComponent, CanvasRenderer]);
 const A='#56dce8', B='#ffb06b', INK='#96a5ae';
@@ -13,17 +13,34 @@ const layout = [[24,128],[186,48],[270,40],[350,23],[416,80]];
 const axisNames = ['SPEED  ·  KM/H','THROTTLE  ·  %','GEAR','BRAKE  ·  ON/OFF','CUMULATIVE Δ  ·  S'];
 const labels = (v:number|null|undefined) => v == null ? '—' : String(Math.round(v));
 
+export function chartRows(view:TraceView) {
+  const shown=availableSignals(view);
+  const indices=[...signalOrder.flatMap((name,i)=>shown.includes(name)?[i]:[]),4];
+  let top=24;
+  return indices.map(original=>{
+    const height=layout[original][1];
+    const row={original,top:indices.length===5?layout[original][0]:top,height};
+    top+=height+38;
+    return row;
+  });
+}
+
 function options(v:TraceView, start:number, end:number):EChartsCoreOption {
   const series:Record<string,unknown>[]=[];
+  const rows=chartRows(v), marked=new Set<number>();
   const divisions = v.boundaries.filter(d=>d>=start && d<=end).map(d=>({xAxis:d}));
   const add=(index:number, vals:(number|null)[], name:string, color:string, dashed=false, step=false, extraLine=false)=>{
+    const actual=rows.findIndex(row=>row.original===index);
+    if(actual<0) return;
+    if(index<4 && !hasSupportedSignal(dashed?v.b:v.a,dashed?v.provenanceB:v.provenanceA,signalOrder[index])) return;
     const markers:Record<string,number>[] = [...divisions];
     if (extraLine) markers.push({yAxis:0});
-    series.push({name,type:'line',xAxisIndex:index,yAxisIndex:index,
+    const first=!marked.has(actual); marked.add(actual);
+    series.push({name,type:'line',xAxisIndex:actual,yAxisIndex:actual,
       data:v.distance.map((d,i)=>[d,vals[i]]), showSymbol:false, animation:false, clip:true,
       step:step?'end':false, connectNulls:false, smooth:false,
       emphasis:{disabled:true},lineStyle:{color,width:index===0?2.3:1.8,type:dashed?'dashed':'solid'},
-      itemStyle:{color},...(dashed?{}:{markLine:{silent:true,animation:false,symbol:'none',
+      itemStyle:{color},...(!first?{}:{markLine:{silent:true,animation:false,symbol:'none',
         label:{show:false},lineStyle:{color:'#64727d',type:'dashed',width:1},data:markers}})});
   };
   add(0,v.a.speed,v.nameA,A); add(0,v.b.speed,v.nameB,B,true);
@@ -33,16 +50,16 @@ function options(v:TraceView, start:number, end:number):EChartsCoreOption {
   add(3,binary(v.a.brake),v.nameA,A,false,true); add(3,binary(v.b.brake),v.nameB,B,true,true);
   add(4,v.delta.map(x=>x===null?null:x/1000),'B − A','#d6c5fb',false,false,true);
   return {animation:false,backgroundColor:'transparent',textStyle:{fontFamily:'system-ui, sans-serif',color:INK},
-    grid:layout.map(([top,height])=>({top,height,left:55,right:25,outerBoundsMode:'none'})),
+    grid:rows.map(({top,height})=>({top,height,left:55,right:25,outerBoundsMode:'none'})),
     tooltip:{trigger:'axis',showContent:false,axisPointer:{type:'line',snap:true}},
     axisPointer:{link:[{xAxisIndex:'all'}],label:{show:false},lineStyle:{color:'#c8d2d8',width:1}},
-    xAxis:layout.map((_,i)=>({type:'value',gridIndex:i,min:start,max:end,boundaryGap:false,
-      splitNumber:4,axisLabel:{show:i===4,color:INK,fontSize:10,hideOverlap:true,formatter:(n:number)=>Math.round(n)+' m'},
-      axisTick:{show:false},axisLine:{show:i===4,lineStyle:{color:'#3b4953'}},splitLine:{show:false}})),
-    yAxis:layout.map((_,i)=>({type:'value',gridIndex:i,name:axisNames[i],nameGap:8,nameLocation:'end',
-      nameTextStyle:{align:'left',fontSize:9,color:'#becbd3',fontWeight:600},scale:i===0 || i===4,
-      ...(i===1?{min:0,max:100,interval:50}:i===2?{min:0,max:8,interval:4}:i===3?{min:0,max:1,interval:1}:{}),
-      splitNumber:2,axisLabel:{color:INK,fontSize:9,formatter:i===3?(n:number)=>n?'On':'Off':undefined},
+    xAxis:rows.map((_,i)=>({type:'value',gridIndex:i,min:start,max:end,boundaryGap:false,
+      splitNumber:4,axisLabel:{show:i===rows.length-1,color:INK,fontSize:10,hideOverlap:true,formatter:(n:number)=>Math.round(n)+' m'},
+      axisTick:{show:false},axisLine:{show:i===rows.length-1,lineStyle:{color:'#3b4953'}},splitLine:{show:false}})),
+    yAxis:rows.map(({original},i)=>({type:'value',gridIndex:i,name:axisNames[original],nameGap:8,nameLocation:'end',
+      nameTextStyle:{align:'left',fontSize:9,color:'#becbd3',fontWeight:600},scale:original===0 || original===4,
+      ...(original===1?{min:0,max:100,interval:50}:original===2?{min:0,max:8,interval:4}:original===3?{min:0,max:1,interval:1}:{}),
+      splitNumber:2,axisLabel:{color:INK,fontSize:9,formatter:original===3?(n:number)=>n?'On':'Off':undefined},
       axisLine:{show:false},axisTick:{show:false},splitLine:{lineStyle:{color:'#233039',width:0.65}}})),
     series};
 }
@@ -55,6 +72,8 @@ export function TraceBoard({view}:{view:TraceView}) {
   const index=nearest(view.distance,Math.max(start,Math.min(end,cursor)));
   const d=view.distance[index];
   const option=useMemo(()=>options(view,start,end),[view,start,end]);
+  const signals=availableSignals(view), rows=chartRows(view);
+  const plotHeight=rows.at(-1)!.top+rows.at(-1)!.height+34;
   useEffect(()=>{
     if(!host.current) return;
     const c=init(host.current,null,{renderer:'canvas'}); chart.current=c;
@@ -75,6 +94,16 @@ export function TraceBoard({view}:{view:TraceView}) {
   const pos=(x:number)=>100*(x-start)/(end-start);
   const last=view.distance.at(-1)!;
   const edge=[0,...view.boundaries,last];
+  function cell(slot:'a'|'b',name:SignalName) {
+    const value=supportedSample(view,slot,name,index);
+    if(value===null) return '—';
+    return name==='brake'?(value?'On':'Off'):labels(value as number)+(name==='speed'?' km/h':name==='throttle'?'%':'');
+  }
+  function source(slot:'a'|'b',name:SignalName) {
+    const provenance=(slot==='a'?view.provenanceA:view.provenanceB)[name];
+    return provenance.status==='measured'?'Source '+provenance.sourceChannel+' · aligned display samples'
+      : provenance.status==='synthetic'?'Synthetic preview fixture':provenance.reason??'No source measurement';
+  }
   return <section className="trace-board" aria-label="Distance-aligned telemetry">
     <div className="trace-tools"><div><p className="eyebrow">TELEMETRY / DISTANCE</p><h2>Where the gap develops</h2></div>
       <label>Inspect turn <select value={zoom} onChange={e=>select(e.target.value)}><option value="">Full lap</option>{view.turns.map(t=><option key={t.label} value={t.label}>{t.label} · {t.speedClass} speed</option>)}</select></label></div>
@@ -92,11 +121,12 @@ export function TraceBoard({view}:{view:TraceView}) {
     })}</div>
     <div className="trace-rail turn-rail" aria-label="Turn positions">{view.turns.filter(t=>t.at>=start && t.at<=end).map(t=>
       <button key={t.label} onClick={()=>select(t.label)} style={{left:pos(t.at)+'%'}} aria-label={'Inspect '+t.label}>{t.label}</button>)}</div>
-    <div className="plot-canvas" ref={host} role="img" aria-label="Speed, throttle, gear, brake state and cumulative elapsed-time difference by distance. Use the cursor control for numeric values."/>
+    <div className="plot-canvas" ref={host} style={{height:plotHeight}} role="img" aria-label={signals.map(name=>signalLabels[name]).join(', ')+', and cumulative elapsed-time difference by distance. Use the cursor control for numeric values.'}/>
     <div className="cursor-control"><label>Distance cursor <output>{Math.round(d)} m</output><input type="range" min={start} max={end} step={5} value={d}
       onChange={e=>inspect(Number(e.target.value))} aria-label="Distance cursor in metres"/></label>
       <p>{turn?turn.label+' · '+turn.speedClass+' speed':'Full lap'} · Δ {view.delta[index]===null?'—':signed(view.delta[index]!)} s</p></div>
-    <table className="readout"><caption>Channels at the cursor</caption><thead><tr>{['Driver','Speed','Throttle','Gear','Brake'].map(s=><th key={s}>{s}</th>)}</tr></thead>
-    <tbody>{([['a',view.nameA],['b',view.nameB]] as const).map(([k,n])=><tr key={k}><th>{n}</th><td>{labels(view[k].speed[index])} km/h</td><td>{labels(view[k].throttle[index])}%</td><td>{labels(view[k].gear[index])}</td><td>{view[k].brake[index]===null?'—':view[k].brake[index]?'On':'Off'}</td></tr>)}</tbody></table>
+    <table className="readout"><caption>Source-supported channels at the cursor</caption><thead><tr><th>Driver</th>{signals.map(name=><th key={name}>{signalLabels[name]}</th>)}</tr></thead>
+    <tbody>{([['a',view.nameA],['b',view.nameB]] as const).map(([slot,name])=><tr key={slot}><th>{name}</th>{signals.map(channel=><td key={channel} title={source(slot,channel)}>{cell(slot,channel)}</td>)}</tr>)}</tbody></table>
+    <details><summary>Channel availability and sources</summary><ul>{signalOrder.map(name=><li key={name}>{signalLabels[name]} · {view.nameA}: {source('a',name)} · {view.nameB}: {source('b',name)}{!signals.includes(name)?' · Trace hidden because neither lap has a measured signal.':''}</li>)}</ul></details>
   </section>;
 }

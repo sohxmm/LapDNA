@@ -3,10 +3,16 @@ import fixture from './design-fixture.json';
 import {TraceBoard} from './TraceBoard';
 import {SectorPoints} from './SectorPoints';
 import {seconds, signed} from './view';
-import type {TraceView} from './view';
+import type {SignalProvenanceSet, TraceView} from './view';
 import './trace.css';
 
-const preview:TraceView={...fixture,nameA:'Sample A',nameB:'Sample B'};
+const previewProvenance:SignalProvenanceSet={
+  speed:{status:'synthetic',sourceChannel:null,reason:'Constructed preview fixture; no source measurement'},
+  throttle:{status:'synthetic',sourceChannel:null,reason:'Constructed preview fixture; no source measurement'},
+  gear:{status:'synthetic',sourceChannel:null,reason:'Constructed preview fixture; no source measurement'},
+  brake:{status:'synthetic',sourceChannel:null,reason:'Constructed preview fixture; no source measurement'},
+};
+const preview:TraceView={...fixture,nameA:'Sample A',nameB:'Sample B',provenanceA:previewProvenance,provenanceB:previewProvenance};
 
 export default function DesignPreview() {
   const [mode,setMode]=useState<'trace'|'sector'>('trace');
