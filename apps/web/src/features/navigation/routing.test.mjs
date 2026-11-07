@@ -1,6 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseRoute, routeSearch, sessionsForRace } from "./routing.ts";
+import { isWorkspaceRoute, parseRoute, routeSearch, sessionsForRace } from "./routing.ts";
+test("home is distinct from calendar entry and existing comparison links", () => {
+  assert.equal(isWorkspaceRoute(""), false);
+  assert.equal(isWorkspaceRoute("?preview=1"), false);
+  for (const search of ["?view=calendar", "?year=2018", "?year=2026&race=2026-19&view=studio", "?view=studio"]) {
+    assert.equal(isWorkspaceRoute(search), true);
+  }
+});
 test("current server-provided year defaults and historical links survive reload", () => {
   assert.deepEqual(parseRoute("", 2026), {
     year: 2026,

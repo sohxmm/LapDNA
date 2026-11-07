@@ -5,6 +5,11 @@ export type StudioRoute = {
   warning: string | null;
 };
 
+export function isWorkspaceRoute(search: string) {
+  const query = new URLSearchParams(search);
+  return query.has("year") || query.has("race") || query.get("view") === "calendar" || query.get("view") === "studio";
+}
+
 export function parseRoute(
   search: string,
   currentYear: number,
