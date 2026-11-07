@@ -79,6 +79,19 @@
           "title": "Lap Number",
           "type": "integer"
         },
+        "lap_start_utc": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lap Start Utc"
+        },
         "lap_time_ms": {
           "exclusiveMinimum": 0,
           "title": "Lap Time Ms",
@@ -209,8 +222,11 @@
       "type": "array"
     },
     "schema_version": {
-      "const": "1.2.0",
       "default": "1.2.0",
+      "enum": [
+        "1.2.0",
+        "1.3.0"
+      ],
       "title": "Schema Version",
       "type": "string"
     }

@@ -1,6 +1,17 @@
 # Data and API contracts
 
-Python is authoritative: `services/api/src/lapdna/models.py`, `inventory.py` and `calendar.py`. Run `npm run contracts` to regenerate OpenAPI, comparison/catalog JSON Schema and TypeScript. Comparison/inventory version **1.2.0** adds required per-driver channel provenance to the unpublished 1.1 scaffold contract. No real published dataset needs migration. Calendar/seasons use their own version **1.0.0**.
+Python is authoritative: `services/api/src/lapdna/models.py`, `inventory.py` and `calendar.py`. Run `npm run contracts` to regenerate OpenAPI, comparison/catalog JSON Schema and TypeScript. New real Monza artifacts use **1.3.0**; legacy **1.2.0** remains readable. Calendar/seasons and classifications keep their separate **1.0.0** contracts.
+
+## Real Monza 1.3.0 additions
+
+- Provenance explicitly supports `openf1_tracinginsights`, plus `openf1` and legacy `fastf1`. Components carry source/version, URL, retrieval UTC, SHA-256 and licence labels/links. An unknown archive FastF1 version remains null, not a guessed installed version.
+- Native channel names are checked against the actual provider (`speed`, `throttle`, `n_gear`, `brake` for OpenF1). Existing measured/missing declarations and null-array/evidence support gates remain mandatory.
+- Geometry declares `coordinate_unit` and a note; OpenF1 source coordinates are not relabelled surveyed metres. Shared `distance_m` still means the integrated-speed reference axis.
+- Optional actual lap-start UTC, roster team, lap compound/tyre age and source/data-availability details support the full session UI without fabricating run identities.
+- The local comparison POST now computes eligible Monza cache misses from a digest-checked compact normalized publication. No request downloads or normalizes upstream telemetry. Unsupported explicit telemetry requests fail; auto may return independently eligible sector timing.
+- Immutable lookup can regenerate a result from the retained frozen publication after a cold process. Share URLs retain exact lap IDs, source revision and view order. Multi-revision archive retention remains later work.
+
+The source/quality gates and actual reduced-capability examples are recorded in [the Monza pilot](19-monza-2024-pilot.md). Generated files are always regenerated together; do not hand-edit TypeScript to add provider values.
 
 ## Endpoints implemented in the scaffold
 

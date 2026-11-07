@@ -16,7 +16,7 @@ QualityStatus = Literal["pass", "warn", "block"]
 DriverSlot = Literal["A", "B"]
 Phase = Literal["Q1", "Q2", "Q3"]
 SpeedClass = Literal["low", "medium", "high"]
-SchemaVersion = Literal["1.2.0"]
+SchemaVersion = Literal["1.2.0", "1.3.0"]
 Count = Annotated[int, Field(ge=0)]
 ShortText = Annotated[str, Field(min_length=1, max_length=600)]
 
@@ -64,11 +64,27 @@ class LapMetadata(LapIdentity):
     compound: str
     tyre_life_laps: Annotated[Finite, Field(ge=0)] | None
     track_status: str
+    lap_start_utc: datetime | None = None
+
+
+class SourceComponent(Contract):
+    source: ShortText
+    version: str | None = None
+    url: str
+    sha256: Sha256
+    retrieved_at: datetime
+    license_name: str | None = None
+    license_url: str | None = None
 
 
 class TimingProvenance(Contract):
-    source: Literal["fastf1"] = "fastf1"
-    fastf1_version: str
+    source: Literal["fastf1", "openf1", "openf1_tracinginsights"] = "fastf1"
+    fastf1_version: str | None = None
+    provider_version: str | None = None
+    source_retrieved_at: datetime | None = None
+    source_urls: list[str] = []
+    verification_scope: str | None = None
+    components: list[SourceComponent] = []
     pipeline_version: str
     methodology_version: str
     source_snapshot_sha256: Sha256
@@ -79,6 +95,18 @@ class TimingProvenance(Contract):
     def require_timezone(self) -> Self:
         if self.generated_at.tzinfo is None:
             raise ValueError("generated_at must include a timezone")
+        if self.source_retrieved_at is not None and self.source_retrieved_at.tzinfo is None:
+            raise ValueError("source_retrieved_at must include a timezone")
+        if self.source == "fastf1" and not self.fastf1_version:
+            raise ValueError("FastF1 provenance requires its library version")
+        if self.source == "openf1" and (not self.provider_version or self.fastf1_version is not None):
+            raise ValueError("OpenF1 provenance names its provider version, not a FastF1 version")
+        if self.source == "openf1_tracinginsights" and (
+            not self.provider_version or not {"openf1", "tracinginsights"}.issubset(
+                {component.source for component in self.components}
+            )
+        ):
+            raise ValueError("composite provenance requires both explicit source components")
         return self
 
 
@@ -151,6 +179,8 @@ class TrackGeometry(Contract):
 
     x: list[Finite | None]
     y: list[Finite | None]
+    coordinate_unit: Literal["m", "source_units"] = "m"
+    coordinate_note: str | None = None
 
 
 class ReconciliationCheck(Contract):
@@ -404,8 +434,10 @@ class ComparisonArtifact(ArtifactHeader):
         if any(len(values) != size for values in arrays):
             raise ValueError("all sample arrays must match distance_m length")
         native_fields = {
-            "speed_kph": {"Speed"}, "throttle_pct": {"Throttle"},
-            "gear": {"nGear"}, "brake": {"Brake"},
+            "speed_kph": {"Speed"} if self.provenance.source == "fastf1" else {"speed"},
+            "throttle_pct": {"Throttle"} if self.provenance.source == "fastf1" else {"throttle"},
+            "gear": {"nGear"} if self.provenance.source == "fastf1" else {"n_gear"},
+            "brake": {"Brake"} if self.provenance.source == "fastf1" else {"brake"},
         }
         for channels, provenance in ((self.channels_a, self.channel_provenance_a),
                                      (self.channels_b, self.channel_provenance_b)):

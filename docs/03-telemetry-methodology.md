@@ -1,6 +1,10 @@
 # Telemetry methodology
 
-This implementation specification uses method identifier `distance-v2`. Numerical thresholds are proposed project policy. T01 onward will validate them on real comparisons. This revision adds independent Q-phase selection, explicit data tiers, estimated minisectors and stable corner-speed categories.
+The original implementation specification uses method identifier `distance-v2`. The implemented Monza pilot uses **`distance-v3-openf1-native-composite`**, preserving the numerical thresholds, sign convention and quality fallbacks below. It has been exercised on real qualifying comparisons; this does not establish precise corner ground truth or validation for every circuit.
+
+### Implemented provider decision — 8 November 2026
+
+Native OpenF1 car/position streams are joined only after identity/timing checks to original TracingInsights/FastF1 lap clocks, phases and validity flags. Unknown flags, native masks and every raw timing residual are preserved; no time or sector fitting is introduced. OpenF1 geometry retains explicit source units rather than an assumed metre conversion; the analytical distance axis remains integrated speed. Schema 1.3.0 records component URLs/hashes/licences and actual native provider field names while accepting legacy 1.2.0 results. Earlier FastF1-only adapter descriptions below remain the direct-adapter specification, not a claim that this composite was downloaded through FastF1. [Exact source/quality decision and pilot limits](19-monza-2024-pilot.md).
 
 The prior user milestone [R01](16-results-first-milestone.md) now serves recorded qualifying classifications and same-phase duration differences. It does not run distance-v2 or establish any corner/telemetry evidence. Historical and SQ classification fields live in separate contracts; future native SQ/lap support needs explicit per-lap contract and eligibility review.
 

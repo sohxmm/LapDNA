@@ -273,9 +273,9 @@ export interface components {
             /**
              * Schema Version
              * @default 1.2.0
-             * @constant
+             * @enum {string}
              */
-            schema_version: "1.2.0";
+            schema_version: "1.2.0" | "1.3.0";
         };
         /**
          * ChannelProvenance
@@ -492,9 +492,9 @@ export interface components {
             /**
              * Schema Version
              * @default 1.2.0
-             * @constant
+             * @enum {string}
              */
-            schema_version: "1.2.0";
+            schema_version: "1.2.0" | "1.3.0";
             /** Sector Boundaries M */
             sector_boundaries_m: [
                 number,
@@ -628,6 +628,8 @@ export interface components {
             driver_name: string;
             /** Driver Number */
             driver_number: string;
+            /** Team Name */
+            team_name?: string | null;
         };
         /** ErrorDetail */
         ErrorDetail: {
@@ -692,6 +694,8 @@ export interface components {
             lap_id: string;
             /** Lap Number */
             lap_number: number;
+            /** Lap Start Utc */
+            lap_start_utc?: string | null;
             /** Lap Time Ms */
             lap_time_ms: number;
             /**
@@ -717,6 +721,8 @@ export interface components {
              * @enum {string}
              */
             capability: "telemetry" | "sector_only" | "unavailable";
+            /** Compound */
+            compound?: string | null;
             /** Driver Code */
             driver_code: string;
             /** Driver Name */
@@ -727,6 +733,8 @@ export interface components {
             lap_id: string;
             /** Lap Number */
             lap_number: number;
+            /** Lap Start Utc */
+            lap_start_utc?: string | null;
             /** Lap Time Ms */
             lap_time_ms: number | null;
             /**
@@ -742,6 +750,8 @@ export interface components {
                 number | null,
                 number | null
             ];
+            /** Tyre Life Laps */
+            tyre_life_laps?: number | null;
         };
         /** MetricEvidence */
         MetricEvidence: {
@@ -821,8 +831,13 @@ export interface components {
         Provenance: {
             /** Circuit Revision */
             circuit_revision: string;
+            /**
+             * Components
+             * @default []
+             */
+            components: components["schemas"]["SourceComponent"][];
             /** Fastf1 Version */
-            fastf1_version: string;
+            fastf1_version?: string | null;
             /**
              * Generated At
              * Format: date-time
@@ -832,6 +847,8 @@ export interface components {
             methodology_version: string;
             /** Pipeline Version */
             pipeline_version: string;
+            /** Provider Version */
+            provider_version?: string | null;
             /** Reference Lap Id */
             reference_lap_id: string;
             /** Reference Sha256 */
@@ -839,13 +856,22 @@ export interface components {
             /**
              * Source
              * @default fastf1
-             * @constant
+             * @enum {string}
              */
-            source: "fastf1";
+            source: "fastf1" | "openf1" | "openf1_tracinginsights";
+            /** Source Retrieved At */
+            source_retrieved_at?: string | null;
             /** Source Session */
             source_session: string;
             /** Source Snapshot Sha256 */
             source_snapshot_sha256: string;
+            /**
+             * Source Urls
+             * @default []
+             */
+            source_urls: string[];
+            /** Verification Scope */
+            verification_scope?: string | null;
         };
         /** QualityReport */
         QualityReport: {
@@ -942,9 +968,9 @@ export interface components {
             /**
              * Schema Version
              * @default 1.2.0
-             * @constant
+             * @enum {string}
              */
-            schema_version: "1.2.0";
+            schema_version: "1.2.0" | "1.3.0";
             /** Sector Delta Ms */
             sector_delta_ms: [
                 number,
@@ -1025,14 +1051,19 @@ export interface components {
             /**
              * Schema Version
              * @default 1.2.0
-             * @constant
+             * @enum {string}
              */
-            schema_version: "1.2.0";
+            schema_version: "1.2.0" | "1.3.0";
             /** Sessions */
             sessions: components["schemas"]["SessionSummary"][];
         };
         /** SessionLapIndex */
         SessionLapIndex: {
+            /**
+             * Data Points
+             * @default []
+             */
+            data_points: string[];
             /** Drivers */
             drivers: components["schemas"]["DriverEntry"][];
             /** Laps */
@@ -1040,12 +1071,21 @@ export interface components {
             /**
              * Schema Version
              * @default 1.2.0
-             * @constant
+             * @enum {string}
              */
-            schema_version: "1.2.0";
+            schema_version: "1.2.0" | "1.3.0";
             session: components["schemas"]["SessionIdentity"];
+            /** Source Name */
+            source_name?: string | null;
             /** Source Snapshot Sha256 */
             source_snapshot_sha256: string;
+            /** Source Url */
+            source_url?: string | null;
+            /**
+             * Warnings
+             * @default []
+             */
+            warnings: string[];
         };
         /** SessionSummary */
         SessionSummary: {
@@ -1055,10 +1095,35 @@ export interface components {
             selectable_lap_count: number;
             session: components["schemas"]["SessionIdentity"];
         };
+        /** SourceComponent */
+        SourceComponent: {
+            /** License Name */
+            license_name?: string | null;
+            /** License Url */
+            license_url?: string | null;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /** Sha256 */
+            sha256: string;
+            /** Source */
+            source: string;
+            /** Url */
+            url: string;
+            /** Version */
+            version?: string | null;
+        };
         /** TimingProvenance */
         TimingProvenance: {
+            /**
+             * Components
+             * @default []
+             */
+            components: components["schemas"]["SourceComponent"][];
             /** Fastf1 Version */
-            fastf1_version: string;
+            fastf1_version?: string | null;
             /**
              * Generated At
              * Format: date-time
@@ -1068,22 +1133,41 @@ export interface components {
             methodology_version: string;
             /** Pipeline Version */
             pipeline_version: string;
+            /** Provider Version */
+            provider_version?: string | null;
             /**
              * Source
              * @default fastf1
-             * @constant
+             * @enum {string}
              */
-            source: "fastf1";
+            source: "fastf1" | "openf1" | "openf1_tracinginsights";
+            /** Source Retrieved At */
+            source_retrieved_at?: string | null;
             /** Source Session */
             source_session: string;
             /** Source Snapshot Sha256 */
             source_snapshot_sha256: string;
+            /**
+             * Source Urls
+             * @default []
+             */
+            source_urls: string[];
+            /** Verification Scope */
+            verification_scope?: string | null;
         };
         /**
          * TrackGeometry
          * @description Display coordinates in metres; distance_m is the measurement axis.
          */
         TrackGeometry: {
+            /** Coordinate Note */
+            coordinate_note?: string | null;
+            /**
+             * Coordinate Unit
+             * @default m
+             * @enum {string}
+             */
+            coordinate_unit: "m" | "source_units";
             /** X */
             x: (number | null)[];
             /** Y */

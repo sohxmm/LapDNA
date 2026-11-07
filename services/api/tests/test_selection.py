@@ -56,7 +56,9 @@ def test_roster_includes_driver_without_lap_and_unprepared_pair(tmp_path, index_
     index_payload["drivers"].append({"driver_number": "903", "driver_name": "Synthetic C", "driver_code": "TSC"})
     client = setup_client(tmp_path, index_payload)
     assert client.get("/api/v1/sessions").json()["sessions"][0]["driver_count"] == 3
-    assert client.get("/api/v1/sessions/synthetic-session/laps").json()["drivers"] == index_payload["drivers"]
+    roster = client.get("/api/v1/sessions/synthetic-session/laps").json()["drivers"]
+    assert [{key: row[key] for key in ("driver_number", "driver_code", "driver_name")} for row in roster] == index_payload["drivers"]
+    assert all(row["team_name"] is None for row in roster)
     response = client.post("/api/v1/compare", json=request(index_payload))
     assert response.status_code == 409
     assert response.json()["error"]["code"] == "comparison_not_prepared"

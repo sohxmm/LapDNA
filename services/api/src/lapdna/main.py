@@ -30,8 +30,13 @@ def create_app(artifact_dir: Path | None = None, session_dir: Path | None = None
     ))
     default_dir = Path(__file__).resolve().parents[4] / "data" / "artifacts"
     directory = artifact_dir or Path(os.getenv("LAPDNA_ARTIFACT_DIR", str(default_dir)))
-    store = ArtifactStore(directory)
-    sessions = SessionStore(session_dir or Path(os.getenv("LAPDNA_SESSION_DIR", str(directory.parent / "sessions"))))
+    pilot_directory = Path(__file__).resolve().parent / "pilot_data"
+    pilot = None
+    if artifact_dir is None and session_dir is None and "LAPDNA_SESSION_DIR" not in os.environ and "LAPDNA_ARTIFACT_DIR" not in os.environ and (pilot_directory / "publication.json").is_file():
+        from lapdna.analysis.store import PilotStore
+        pilot = PilotStore(pilot_directory)
+    store = ArtifactStore(directory, resolver=pilot.resolve if pilot is not None else None)
+    sessions = SessionStore(session_dir or Path(os.getenv("LAPDNA_SESSION_DIR", str(pilot_directory / "sessions" if pilot is not None else directory.parent / "sessions"))), engine=pilot)
     origins = [origin.strip() for origin in os.getenv(
         "LAPDNA_CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
     ).split(",") if origin.strip()]
@@ -71,6 +76,14 @@ def create_app(artifact_dir: Path | None = None, session_dir: Path | None = None
     async def invalid_selection(_request, error: SelectionError):
         return JSONResponse(status_code=error.status, content={"error": {
             "code": error.code, "message": error.message,
+        }})
+
+    from lapdna.analysis.store import ComparisonBusy
+
+    @application.exception_handler(ComparisonBusy)
+    async def busy_comparison(_request, _error):
+        return JSONResponse(status_code=503, content={"error": {
+            "code": "comparison_busy", "message": "Comparison capacity is busy. Retry this selection shortly."
         }})
 
     @application.get("/api/v1/health", response_model=Health)

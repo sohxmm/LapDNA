@@ -1,0 +1,265 @@
+"""Offline normalization of one identity-checked session; serving never calls this."""
+
+from datetime import datetime, timezone
+import gzip
+from hashlib import sha256
+import json
+from pathlib import Path
+
+from lapdna.alignment.native import (
+    AlignmentError, aligned_channels, distance_at, linear, prepare_lap, support, utc_seconds,
+)
+from lapdna.alignment.reference import canonical_grid, geometry_at, monza_regions, project_markers
+from lapdna.analysis.engine import METHOD, PIPELINE, canonical_hash, grade, quality
+from lapdna.inventory import SessionLapIndex
+
+
+SESSION = {"session_id": "2024-16-monza-Q", "year": 2024, "round": 16,
+           "session_type": "Q", "circuit_id": "monza", "event_name": "Italian Grand Prix"}
+
+
+def roster_and_laps(snapshot):
+    drivers = {str(row["driver_number"]): row for row in snapshot["drivers"]}
+    roster = [{"driver_number": number, "driver_code": row["name_acronym"],
+               "driver_name": row.get("full_name") or f"{row['first_name']} {row['last_name']}",
+               "team_name": row.get("team_name")} for number, row in drivers.items()]
+    positions = {str(row["driver_number"]): row.get("position") for row in snapshot.get("session_results", [])}
+    roster.sort(key=lambda row: (positions.get(row["driver_number"]) or 999, int(row["driver_number"])))
+    metadata = {}
+    options = []
+    for row in snapshot["laps"]:
+        phase = row.get("phase")
+        if phase not in ("Q1", "Q2", "Q3"):
+            continue
+        number = str(row["driver_number"])
+        driver = drivers[number]
+        value = {"lap_id": row["lap_id"], "phase": phase, "driver_number": number,
+                 "driver_code": driver["name_acronym"], "driver_name": driver["full_name"],
+                 "lap_number": row["lap_number"], "lap_time_ms": row.get("lap_time_ms"),
+                 "sector_times_ms": row["sector_times_ms"], "compound": row.get("compound"),
+                 "tyre_life_laps": row.get("tyre_life_laps"), "lap_start_utc": row.get("lap_start_utc")}
+        reasons = list(row.get("exclusion_reasons", []))
+        candidate = row.get("timing_candidate") is True
+        if candidate:
+            duration, sectors = value["lap_time_ms"], value["sector_times_ms"]
+            if duration is None or duration <= 0 or any(sector is None or sector <= 0 for sector in sectors):
+                candidate = False
+                reasons.append("Recorded lap/sector timings are incomplete.")
+            elif abs(sum(sectors) - duration) > 20.0001:
+                candidate = False
+                reasons.append("Recorded sector sum differs from lap duration by more than 20 ms.")
+            elif abs((utc_seconds(row["lap_end_utc"]) - utc_seconds(row["lap_start_utc"])) * 1000 - duration) > 20.0001:
+                candidate = False
+                reasons.append("Source lap clock differs from recorded duration by more than 20 ms.")
+        if not candidate and not reasons:
+            reasons.append("Source timing/eligibility checks did not establish a clean complete lap.")
+        options.append({**value, "capability": "sector_only" if candidate else "unavailable",
+                        "reasons": reasons or ["Telemetry alignment has not yet passed its quality gates."]})
+        if candidate:
+            metadata[row["lap_id"]] = {**value, "track_status": "1"}
+    return roster, options, metadata
+
+
+def lap_metrics(prepared, regions, markers):
+    native = prepared["native"]
+    distances, elapsed = native["distance_m"], native["elapsed_ms"]
+    output = {}
+    for region in regions:
+        start, end = region["start_m"], region["end_m"]
+        fields = {"speed": support(prepared, start, end), "brake": support(prepared, start, end, "brake"),
+                  "throttle": support(prepared, start, end, "throttle_pct")}
+        local_markers = [marker for marker in markers if marker["segment_id"] == region["segment_id"]]
+        approach_end = local_markers[0]["distance_m"] if local_markers else start
+        onsets = []
+        for i in range(1, len(distances) - 1):
+            if not start <= distances[i] <= approach_end:
+                continue
+            if native["brake"][i - 1] is False and native["brake"][i] is True and native["brake"][i + 1] is True:
+                if 200 <= elapsed[i + 1] - elapsed[i] <= 500.0001 and elapsed[i] - elapsed[i - 1] <= 500.0001:
+                    onsets.append([distances[i - 1], distances[i]])
+        fields["brake"]["onset"] = onsets[0] if len(onsets) == 1 else None
+        local = [i for i, distance in enumerate(distances) if start <= distance <= end]
+        min_index = min(local, key=lambda i: native["speed_kph"][i]) if local else None
+        pickup = None
+        if min_index is not None:
+            for i in range(max(1, min_index + 1), len(distances) - 2):
+                if distances[i] > end:
+                    break
+                values = native["throttle_pct"][i - 1:i + 3]
+                if (all(value is not None for value in values) and values[0] < 95
+                        and all(value >= 95 for value in values[1:])
+                        and 400 <= elapsed[i + 2] - elapsed[i] <= 1000.0001
+                        and max(elapsed[j + 1] - elapsed[j] for j in range(i - 1, i + 2)) <= 500.0001):
+                    pickup = [distances[i - 1], distances[i]]
+                    break
+        fields["throttle"]["pickup"] = pickup
+        # Positive native counts and spans are retained, never inferred from
+        # the much denser display grid.
+        output[region["segment_id"]] = fields
+    return output
+
+
+def _components(snapshot):
+    provenance = snapshot.get("provenance", {})
+    components = provenance.get("components", [])
+    if not components:
+        records = provenance.get("source_records", []) + provenance.get("archive_records", [])
+        for record in records:
+            url = record.get("source_url", "")
+            source = "openf1" if "api.openf1.org/" in url else "tracinginsights" if "TracingInsights/" in url else "multiviewer" if "api.multiviewer.app/" in url else None
+            if source is None:
+                continue
+            components.append({"source": source, "version": record.get("archive_commit") or ("v1" if source == "openf1" else "2024"),
+                               "url": url, "sha256": record["sha256"], "retrieved_at": record["retrieved_at"],
+                               "license_name": "CC BY-NC-SA 4.0" if source == "openf1" else "MIT; archive software/data scope and upstream rights remain distinct" if source == "tracinginsights" else "Public endpoint; redistribution terms not verified",
+                               "license_url": "https://github.com/br-g/openf1/blob/main/LICENSE" if source == "openf1" else
+                               "https://github.com/TracingInsights/2024/blob/d1543a71370d9b617b627319f8ad80b2f85dfd5e/LICENSE" if source == "tracinginsights" else None})
+    if not {"openf1", "tracinginsights"}.issubset({item["source"] for item in components}):
+        raise ValueError("composite snapshot requires explicit provider component hashes")
+    return components
+
+
+def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
+    if snapshot.get("source") != "openf1_tracinginsights":
+        raise ValueError("Monza publication requires identity-checked composite timing and native telemetry")
+    components = _components(snapshot)
+    source_hash = canonical_hash(snapshot)
+    roster, options, metadata = roster_and_laps(snapshot)
+    source_laps = {row["lap_id"]: row for row in snapshot["laps"]}
+    report = {"method": METHOD, "source_snapshot_sha256": source_hash, "lap_count": len(snapshot["laps"]),
+              "roster_count": len(roster), "reference_attempts": [], "laps": {}}
+    prepared = {}
+    candidates = sorted(metadata.values(), key=lambda row: (row["lap_time_ms"], int(row["driver_number"]), row["lap_number"]))
+    for lap in candidates:
+        raw = source_laps[lap["lap_id"]]
+        try:
+            prepared[lap["lap_id"]] = prepare_lap(snapshot["car_data"].get(lap["driver_number"], []),
+                utc_seconds(raw["lap_start_utc"]), utc_seconds(raw["lap_end_utc"]))
+        except AlignmentError as exc:
+            report["laps"][lap["lap_id"]] = {"capability": "sector_only", "reasons": [str(exc)]}
+    reference_id = None
+    for candidate in candidates:
+        identifier = candidate["lap_id"]
+        if identifier not in prepared:
+            continue
+        native = prepared[identifier]
+        trial_grid = canonical_grid(native["length"], [], [], [])
+        try:
+            trial_geometry = geometry_at(native, snapshot["position_data"].get(candidate["driver_number"], []), trial_grid)
+            markers = project_markers(snapshot["markers"], trial_grid, trial_geometry, native)
+            regions = monza_regions(markers, native["length"])
+            crossings = source_laps[identifier].get("sector_crossing_utc")
+            if not crossings or len(crossings) < 2:
+                raise AlignmentError("reference lacks actual source sector crossing timestamps")
+            sectors = [distance_at(native, (utc_seconds(value) - native["start"]) * 1000) for value in crossings[:2]]
+            if any(value is None for value in sectors):
+                raise AlignmentError("reference sector crossings are outside native coverage")
+            grid = canonical_grid(native["length"], markers, regions, sectors)
+            geometry = geometry_at(native, snapshot["position_data"].get(candidate["driver_number"], []), grid)
+            reference_id = identifier
+            report["reference_attempts"].append({"lap_id": identifier, "status": "accepted"})
+            break
+        except AlignmentError as exc:
+            report["reference_attempts"].append({"lap_id": identifier, "status": "rejected", "reason": str(exc)})
+    if reference_id is None:
+        raise ValueError("no timing-eligible lap supplies a usable reference geometry/profile")
+    source_provenance = snapshot["provenance"]
+    retrieved = source_provenance.get("retrieved_at") or source_provenance.get("source_retrieved_at")
+    if not retrieved:
+        raise ValueError("snapshot must retain actual retrieval timestamp")
+    publication = {"schema_version": "1.3.0", "session": SESSION, "reference_lap_id": reference_id,
+                   "distance_m": grid, "geometry": geometry, "regions": regions,
+                   "corners": [{key: value for key, value in marker.items() if key != "projection_error_source_units"} for marker in markers],
+                   "sector_boundaries_m": sectors, "laps": {},
+                   "provenance": {"source": "openf1_tracinginsights", "fastf1_version": None,
+                                  "provider_version": "OpenF1 v1 + TracingInsights 2024 pinned archive",
+                                  "source_retrieved_at": retrieved, "generated_at": retrieved,
+                                  "source_urls": source_provenance.get("source_urls", [item["url"] for item in components]),
+                                  "components": components, "source_snapshot_sha256": source_hash,
+                                  "verification_scope": "Identity-matched source timings, native-channel support and numerical reconciliation. FIA spot checks cover NOR/PIA phase-best timing only; other records are feed-checked. Local estimates are approximate. Source licences do not independently grant all underlying F1 redistribution rights.",
+                                  "source_session": "2024 Italian Grand Prix Qualifying / OpenF1 session 9586 / TracingInsights 2024"}}
+    publication["reference_sha256"] = canonical_hash({"reference_lap_id": reference_id, "geometry": geometry,
+                                                      "regions": regions, "corners": publication["corners"], "grid": grid,
+                                                      "method": METHOD})
+    length = grid[-1]
+    option_map = {option["lap_id"]: option for option in options}
+    for candidate in candidates:
+        identifier, raw = candidate["lap_id"], source_laps[candidate["lap_id"]]
+        record = {"metadata": candidate}
+        publication["laps"][identifier] = record
+        if identifier not in prepared:
+            option_map[identifier]["reasons"] = report["laps"][identifier]["reasons"]
+            continue
+        try:
+            native = prepare_lap(snapshot["car_data"][candidate["driver_number"]],
+                                 utc_seconds(raw["lap_start_utc"]), utc_seconds(raw["lap_end_utc"]), length)
+            record.update(channels=aligned_channels(native, grid), metrics=lap_metrics(native, regions, markers),
+                          integrated_length_m=native["integrated_length_m"], scale_factor=native["scale_factor"],
+                          native_count=native["native"]["native_count"], max_native_gap_ms=native["native"]["max_gap_ms"])
+            # Individual residuals must pass before a pair can hide errors by
+            # cancellation. Compare against the frozen reference locations.
+            residuals = [linear(grid, record["channels"]["time_raw_ms"], sectors[i]) - sum(candidate["sector_times_ms"][:i + 1]) for i in range(2)]
+            sector_error = sum(candidate["sector_times_ms"]) - candidate["lap_time_ms"]
+            sliced_error = record["channels"]["time_raw_ms"][-1] - candidate["lap_time_ms"]
+            blocked = (max(abs(value) for value in residuals) > 150.0001 or abs(record["scale_factor"] - 1) > .0300001
+                       or abs(sector_error) > 20.0001 or abs(sliced_error) > 20.0001)
+            report["laps"][identifier] = {"capability": "sector_only" if blocked else "telemetry",
+                "interior_residual_ms": residuals, "sector_sum_residual_ms": sector_error,
+                "sliced_residual_ms": sliced_error, "scale_factor": record["scale_factor"],
+                "integrated_length_m": record["integrated_length_m"], "native_count": record["native_count"],
+                "max_native_gap_ms": record["max_native_gap_ms"]}
+            if blocked:
+                record.pop("channels")
+                record.pop("metrics")
+                option_map[identifier]["reasons"] = ["Telemetry blocked by unadjusted interior residual, distance scale or timing consistency; inspect source diagnostics."]
+            else:
+                option_map[identifier].update(capability="telemetry", reasons=[])
+        except AlignmentError as exc:
+            report["laps"][identifier] = {"capability": "sector_only", "reasons": [str(exc)]}
+            option_map[identifier]["reasons"] = [str(exc)]
+    publication["publication_sha256"] = canonical_hash(publication)
+    data_points = ["Recorded lap and sector timing", "Q1/Q2/Q3 and source validity", "Native speed (km/h)",
+                   "Native throttle (%)", "Native gear", "Native binary brake", "Approximate location and 11 source turn markers",
+                   "Event-specific drivers/teams", "Compound and tyre age", "Source lap clocks and weather/race control context",
+                   "Derived distance, delta, local gains and evidence-backed observations"]
+    index = {"schema_version": "1.3.0", "session": SESSION, "source_snapshot_sha256": source_hash,
+             "drivers": roster, "laps": options, "source_name": "OpenF1 + TracingInsights",
+             "source_url": "https://openf1.org/docs/", "data_points": data_points,
+             "warnings": ["Public telemetry supports approximate local analysis; brake is binary, not pressure.",
+                          "Map coordinates remain in their source frame. Timing distance is integrated speed.",
+                          "Eligible laps can still fall back to sectors when pair reconciliation fails."]}
+    report["reference_lap_id"] = reference_id
+    report["reference_length_m"] = length
+    report["markers"] = markers
+    report["regions"] = regions
+    report["telemetry_laps"] = sum(option["capability"] == "telemetry" for option in options)
+    report["sector_only_laps"] = sum(option["capability"] == "sector_only" for option in options)
+    report["unavailable_laps"] = sum(option["capability"] == "unavailable" for option in options)
+    return publication, SessionLapIndex.model_validate_json(json.dumps(index)), report
+
+
+def write_publication(snapshot_path: Path, output: Path):
+    snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    publication, index, report = prepare_publication(snapshot)
+    normalized = json.dumps(publication, separators=(",", ":"), allow_nan=False).encode()
+    if len(normalized) > 20 * 1024 * 1024:
+        raise ValueError("normalized pilot publication exceeds bounded reader size")
+    outputs = {
+        output / "sessions" / f"{SESSION['session_id']}.json": index.model_dump_json().encode(),
+        output / "normalized" / f"{SESSION['session_id']}.json.gz": gzip.compress(normalized, mtime=0),
+        output / "reports" / "monza-2024.json": json.dumps(report, indent=2, allow_nan=False).encode(),
+    }
+    manifest = {"session_id": SESSION["session_id"], "schema_version": "1.3.0", "method": METHOD,
+                "source_snapshot_sha256": index.source_snapshot_sha256,
+                "publication_sha256": publication["publication_sha256"],
+                "files": {str(path.relative_to(output)).replace("\\", "/"): sha256(data).hexdigest() for path, data in outputs.items()}}
+    for path, data in outputs.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = path.with_suffix(path.suffix + ".tmp")
+        temporary.write_bytes(data)
+        temporary.replace(path)
+    manifest_path = output / "publication.json"
+    temporary = manifest_path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    temporary.replace(manifest_path)
+    return report, len(normalized), len(outputs[output / "normalized" / f"{SESSION['session_id']}.json.gz"])

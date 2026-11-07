@@ -44,11 +44,17 @@ def read_local_json(directory: Path, identifier: str) -> bytes:
 
 
 class ArtifactStore:
-    def __init__(self, directory: Path):
+    def __init__(self, directory: Path, resolver=None):
         self.directory = directory.resolve()
+        self.resolver = resolver
 
     def load(self, comparison_id: str) -> Artifact:
-        raw = read_local_json(self.directory, comparison_id)
+        try:
+            raw = read_local_json(self.directory, comparison_id)
+        except ArtifactNotFound:
+            if self.resolver is not None and ID_PATTERN.fullmatch(comparison_id):
+                return self.resolver(comparison_id)
+            raise
         try:
             artifact = ARTIFACT_ADAPTER.validate_json(raw)
         except (ValidationError, ValueError) as exc:

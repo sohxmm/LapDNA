@@ -272,8 +272,11 @@
           "$ref": "#/$defs/QualityReport"
         },
         "schema_version": {
-          "const": "1.2.0",
           "default": "1.2.0",
+          "enum": [
+            "1.2.0",
+            "1.3.0"
+          ],
           "title": "Schema Version",
           "type": "string"
         },
@@ -745,6 +748,19 @@
           "title": "Lap Number",
           "type": "integer"
         },
+        "lap_start_utc": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lap Start Utc"
+        },
         "lap_time_ms": {
           "exclusiveMinimum": 0,
           "title": "Lap Time Ms",
@@ -1075,9 +1091,25 @@
           "title": "Circuit Revision",
           "type": "string"
         },
+        "components": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SourceComponent"
+          },
+          "title": "Components",
+          "type": "array"
+        },
         "fastf1_version": {
-          "title": "Fastf1 Version",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fastf1 Version"
         },
         "generated_at": {
           "format": "date-time",
@@ -1092,6 +1124,18 @@
           "title": "Pipeline Version",
           "type": "string"
         },
+        "provider_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Version"
+        },
         "reference_lap_id": {
           "pattern": "^[A-Za-z0-9_-]{1,100}$",
           "title": "Reference Lap Id",
@@ -1103,10 +1147,27 @@
           "type": "string"
         },
         "source": {
-          "const": "fastf1",
           "default": "fastf1",
+          "enum": [
+            "fastf1",
+            "openf1",
+            "openf1_tracinginsights"
+          ],
           "title": "Source",
           "type": "string"
+        },
+        "source_retrieved_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Retrieved At"
         },
         "source_session": {
           "title": "Source Session",
@@ -1116,10 +1177,29 @@
           "pattern": "^[a-f0-9]{64}$",
           "title": "Source Snapshot Sha256",
           "type": "string"
+        },
+        "source_urls": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Urls",
+          "type": "array"
+        },
+        "verification_scope": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Verification Scope"
         }
       },
       "required": [
-        "fastf1_version",
         "pipeline_version",
         "methodology_version",
         "source_snapshot_sha256",
@@ -1332,8 +1412,11 @@
           "$ref": "#/$defs/SectorQuality"
         },
         "schema_version": {
-          "const": "1.2.0",
           "default": "1.2.0",
+          "enum": [
+            "1.2.0",
+            "1.3.0"
+          ],
           "title": "Schema Version",
           "type": "string"
         },
@@ -1586,12 +1669,97 @@
       "title": "SessionIdentity",
       "type": "object"
     },
+    "SourceComponent": {
+      "additionalProperties": false,
+      "properties": {
+        "license_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "License Name"
+        },
+        "license_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "License Url"
+        },
+        "retrieved_at": {
+          "format": "date-time",
+          "title": "Retrieved At",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "source": {
+          "maxLength": 600,
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Version"
+        }
+      },
+      "required": [
+        "source",
+        "url",
+        "sha256",
+        "retrieved_at"
+      ],
+      "title": "SourceComponent",
+      "type": "object"
+    },
     "TimingProvenance": {
       "additionalProperties": false,
       "properties": {
+        "components": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SourceComponent"
+          },
+          "title": "Components",
+          "type": "array"
+        },
         "fastf1_version": {
-          "title": "Fastf1 Version",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fastf1 Version"
         },
         "generated_at": {
           "format": "date-time",
@@ -1606,11 +1774,40 @@
           "title": "Pipeline Version",
           "type": "string"
         },
+        "provider_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Version"
+        },
         "source": {
-          "const": "fastf1",
           "default": "fastf1",
+          "enum": [
+            "fastf1",
+            "openf1",
+            "openf1_tracinginsights"
+          ],
           "title": "Source",
           "type": "string"
+        },
+        "source_retrieved_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Retrieved At"
         },
         "source_session": {
           "title": "Source Session",
@@ -1620,10 +1817,29 @@
           "pattern": "^[a-f0-9]{64}$",
           "title": "Source Snapshot Sha256",
           "type": "string"
+        },
+        "source_urls": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Urls",
+          "type": "array"
+        },
+        "verification_scope": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Verification Scope"
         }
       },
       "required": [
-        "fastf1_version",
         "pipeline_version",
         "methodology_version",
         "source_snapshot_sha256",
@@ -1637,6 +1853,27 @@
       "additionalProperties": false,
       "description": "Display coordinates in metres; distance_m is the measurement axis.",
       "properties": {
+        "coordinate_note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Coordinate Note"
+        },
+        "coordinate_unit": {
+          "default": "m",
+          "enum": [
+            "m",
+            "source_units"
+          ],
+          "title": "Coordinate Unit",
+          "type": "string"
+        },
         "x": {
           "items": {
             "anyOf": [

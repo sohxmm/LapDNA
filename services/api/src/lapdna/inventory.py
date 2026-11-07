@@ -16,6 +16,7 @@ class DriverEntry(Contract):
     driver_number: Annotated[str, Field(pattern=r"^[0-9]{1,3}$")]
     driver_code: Annotated[str, Field(pattern=r"^[A-Z0-9]{2,4}$")]
     driver_name: ShortText
+    team_name: ShortText | None = None
 
 
 class LapOption(LapIdentity):
@@ -23,6 +24,9 @@ class LapOption(LapIdentity):
     sector_times_ms: tuple[Nonnegative | None, Nonnegative | None, Nonnegative | None]
     capability: Literal["telemetry", "sector_only", "unavailable"]
     reasons: list[ShortText]
+    compound: str | None = None
+    tyre_life_laps: Nonnegative | None = None
+    lap_start_utc: str | None = None
 
     @model_validator(mode="after")
     def check_capability(self) -> Self:
@@ -41,6 +45,10 @@ class SessionLapIndex(Contract):
     source_snapshot_sha256: Sha256
     drivers: list[DriverEntry]
     laps: list[LapOption]
+    source_name: str | None = None
+    source_url: str | None = None
+    data_points: list[ShortText] = []
+    warnings: list[ShortText] = []
 
     @model_validator(mode="after")
     def check_identity(self) -> Self:
@@ -85,8 +93,9 @@ class SelectionError(Exception):
 
 
 class SessionStore:
-    def __init__(self, directory: Path):
+    def __init__(self, directory: Path, engine=None):
         self.directory = directory.resolve()
+        self.engine = engine
 
     def load(self, session_id: str) -> SessionLapIndex:
         raw = read_local_json(self.directory, session_id)
@@ -156,6 +165,29 @@ class SessionStore:
                     raise InvalidArtifact("cached lap disagrees with imported inventory")
             candidates.append(artifact)
         if not candidates:
+            if self.engine is not None:
+                from lapdna.analysis.engine import ComparisonUnavailable
+                from lapdna.analysis.store import ComparisonBusy
+                try:
+                    chosen = self.engine.compare(request.session_id, a.lap_id, b.lap_id, request.detail_level)
+                except ArtifactNotFound as exc:
+                    raise SelectionError(409, "comparison_not_prepared", "This session has no normalized local publication.") from exc
+                except ComparisonBusy as exc:
+                    raise SelectionError(503, "comparison_busy", "Comparison capacity is busy. Retry this selection shortly.") from exc
+                except ComparisonUnavailable as exc:
+                    raise SelectionError(422, "telemetry_quality_blocked", str(exc)) from exc
+                except (ValidationError, KeyError, TypeError, ValueError) as exc:
+                    raise InvalidArtifact("computed comparison failed dataset validation") from exc
+                if chosen.provenance.source_snapshot_sha256 != index.source_snapshot_sha256:
+                    raise InvalidArtifact("normalized publication disagrees with session snapshot")
+                for lap in (chosen.lap_a, chosen.lap_b):
+                    option = options.get(lap.lap_id)
+                    if option is None or (lap.driver_number, lap.driver_code, lap.driver_name, lap.phase,
+                                          lap.lap_number, lap.lap_time_ms, lap.sector_times_ms) != (
+                            option.driver_number, option.driver_code, option.driver_name, option.phase,
+                            option.lap_number, option.lap_time_ms, option.sector_times_ms):
+                        raise InvalidArtifact("normalized lap disagrees with imported inventory")
+                return CompareResponse(artifact=chosen, swapped=chosen.lap_a.lap_id != a.lap_id)
             raise SelectionError(409, "comparison_not_prepared", "This lap pair has no prepared result yet.")
         chosen = max(candidates, key=lambda item: (
             item.detail_level == "telemetry", item.provenance.generated_at, item.comparison_id,
