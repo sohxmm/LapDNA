@@ -6,7 +6,7 @@ The R01 recorded-results studio generates a short deterministic comparison from 
 
 The synthetic preview contains a fixed illustrative paragraph and a precomputed fictional metric fixture. It does not call an LLM. Real-result components currently read `artifact.analysis.text` and `artifact.observations` from the selected immutable comparison artifact. Different artifacts can contain different summaries; the browser does not ask a model to write a new one on every view.
 
-The planned numerical engine computes the evidence for the exact selected laps, then produces deterministic templates from those facts. It is unfinished until the actual-import/alignment/evidence tickets pass. The current saved-artifact renderer is not evidence that those computations already exist.
+The Monza 2024 numerical engine now computes the evidence for the exact selected actual laps and produces deterministic templates from those facts on a local cache miss. Repeated comparisons reuse the immutable result; swapping changes view orientation while preserving driver-identity-based wording. It generates corner-speed summaries and zero to three regional observations under the support/sensitivity gates. This is actual per-comparison analysis, not a preloaded list of driver-pair paragraphs. Other telemetry events still require import/preparation. [Implemented pilot and verification](19-monza-2024-pilot.md).
 
 ## Can an LLM generate fresh analysis?
 

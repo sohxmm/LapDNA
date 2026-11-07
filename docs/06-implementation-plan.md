@@ -1,37 +1,42 @@
 # Implementation tickets
 
-T00 is the runnable scaffold. T01–T12 are implementation work. Take the first unfinished ticket whose prerequisites passed, run its checks and record actual results in the [handoff](10-handoff.md). A ticket may contain multiple small verified features. Commit and push each independently usable change as it passes. The two-week schedule assumes source access and suitable real sessions.
+Updated 8 November 2026. T00 is the original scaffold; **T01–T10 now work locally for the Monza 2024 pilot**, using the explicit reviewed source exception in [the pilot guide](19-monza-2024-pilot.md). T11's other circuits/archive expansion and T12's broader release work remain open. Take the first unfinished dependency-ready checkpoint, run its checks and record results in [handoff](10-handoff.md). Commit and push each independently usable change as it passes. The original schedule is not a promise for the expanded archive.
 
-**User priority update, 7 November:** [R01 recorded results first](16-results-first-milestone.md) precedes the telemetry tickets. It imports final phase/session bests, event-specific driver/team records and same-phase comparisons across available years. Individual runs/laps are explicitly deferred to R02, which resumes T01/T02 before numerical telemetry work. Do not mistake classification ingestion for completion of T01.
+**User priority update, 7 November:** [R01 recorded results first](16-results-first-milestone.md) preceded native lap work and is complete. It imports final phase/session bests, event-specific driver/team records and same-phase comparisons across available years. The subsequent Monza milestone now supplies actual lap selection through the source/numerical gates; inferred run-number labels remain deferred. Classification ingestion alone never satisfies a telemetry ticket.
 
 **Approved follow-up:** [UI and scope decision](17-approved-ui-and-telemetry-rollout.md): A sports-editorial landing, G1 stacked overlays, detailed telemetry limited to verified sessions/channels in 2018–2026, older timing comparisons preserved. The three original circuits are validation pilots before all source-supported events/layouts. U01 is the interface checkpoint; it does not satisfy T01 or real telemetry acceptance.
+
+**Implemented pilot decision, 8 November:** native OpenF1 car/location plus identity-matched pinned TracingInsights timing/phase/validity data replace the unavailable tested direct archive path for Monza. Method `distance-v3-openf1-native-composite`, contract 1.3.0 (legacy 1.2.0 accepted). This closes the Monza source-to-comparison pilot, not the direct authenticated FastF1 adapter. The detailed tickets below retain their numerical/acceptance requirements; their original FastF1-specific commands/interfaces are historical work orders where superseded by the implemented modules/scripts and source decision in doc 19. Do not rebuild completed components or declare other circuits imported.
 
 ## Status board
 
 | Ticket | Deliverable | Requires | Day | Status |
 | --- | --- | --- | --- | --- |
 | T00 | Contracts, local selection boundary, synthetic chart preview and source probe | — | Setup | Complete |
-| U01 | Approved landing and compact recorded-results studio | R01 | UI | Complete; real telemetry remains T01–T12 |
-| T01 | Pinned FastF1 session import | T00 | 1 | Not started |
-| T02 | Full qualifying roster, actual phase/lap inventory and eligibility | T01 | 2 | Not started |
-| T03 | Frozen reference geometry, turn markers and reviewed windows | T02 | 3 | Not started |
-| T04 | Offline lap normalization, raw delta and reconciliation | T03 | 4 | Not started |
-| T05 | Local pair resolver, two result tiers, findings and cache | T04 | 5 | Not started |
-| T06 | Production driver/phase/lap selection | T05 | 5 | Not started |
-| T07 | Synchronized real telemetry, turns, minisectors and sector fallback | T06 | 6 | Not started |
-| T08 | Performance map linked to shared distance | T07 | 7 | Not started |
-| T09 | Category analysis, corner/straight ranking and evidence | T08 | 8 | Not started |
-| T10 | Shareable comparisons and PNG/JSON cards | T09 | 8 | Not started |
-| T11 | Three pilot inventories, then verified 2018–2026 session/layout expansion | T10 | Pilot day 9; archive separately scoped | Not started |
-| T12 | Release packaging and verification | T11 | 10 | Not started |
+| U01 | Approved landing and compact recorded-results studio | R01 | UI | Complete; original interface checkpoint |
+| U02 | Shared editorial theme and persistent dark/light modes | U01 | UI | Complete locally; hosted QA pending |
+| T01 | Full Monza session import with pinned explicit composite | T00 | 1 | Monza complete; direct FastF1 account adapter deferred |
+| T02 | Full qualifying roster, actual phase/lap inventory and eligibility | T01 | 2 | Monza complete: 20 drivers, 276 actual laps |
+| T03 | Frozen reference geometry, turn markers and reviewed windows | T02 | 3 | Monza complete; other layouts pending |
+| T04 | Offline lap normalization, raw delta and reconciliation | T03 | 4 | Monza complete: 40 telemetry, 39 eligible sector-only laps |
+| T05 | Local pair resolver, two result tiers, findings and cache | T04 | 5 | Monza complete; durable multi-revision archive remains open |
+| T06 | Production driver/phase/lap selection | T05 | 5 | Monza complete; run-number labels deferred |
+| T07 | Synchronized real telemetry, turns, minisectors and sector fallback | T06 | 6 | Monza complete locally; release/mobile QA continues |
+| T08 | Performance map linked to shared distance | T07 | 7 | Monza complete locally; broader layout review pending |
+| T09 | Category analysis, corner/straight ranking and evidence | T08 | 8 | Monza complete; no runtime LLM |
+| T10 | Shareable comparisons and PNG/JSON cards | T09 | 8 | Monza complete locally; final dark/mobile/export QA continues |
+| T11 | Three pilot inventories, then verified 2018–2026 session/layout expansion | T10 | Archive separately scoped | Open: Monza only; Silverstone/Suzuka/bulk pending |
+| T12 | Release packaging and verification | T11 | Release | Open: single-pilot local bundle prepared; hosted and broader durable-release gates pending |
 
 ## T00 — Existing foundation
 
-The API exposes health, sourced year/calendar metadata, session inventory, session laps, prepared artifact catalogue/lookup and a local selection POST. Contract v1.2.0 distinguishes telemetry and sector-only results and requires per-driver native-channel provenance. Calendar navigation starts with the current year, then a real race, then its studio. The selection path validates a request, enforces cross-phase opt-in and finds an existing compatible artifact. A valid uncached selection gets an explicit preparation error. The React workspace reads inventory, selects actual indexed laps/phases and renders supplied cached artifacts through a chart, sector-only view or evidence panels as appropriate. A separate labeled synthetic ECharts preview preserves all four channels and runs without an import. See [contracts](05-contracts.md) for the current routes and shapes.
+The original scaffold established health, sourced year/calendar metadata, session/lap inventory, artifact catalogue/lookup, local selection validation and the separate synthetic ECharts preview. Current contract 1.3.0 extends that boundary with composite provenance and explicit geometry units while retaining 1.2.0 reads. Monza now computes a new eligible pair from frozen normalized local inputs instead of stopping at a prepared-artifact cache miss. Sessions without a publication retain an honest unavailable/not-prepared response. The full actual roster/phases/laps, context, quality and capability-specific output share the same workspace. See [contracts](05-contracts.md) for current routes and [the pilot guide](19-monza-2024-pilot.md) for actual import coverage.
 
-The [historical source probe](09-sources.md) checked OpenF1 availability for one Monza driver/lap. The first real FastF1 import, pair computation, public-data comparison view, results and exports belong to the tickets below. Synthetic examples and schema checks cannot satisfy real-data acceptance gates.
+The earlier [historical source probe](09-sources.md) established one lap's availability only. The completed Monza composite import and comparison now have a full source/identity report and selected external timing checks. Neither those Monza checks nor synthetic/schema fixtures satisfy acceptance for another event, circuit or source adapter.
 
 ## T01 — Import one supported session
+
+Monza is complete through the explicit source exception in [doc 19](19-monza-2024-pilot.md). The original direct FastF1 adapter specification below remains a future adapter work order; it must not be reported as implemented by the composite importer. Use the actual `scripts/import_telemetry.py`/publication/validation interfaces for the current pilot.
 
 Read [methodology §§2–4](03-telemetry-methodology.md), the [source register](09-sources.md), [20-source audit](13-data-source-audit.md), [field inventory](15-data-points-and-rollout.md) and [operations](08-operations.md). Implement `ingestion/{adapter,snapshot}.py`, `cli.py`, the data dependency lock and offline adapter tests in the API package.
 

@@ -4,6 +4,8 @@ Decision: user instruction, 7 November 2026. Implement recorded qualifying class
 
 Follow-up approved that day: [sports-editorial UI, stacked overlays and verified 2018–2026 telemetry](17-approved-ui-and-telemetry-rollout.md). Retain R01 timing comparisons before 2018. Detailed telemetry coverage is verified per actual session/lap/channel; older years and unimported sessions never receive synthetic continuous traces. The three pilot circuits precede expansion across supported events/layouts.
 
+**8 November update:** the user's Monza request is implemented locally through the [real 2024 pilot](19-monza-2024-pilot.md), including all actual laps, phases, native telemetry/sector fallback and individual lap selectors. Run 1 / Run 2 labels remain deferred; actual lap number is shown without guessing a matched attempt. The R01 publication and its broader historical coverage remain unchanged.
+
 ## R01 — Working recorded-results comparison
 
 The first real-data release imports published phase/session best times and event-specific participant/team records. It supports any available circuit in the source archive, rather than restricting this timing tier to the three future telemetry profiles.

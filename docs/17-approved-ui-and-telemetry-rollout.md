@@ -2,9 +2,11 @@
 
 Decision: user selection, 7 November 2026. **A — Sports editorial** is the landing direction. **G1 — Stacked overlays** is the primary graph layout. The user then narrowed detailed telemetry to years with verified data: **2018–2026 is the eligible source range**, replacing the proposed 2014–2026 range. This is a source boundary, not a claim that every event, lap or channel in those years has been imported or verified.
 
-This decision supersedes the earlier three-circuit product limit. Monza, Silverstone and Suzuka remain validation pilots, followed by all source-supported qualifying events/layouts in the eligible years. Preserve recorded qualifying comparisons for older years. R01 remains complete; native telemetry T01–T12 remains unfinished.
+This decision supersedes the earlier three-circuit product limit. Monza, Silverstone and Suzuka remain validation pilots, followed by all source-supported qualifying events/layouts in the eligible years. Preserve recorded qualifying comparisons for older years. R01 remains complete. The [Monza 2024 real pilot](19-monza-2024-pilot.md) is now implemented through the source, numerical, UI and export gates; additional circuits and broader archive/release gates remain open.
 
 U01 is implemented: editorial landing, current-year calendar entry, compact recorded-results studio and the refined labelled G1 synthetic preview. Node tests (17), TypeScript and production build pass. Desktop/tablet/mobile, exact timing/phase selection, keyboard swap/cursor, turn selection and sector-only presentation were inspected. This verifies the interface, not real data ingestion; see [handoff](10-handoff.md) for current limits.
+
+The subsequent 8 November implementation applies shared blue dark/off-white light modes to the complete project, persists that preference, and connects G1, map/turn/region inspection, evidence, actual lap selection and PNG/JSON/share exports to the verified Monza data. The source gate uses an explicit identity-checked composite because the tested direct FastF1 path was unavailable; it does not pretend a direct account adapter was completed. [Current verification](10-handoff.md); [year/field matrix](18-data-availability-by-year.md).
 
 ## 1. Capability policy
 

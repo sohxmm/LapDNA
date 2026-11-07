@@ -1,8 +1,21 @@
 {
-  "registry_version": "1.2.0",
-  "reviewed_on": "2026-11-07",
+  "registry_version": "1.3.0",
+  "reviewed_on": "2026-11-08",
   "scope": "Finite practical source survey; not an exhaustive internet or private-contract inventory",
-  "integration_status": "R01 recorded classifications imported; native telemetry import remains unimplemented",
+  "integration_status": "R01 classifications plus verified Monza 2024 qualifying telemetry pilot; other telemetry sessions remain unimported",
+  "telemetry_publications": [{
+    "year": 2024, "round": 16, "session_id": "2024-16-monza-Q", "source_session_key": 9586,
+    "provider": "openf1_tracinginsights", "method": "distance-v3-openf1-native-composite", "pipeline": "monza-pilot-1",
+    "roster_count": 20, "indexed_laps": 276, "timing_eligible_laps": 79,
+    "telemetry_laps": 40, "sector_only_laps": 39, "unavailable_laps": 197,
+    "native_car_records": 348120, "position_records": 364780, "weather_records": 79, "corner_markers": 11,
+    "source_snapshot_sha256": "d9993d260af7eeec9e272e268eb057dfe00628b7427f03951698da9545f093e2",
+    "archive_commit": "d1543a71370d9b617b627319f8ad80b2f85dfd5e",
+    "source_coordinates": "source_units; no assumed metre conversion",
+    "documentation": "docs/19-monza-2024-pilot.md",
+    "raw_data_committed": false, "normalized_data_committed": false,
+    "limitations": ["PIA fastest Q3 lap is sector-only due a 1.119 s native speed gap", "PIA Q1 has no eligible lap under validity/green-track gates", "RPM/DRS retained but not core graph rows", "Only one reviewed telemetry event"]
+  }],
   "audit_document": "docs/13-data-source-audit.md",
   "feature_policy": {
     "preserve_labelled_synthetic_demo": true,
@@ -54,8 +67,8 @@
     },
     {
       "id": "openf1",
-      "classification_integration": "Sprint Qualifying results imported for 2023-2026; telemetry adapter remains planned",
-      "role": "alternative_planned_session_adapter",
+      "classification_integration": "Sprint Qualifying results imported for 2023-2026; native Monza 2024 car/location imported with identity-matched archive timing clocks",
+      "role": "implemented_monza_native_stream_adapter",
       "documentation": "https://openf1.org/docs/",
       "upstream_family": "formula1_livetiming_community_api",
       "telemetry_from_year": 2023,

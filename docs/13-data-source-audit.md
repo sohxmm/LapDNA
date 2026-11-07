@@ -2,6 +2,8 @@
 
 Reviewed 6 November 2026; field-semantics follow-up 7 November. This is a finite survey of practical public feeds, maintained archives, official timing publications and commercial APIs. It cannot establish that every dataset on the internet or every private vendor contract has been examined. A documented field, a successful sample request and a validated whole-session import are separate evidence levels.
 
+**Implementation update, 8 November:** the [Monza 2024 pilot](19-monza-2024-pilot.md) now imports a verified full-session OpenF1/TracingInsights composite: 20 drivers, 276 actual laps, 40 telemetry and 39 sector-only eligible laps. Original timing clocks/flags are identity-matched to native car/location streams; no archive convenience telemetry is called native. The survey below records its earlier research stage. [Current year/field matrix](18-data-availability-by-year.md) separates available sources from actually imported events.
+
 ## Finding and feature decision
 
 **Actual speed, throttle, gear and binary brake data exist.** These four panels can remain in the product plan. They must be populated from their own native source channels. Braking inferred from falling speed is not acceptable. A fresh OpenF1 check on 6 November returned 306 records for 2024 Monza qualifying, driver 4, lap 11, with brake values `{0,100}`, gears 2–8, 31 distinct throttle values and 165 speed values. The [lap record](https://api.openf1.org/v1/laps?session_key=9586&driver_number=4&lap_number=11) supplies the request window; see the repeatable probe in [the source register](09-sources.md).

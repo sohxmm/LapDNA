@@ -4,6 +4,8 @@ Reviewed 7 November 2026. This is the working inventory for the sources evaluate
 
 **Subsequent user priority:** [R01](16-results-first-milestone.md) now imports recorded qualifying classifications across 1950–2026 and Sprint Qualifying from 2023–2026. Its event-specific rosters, phase bests and comparison UI precede individual-run/native-telemetry work. The full sensor/method inventory below remains the plan for R02/T01–T12, not a claim that telemetry has been imported.
 
+**8 November pilot update:** [Monza 2024](19-monza-2024-pilot.md) now has a complete real roster/lap index, native car/position import, local numerical comparisons, linked graphs/map, evidence and exports. Forty laps pass telemetry checks and 39 support sectors only. Optional raw fields in this inventory do not automatically become graph rows. [Year/field availability and actual import status](18-data-availability-by-year.md) is the concise current coverage guide.
+
 ## 1. Product decisions
 
 - Preserve the four preview channels: speed, throttle, gear and binary brake. Their synthetic curves stay explicitly labelled.
@@ -13,7 +15,7 @@ Reviewed 7 November 2026. This is the working inventory for the sources evaluate
 - Use FastF1 as the first session adapter, separately validate OpenF1, consider TracingInsights for archive/backfill, use Jolpica for calendars/classifications, and FIA reports for external timing review.
 - Keep RPM and historical DRS as optional follow-ups. Other available racing data does not automatically expand this qualifying product.
 - Default to the highest common eligible qualifying phase; allow deliberate cross-phase comparisons with persistent context warnings.
-- No real session has been imported into the current app. Calendar navigation, contracts, prepared-result rendering and the synthetic preview exist; numerical engine tickets remain open.
+- Monza 2024 is the first real telemetry session; other circuits/years remain source candidates until their own import, profile and quality gates pass. Preserve the separate synthetic preview.
 
 ## 2. What the labels mean
 
