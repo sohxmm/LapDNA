@@ -4,11 +4,13 @@ import type {EChartsCoreOption, EChartsType} from 'echarts/core';
 import {LineChart} from 'echarts/charts';
 import {GridComponent, TooltipComponent, MarkLineComponent, AxisPointerComponent} from 'echarts/components';
 import {CanvasRenderer} from 'echarts/renderers';
-import {availableSignals, hasSupportedSignal, nearest, signalLabels, signalOrder, signed, supportedSample} from './view';
+import {availableSignals, groupTurnMarkers, hasSupportedSignal, nearest, signalLabels, signalOrder, signed, supportedSample} from './view';
 import type {SignalName, TraceView} from './view';
+import {useTheme} from '../theme/ThemeProvider';
+import {chartPalette} from '../theme/theme';
 
 use([LineChart, GridComponent, TooltipComponent, MarkLineComponent, AxisPointerComponent, CanvasRenderer]);
-const A='#56dce8', B='#ffb06b', INK='#96a5ae';
+export type TraceWindow = {label:string; start:number; end:number} | null;
 const layout = [[24,160],[218,48],[300,40],[374,46],[454,86]];
 const axisNames = ['SPEED  ·  KM/H','THROTTLE  ·  %','GEAR','BRAKE  ·  BINARY STATES','CUMULATIVE Δ  ·  S'];
 const labels = (v:number|null|undefined) => v == null ? '—' : String(Math.round(v));
@@ -25,7 +27,8 @@ export function chartRows(view:TraceView) {
   });
 }
 
-function options(v:TraceView, start:number, end:number):EChartsCoreOption {
+function options(v:TraceView, start:number, end:number, colors:ReturnType<typeof chartPalette>):EChartsCoreOption {
+  const {a:A,b:B,ink:INK}=colors;
   const series:Record<string,unknown>[]=[];
   const deltaExtent=Math.max(.02,...v.delta.flatMap((value,i)=>value!==null&&v.distance[i]>=start&&v.distance[i]<=end?[Math.abs(value/1000)]:[]))*1.12;
   const rows=chartRows(v), marked=new Set<number>();
@@ -42,37 +45,49 @@ function options(v:TraceView, start:number, end:number):EChartsCoreOption {
       step:step?'end':false, connectNulls:false, smooth:false,
       emphasis:{disabled:true},lineStyle:{color,width:index===0?2.3:1.8,type:dashed?'dashed':'solid'},
       itemStyle:{color},...(!first?{}:{markLine:{silent:true,animation:false,symbol:'none',
-        label:{show:false},lineStyle:{color:'#64727d',type:'dashed',width:1},data:markers}})});
+        label:{show:false},lineStyle:{color:colors.marker,type:'dashed',width:1},data:markers}})});
   };
   add(0,v.a.speed,v.nameA,A); add(0,v.b.speed,v.nameB,B,true);
   add(1,v.a.throttle,v.nameA,A); add(1,v.b.throttle,v.nameB,B,true);
   add(2,v.a.gear,v.nameA,A,false,true); add(2,v.b.gear,v.nameB,B,true,true);
   const binary=(b:(boolean|null)[],offset=0)=>b.map(k=>k===null?null:Number(k)+offset);
   add(3,binary(v.a.brake),v.nameA,A,false,true); add(3,binary(v.b.brake,2),v.nameB,B,true,true);
-  add(4,v.delta.map(x=>x===null?null:x/1000),'B − A','#d6c5fb',false,false,true);
+  add(4,v.delta.map(x=>x===null?null:x/1000),'B − A',colors.delta,false,false,true);
   return {animation:false,backgroundColor:'transparent',textStyle:{fontFamily:'system-ui, sans-serif',color:INK},
     grid:rows.map(({top,height})=>({top,height,left:55,right:25,outerBoundsMode:'none'})),
     tooltip:{trigger:'axis',showContent:false,axisPointer:{type:'line',snap:true}},
-    axisPointer:{link:[{xAxisIndex:'all'}],label:{show:false},lineStyle:{color:'#c8d2d8',width:1}},
+    axisPointer:{link:[{xAxisIndex:'all'}],label:{show:false},lineStyle:{color:colors.pointer,width:1}},
     xAxis:rows.map((_,i)=>({type:'value',gridIndex:i,min:start,max:end,boundaryGap:false,
       splitNumber:4,axisLabel:{show:i===rows.length-1,color:INK,fontSize:10,hideOverlap:true,formatter:(n:number)=>Math.round(n)+' m'},
-      axisTick:{show:false},axisLine:{show:i===rows.length-1,lineStyle:{color:'#3b4953'}},splitLine:{show:false}})),
+      axisTick:{show:false},axisLine:{show:i===rows.length-1,lineStyle:{color:colors.axis}},splitLine:{show:false}})),
     yAxis:rows.map(({original},i)=>({type:'value',gridIndex:i,name:axisNames[original],nameGap:8,nameLocation:'end',
-      nameTextStyle:{align:'left',fontSize:9,color:'#becbd3',fontWeight:600},scale:original===0 || original===4,
+      nameTextStyle:{align:'left',fontSize:9,color:INK,fontWeight:600},scale:original===0 || original===4,
       ...(original===1?{min:0,max:100,interval:50}:original===2?{min:0,max:8,interval:4}:original===3?{min:0,max:3,interval:1}:original===4?{min:-deltaExtent,max:deltaExtent}:{}),
       splitNumber:2,axisLabel:{color:INK,fontSize:9,formatter:original===3?(n:number)=>['A off','A on','B off','B on'][n]:undefined},
-      axisLine:{show:false},axisTick:{show:false},splitLine:{lineStyle:{color:'#233039',width:0.65}}})),
+      axisLine:{show:false},axisTick:{show:false},splitLine:{lineStyle:{color:colors.grid,width:0.65}}})),
     series};
 }
 
-export function TraceBoard({view}:{view:TraceView}) {
+export function TraceBoard({view,cursor:externalCursor,onCursorChange,selection:externalSelection,onSelectionChange}:{
+  view:TraceView; cursor?:number; onCursorChange?:(distance:number)=>void;
+  selection?:TraceWindow; onSelectionChange?:(selection:TraceWindow)=>void;
+}) {
+  const {theme}=useTheme();
   const host=useRef<HTMLDivElement>(null), chart=useRef<EChartsType|null>(null);
-  const [zoom,setZoom]=useState(''), [cursor,setCursor]=useState(0);
-  const turn=view.turns.find(t=>t.label===zoom);
-  const start=turn?.start??0, end=turn?.end??view.distance[view.distance.length-1];
-  const index=nearest(view.distance,Math.max(start,Math.min(end,cursor)));
+  const [localSelection,setLocalSelection]=useState<TraceWindow>(null), [localCursor,setLocalCursor]=useState(0);
+  const [pinned,setPinned]=useState(false), pinnedRef=useRef(false);
+  const [railWidth,setRailWidth]=useState(800);
+  const cursorChange=useRef(onCursorChange); cursorChange.current=onCursorChange;
+  pinnedRef.current=pinned;
+  const selection=externalSelection===undefined?localSelection:externalSelection;
+  const cursor=externalCursor??localCursor;
+  const turn=view.turns.find(t=>t.label===selection?.label);
+  const start=selection?.start??0, end=selection?.end??view.distance[view.distance.length-1];
+  const firstIndex=Math.max(0,view.distance.findIndex(distance=>distance>=start));
+  let lastIndex=view.distance.length-1;while(lastIndex>firstIndex&&view.distance[lastIndex]>end)lastIndex--;
+  const index=Math.max(firstIndex,Math.min(lastIndex,nearest(view.distance,Math.max(start,Math.min(end,cursor)))));
   const d=view.distance[index];
-  const option=useMemo(()=>options(view,start,end),[view,start,end]);
+  const option=useMemo(()=>options(view,start,end,chartPalette(theme)),[view,start,end,theme]);
   const signals=availableSignals(view), rows=chartRows(view);
   const plotHeight=rows.at(-1)!.top+rows.at(-1)!.height+34;
   useEffect(()=>{
@@ -80,14 +95,25 @@ export function TraceBoard({view}:{view:TraceView}) {
     const c=init(host.current,null,{renderer:'canvas'}); chart.current=c;
     c.on('updateAxisPointer',(raw: unknown)=>{
       const evt=raw as {axesInfo?:{value?:number}[]};
-      const value=evt.axesInfo?.[0]?.value; if(typeof value==='number' && Number.isFinite(value))setCursor(value);
+      const value=evt.axesInfo?.[0]?.value;
+      if(!pinnedRef.current&&typeof value==='number'&&Number.isFinite(value)) {
+        setLocalCursor(value); cursorChange.current?.(value);
+      }
     });
-    const observer=new ResizeObserver(()=>c.resize()); observer.observe(host.current);
+    c.on('click',()=>setPinned(true));
+    const observer=new ResizeObserver(()=>{c.resize();setRailWidth(Math.max(1,(host.current?.clientWidth??880)-80));}); observer.observe(host.current);
     return ()=>{observer.disconnect();c.dispose();chart.current=null;};
   },[]);
   useEffect(()=>{chart.current?.setOption(option,{notMerge:true});},[option]);
+  useEffect(()=>{
+    if(externalCursor!==undefined) chart.current?.dispatchAction({type:'showTip',seriesIndex:0,dataIndex:nearest(view.distance,externalCursor)});
+  },[externalCursor,view.distance]);
+  function setCursor(value:number) {setLocalCursor(value);onCursorChange?.(value);}
+  function setSelection(value:TraceWindow) {setLocalSelection(value);onSelectionChange?.(value);}
   function select(label:string) {
-    setZoom(label); setCursor(view.turns.find(t=>t.label===label)?.at??0);
+    const selected=view.turns.find(t=>t.label===label);
+    setSelection(selected?{label:selected.label,start:selected.start,end:selected.end}:null);
+    setCursor(selected?.at??0);
   }
   function inspect(value:number) {
     setCursor(value); chart.current?.dispatchAction({type:'showTip',seriesIndex:0,dataIndex:nearest(view.distance,value)});
@@ -107,7 +133,7 @@ export function TraceBoard({view}:{view:TraceView}) {
   }
   return <section className="trace-board" aria-label="Distance-aligned telemetry">
     <div className="trace-tools"><div><p className="eyebrow">TELEMETRY / DISTANCE</p><h2>The lap, side by side.</h2></div>
-      <label>Inspect turn <select value={zoom} onChange={e=>select(e.target.value)}><option value="">Full lap</option>{view.turns.map(t=><option key={t.label} value={t.label}>{t.label} · {t.speedClass} speed</option>)}</select></label></div>
+      <label>Inspect turn <select value={selection?.label??''} onChange={e=>select(e.target.value)}><option value="">Full lap</option>{selection&&!turn&&<option value={selection.label}>{selection.label}</option>}{view.turns.map(t=><option key={t.label} value={t.label}>{t.label} · {t.speedClass} speed</option>)}</select></label></div>
     <div className="trace-legend"><span className="key-a">{view.nameA} · solid</span><span className="key-b">{view.nameB} · dashed</span><span>Positive Δ: {view.nameA} ahead</span></div>
     <div className="strip-label">Estimated minisector gain <span>100 m · grey: within 0.01 s · striped: unavailable</span></div>
     <div className="trace-rail bins">{view.bins.map(b=>{
@@ -120,12 +146,20 @@ export function TraceBoard({view}:{view:TraceView}) {
       const a=Math.max(start,n), b=Math.min(end,edge[i+1]);if(a>=b)return null;
       return <span key={i} style={{left:pos(a)+'%',width:(pos(b)-pos(a))+'%'}}>S{i+1}</span>;
     })}</div>
-    <div className="trace-rail turn-rail" aria-label="Turn positions">{view.turns.filter(t=>t.at>=start && t.at<=end).map(t=>
-      <button key={t.label} onClick={()=>select(t.label)} style={{left:pos(t.at)+'%'}} aria-label={'Inspect '+t.label}>{t.label}</button>)}</div>
+    <div className="trace-rail turn-rail" aria-label="Turn positions">{view.turns.filter(t=>t.at>=start&&t.at<=end).map(t=><i aria-hidden="true" key={'tick'+t.label} style={{position:'absolute',left:pos(t.at)+'%',height:10,borderLeft:'1px solid var(--muted)'}}/>)}
+      {groupTurnMarkers(view.turns,start,end,railWidth).map(group=>{
+        const first=group[0],last=group.at(-1)!,label=group.length===1?first.label:first.label+'–'+last.label;
+        return <button key={label} onClick={()=>{
+          if(group.length===1)select(first.label);
+          else {setSelection({label,start:first.start,end:last.end});setCursor(first.at);}
+        }} style={{left:pos((first.at+last.at)/2)+'%',top:12}} aria-label={'Inspect '+label+(group.length>1?' turn group':'')}>{label}</button>;
+      })}</div>
     <div className="plot-canvas" ref={host} style={{height:plotHeight}} role="img" aria-label={signals.map(name=>signalLabels[name]).join(', ')+', and cumulative elapsed-time difference by distance. Use the cursor control for numeric values.'}/>
-    <div className="cursor-control"><label>Distance cursor <output>{Math.round(d)} m</output><input type="range" min={start} max={end} step={5} value={d}
-      onChange={e=>inspect(Number(e.target.value))} aria-label="Distance cursor in metres"/></label>
-      <p>{turn?turn.label+' · '+turn.speedClass+' speed':'Full lap'} · Δ {view.delta[index]===null?'—':signed(view.delta[index]!)} s</p></div>
+    <div className="cursor-control"><label>Distance cursor <output>{Math.round(d)} m</output><input type="range" min={view.distance[firstIndex]} max={view.distance[lastIndex]} step={5} value={d}
+      onChange={e=>inspect(Number(e.target.value))} onKeyDown={e=>{if(e.shiftKey&&(e.key==='ArrowLeft'||e.key==='ArrowRight')){e.preventDefault();inspect(Math.max(start,Math.min(end,d+(e.key==='ArrowRight'?50:-50))));}}} aria-label="Distance cursor in metres"/></label>
+      <p>{selection?.label??'Full lap'} · Δ {view.delta[index]===null?'—':signed(view.delta[index]!)} s</p>
+      <button type="button" className="secondary-button" aria-pressed={pinned} onClick={()=>setPinned(!pinned)}>{pinned?'Unpin cursor':'Pin cursor'}</button>
+      {selection&&<button type="button" className="secondary-button" onClick={()=>{setSelection(null);setCursor(d);}}>Full lap</button>}</div>
     <table className="readout"><caption>Source-supported channels at the cursor</caption><thead><tr><th>Driver</th>{signals.map(name=><th key={name}>{signalLabels[name]}</th>)}</tr></thead>
     <tbody>{([['a',view.nameA],['b',view.nameB]] as const).map(([slot,name])=><tr key={slot}><th>{name}</th>{signals.map(channel=><td key={channel} title={source(slot,channel)}>{cell(slot,channel)}</td>)}</tr>)}</tbody></table>
     <details className="trace-data-details"><summary>Data details</summary><p>Brake displays on/off states in separate A and B lanes. This channel does not measure brake pressure.</p><ul>{signalOrder.map(name=><li key={name}>{signalLabels[name]} · {view.nameA}: {source('a',name)} · {view.nameB}: {source('b',name)}{!signals.includes(name)?' · Trace hidden because neither lap has a measured signal.':''}</li>)}</ul></details>

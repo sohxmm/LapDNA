@@ -2,7 +2,18 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { initialDraft, changeMode, changePhase, changeDriver } from './selection.ts';
 import { traceView } from './resultView.ts';
-import { availableSignals, supportedSample } from '../telemetry/view.ts';
+import { availableSignals, supportedSample, signed, groupTurnMarkers } from '../telemetry/view.ts';
+
+test('local display precision does not imply a negative zero gain',()=>{
+  assert.equal(signed(-4,2),'+0.00');assert.equal(signed(-6,2),'−0.01');
+});
+test('dense turn labels group without changing their source positions and resolve after zoom',()=>{
+  const turns=[100,120,180,700].map((at,i)=>({label:'T'+(i+1),at,start:80,end:220,speedClass:'low'}));
+  const before=JSON.stringify(turns);
+  assert.deepEqual(groupTurnMarkers(turns,0,1000,250).map(group=>group.map(turn=>turn.label)),[['T1','T2','T3'],['T4']]);
+  assert.deepEqual(groupTurnMarkers(turns,80,220,600).map(group=>group.map(turn=>turn.label)),[['T1'],['T2'],['T3']]);
+  assert.equal(JSON.stringify(turns),before);
+});
 
 const drivers = ['1', '2', '3'].map(n => ({ driver_number: n, driver_code: 'D' + n, driver_name: 'Test ' + n }));
 const lap = (driver_number, phase, lap_number, lap_time_ms, capability = 'telemetry') => ({

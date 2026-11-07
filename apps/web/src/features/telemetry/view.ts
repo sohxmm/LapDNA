@@ -12,6 +12,15 @@ export type SignalProvenanceSet = Record<SignalName, SignalProvenance>;
 export const signalOrder: SignalName[] = ['speed','throttle','gear','brake'];
 export const signalLabels: Record<SignalName,string> = {speed:'Speed',throttle:'Throttle',gear:'Gear',brake:'Brake'};
 export type TraceTurn = { label: string; at: number; start: number; end: number; speedClass: string };
+export function groupTurnMarkers(turns:TraceTurn[],start:number,end:number,width:number) {
+  const groups:TraceTurn[][]=[];
+  for(const turn of turns.filter(item=>item.at>=start&&item.at<=end)) {
+    const previous=groups.at(-1),first=previous?.[0];
+    if(first&&(turn.at-first.at)/Math.max(1,end-start)*width<32)previous!.push(turn);
+    else groups.push([turn]);
+  }
+  return groups;
+}
 export type TraceView = {
   distance: number[]; a: Samples; b: Samples; delta: (number | null)[];
   turns: TraceTurn[]; bins: {start:number; end:number; gain:number | null}[];
@@ -36,4 +45,7 @@ export function nearest(grid: number[], value: number) {
   return lo>0 && value-grid[lo-1]<grid[lo]-value ? lo-1 : lo;
 }
 export const seconds = (ms: number, decimals=3) => (ms/1000).toFixed(decimals);
-export const signed = (ms: number, decimals=3) => (ms<0?'−':'+') + seconds(Math.abs(ms),decimals);
+export const signed = (ms: number, decimals=3) => {
+  const magnitude=seconds(Math.abs(ms),decimals);
+  return (ms<0&&Number(magnitude)!==0?'−':'+')+magnitude;
+};

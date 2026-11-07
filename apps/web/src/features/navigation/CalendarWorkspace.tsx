@@ -4,6 +4,7 @@ import type { CalendarRace, RaceCalendar, SeasonList } from "./api";
 import { parseRoute, routeSearch } from "./routing";
 import type { StudioRoute } from "./routing";
 import "./navigation.css";
+import {loadSessions} from '../comparison/api';
 
 const SessionBrowser = lazy(() => import("../comparison/SessionBrowser"));
 const ResultsBrowser = lazy(() => import("../results/ResultsBrowser"));
@@ -130,7 +131,27 @@ function Studio({
   onBack: () => void;
 }) {
   const title = useRef<HTMLHeadingElement>(null);
-  const [showLapWorkspace, setShowLapWorkspace] = useState(false);
+  const [availability,setAvailability]=useState<'loading'|'available'|'missing'|'error'>('loading');
+  const [mode,setMode]=useState<'timing'|'telemetry'|null>(()=>{
+    const value=new URLSearchParams(window.location.search).get('analysis');
+    return value==='timing'||value==='telemetry'?value:null;
+  });
+  useEffect(()=>{
+    const controller=new AbortController();setAvailability('loading');
+    loadSessions(controller.signal).then(data=>{
+      if(!controller.signal.aborted)setAvailability(data.sessions.some(entry=>entry.session.year===race.year&&entry.session.round===race.round)?'available':'missing');
+    }).catch(()=>{if(!controller.signal.aborted)setAvailability('error');});
+    return()=>controller.abort();
+  },[race.year,race.round]);
+  useEffect(()=>{
+    const restore=()=>{const value=new URLSearchParams(window.location.search).get('analysis');setMode(value==='timing'||value==='telemetry'?value:null);};
+    window.addEventListener('popstate',restore);return()=>window.removeEventListener('popstate',restore);
+  },[]);
+  const activeMode=mode??(availability==='available'?'telemetry':'timing');
+  function changeView(next:'timing'|'telemetry') {
+    const query=new URLSearchParams(window.location.search);query.set('analysis',next);
+    window.history.pushState({},'',window.location.pathname+'?'+query.toString());setMode(next);
+  }
   useEffect(() => title.current?.focus({ preventScroll: true }), []);
   return (
     <section className="selected-studio" aria-labelledby="studio-title">
@@ -154,6 +175,11 @@ function Studio({
       {race.year < 2018 && (
         <p className="calendar-tier">Timing only · telemetry coverage begins in 2018.</p>
       )}
+      <div className="studio-view-tabs" role="group" aria-label="Comparison view">
+        <button type="button" aria-pressed={activeMode==='timing'} onClick={()=>changeView('timing')}>Recorded timings</button>
+        <button type="button" aria-pressed={activeMode==='telemetry'} disabled={availability==='missing'||race.year<2018} title={availability==='missing'?'Lap telemetry is not imported for this event':undefined} onClick={()=>changeView('telemetry')}>Lap telemetry{availability==='available'?' · Available':''}</button>
+      </div>
+      {availability==='loading'&&!mode?<p role="status">Loading available comparisons…</p>:activeMode==='telemetry'?<Suspense fallback={<p role="status">Loading lap comparison…</p>}><SessionBrowser year={race.year} round={race.round} eventName={race.name}/></Suspense>:
       <Suspense
         fallback={<p role="status">Loading this race's recorded results…</p>}
       >
@@ -162,24 +188,7 @@ function Studio({
           year={race.year}
           round={race.round}
         />
-      </Suspense>
-      <details
-        className="results-later"
-        onToggle={(event) => setShowLapWorkspace(event.currentTarget.open)}
-      >
-        <summary>Individual lap data</summary>
-        {showLapWorkspace && (
-          <Suspense
-            fallback={<p role="status">Loading detailed lap workspace…</p>}
-          >
-            <SessionBrowser
-              year={race.year}
-              round={race.round}
-              eventName={race.name}
-            />
-          </Suspense>
-        )}
-      </details>
+      </Suspense>}
       <details className="calendar-schedule-details"><summary>Session schedule</summary><p>{qualifyingLabel(race)} · {timestamp(race.qualifying_start_at)}</p></details>
       <Metadata calendar={calendar} />
     </section>
@@ -380,6 +389,7 @@ export default function CalendarWorkspace() {
         </section>
       ) : studio && selected ? (
         <Studio
+          key={selected.race_id}
           race={selected}
           calendar={calendar.data}
           onBack={() => navigate(route.year)}

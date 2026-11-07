@@ -66,3 +66,35 @@ export function lapTime(ms: number | null) {
   const remainder = value % 60000;
   return minutes + ':' + (remainder / 1000).toFixed(3).padStart(6, '0');
 }
+
+export function restoreLapSelection(index:Index,search:string):{draft:Draft;warning:string|null;requested:boolean} {
+  const query=new URLSearchParams(search),first=query.get('lapA'),second=query.get('lapB');
+  const fallback=initialDraft(index);
+  if(!first&&!second)return {draft:fallback,warning:null,requested:false};
+  const fail=(warning:string)=>({draft:fallback,warning,requested:true});
+  if(query.get('lapSession')!==index.session.session_id)return fail('This link refers to a different qualifying session. Choose the laps below.');
+  if(query.get('dataset')!==index.source_snapshot_sha256)return fail('This exact dataset revision is unavailable. Choose laps from the current publication below.');
+  const a=index.laps.find(lap=>lap.lap_id===first),b=index.laps.find(lap=>lap.lap_id===second);
+  if(!a||!b||a.driver_number===b.driver_number)return fail('This lap pair is absent or invalid. Choose two different drivers below.');
+  if(a.capability==='unavailable'||b.capability==='unavailable')return fail('A linked lap is ineligible in this publication. Choose an available lap below.');
+  const independent=query.get('cross')==='1';
+  if(a.phase!==b.phase&&!independent)return fail('This link needs an explicit cross-phase choice. Select the phases and enable different phases below.');
+  return {draft:{a:{driver:a.driver_number,phase:a.phase,lapId:a.lap_id},b:{driver:b.driver_number,phase:b.phase,lapId:b.lap_id},independent},warning:null,requested:true};
+}
+
+export function lapSelectionSearch(index:Index,draft:Draft,search='') {
+  const query=new URLSearchParams(search);
+  for(const key of ['session','phase','a','b','comparison'])query.delete(key);
+  query.set('year',String(index.session.year));query.set('race',index.session.year+'-'+index.session.round);
+  query.set('view','studio');query.set('analysis','telemetry');query.set('lapSession',index.session.session_id);
+  query.set('lapA',draft.a.lapId);query.set('lapB',draft.b.lapId);query.set('dataset',index.source_snapshot_sha256);
+  if(draft.a.phase!==draft.b.phase&&draft.independent)query.set('cross','1');else query.delete('cross');
+  return '?'+query.toString();
+}
+
+export function telemetryAlternative(index:Index,draft:Draft):Draft|null {
+  const a=available(index,draft.a.driver,draft.a.phase).find(lap=>lap.capability==='telemetry');
+  const b=available(index,draft.b.driver,draft.b.phase).find(lap=>lap.capability==='telemetry');
+  if(!a||!b||(a.lap_id===draft.a.lapId&&b.lap_id===draft.b.lapId))return null;
+  return {...draft,a:{...draft.a,lapId:a.lap_id},b:{...draft.b,lapId:b.lap_id}};
+}

@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import { compareLaps, loadLaps, loadSessions } from './api';
 import ComparisonResult from './ComparisonResult';
 import type { PairResponse } from './resultView';
-import { available, changeDriver, changeMode, changePhase, initialDraft, lapTime, phases } from './selection';
+import { available, changeDriver, changeMode, changePhase, lapTime, phases, lapSelectionSearch, restoreLapSelection, telemetryAlternative } from './selection';
 import type { Draft, Index, Phase, SlotName } from './selection';
 import { sessionsForRace } from '../navigation/routing';
 import './comparison.css';
@@ -36,13 +36,14 @@ function SlotPicker({ index, draft, name, update }: {
   const laps = slot.phase ? available(index, slot.driver, slot.phase) : [];
   const reasons = index.laps.filter(lap => lap.driver_number === slot.driver && lap.capability === 'unavailable');
   const driver = index.drivers.find(d => d.driver_number === slot.driver);
+  const selected=laps.find(lap=>lap.lap_id===slot.lapId);
   return <fieldset className={'sc-slot sc-slot-' + name}><legend>Driver {name.toUpperCase()}</legend>
     <label>Driver<select aria-label={'Driver ' + name.toUpperCase()} value={slot.driver} onChange={e => update(changeDriver(index, draft, name, e.target.value))}>
       {!slot.driver && <option value="">Choose driver</option>}
       {index.drivers.map(d => {
         const missing = !available(index, d.driver_number).length;
         return <option key={d.driver_number} value={d.driver_number} disabled={d.driver_number === other.driver || missing}>
-          {d.driver_code} · {d.driver_name}{missing ? ' · No eligible lap' : ''}
+          {d.driver_code} · {d.driver_name}{d.team_name?' · '+d.team_name:''}{missing ? ' · No eligible lap' : ''}
         </option>;
       })}
     </select></label>
@@ -60,20 +61,35 @@ function SlotPicker({ index, draft, name, update }: {
     <label>Lap<select aria-label={'Lap ' + name.toUpperCase()} value={slot.lapId} disabled={!laps.length}
       onChange={e => update({ ...draft, [name]: { ...slot, lapId:e.target.value } })}>
       {!laps.length && <option value="">No eligible lap</option>}
-      {laps.map((lap, i) => <option key={lap.lap_id} value={lap.lap_id}>Lap {lap.lap_number} · {lapTime(lap.lap_time_ms)}{i === 0 ? ' · Fastest eligible' : ''}{lap.capability === 'sector_only' ? ' · Sector timing only' : ''}</option>)}
+      {laps.map((lap, i) => <option key={lap.lap_id} value={lap.lap_id}>Lap {lap.lap_number} · {lapTime(lap.lap_time_ms)}{lap.compound?' · '+lap.compound:''}{i === 0 ? ' · Fastest eligible' : ''}{lap.capability === 'sector_only' ? ' · Sector timing only' : ''}</option>)}
     </select></label>
+    {selected&&laps[0]&&selected.lap_id!==laps[0].lap_id&&<p className="lap-context">Fastest eligible in {slot.phase}: {lapTime(laps[0].lap_time_ms)}. Selected: lap {selected.lap_number}, {lapTime(selected.lap_time_ms)}.</p>}
     {reasons.length > 0 && <details><summary>Excluded laps for {driver?.driver_code}</summary><ul>{reasons.map(lap =>
       <li key={lap.lap_id}>{lap.phase} lap {lap.lap_number} · {lap.reasons.join(', ')}</li>)}</ul></details>}
   </fieldset>;
 }
 
 function ComparisonForm({ index }: { index: Index }) {
-  const [draft, setDraft] = useState(() => initialDraft(index));
+  const [restored]=useState(()=>restoreLapSelection(index,window.location.search));
+  const [draft, setDraft] = useState(() => restored.draft);
   const [result, setResult] = useState<PairResponse | null>(null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(restored.warning??'');
+  type Detail='auto'|'telemetry'|'sector_only';
+  const readDetail=():Detail=>{const value=new URLSearchParams(window.location.search).get('detail');return value==='telemetry'||value==='sector_only'?value:'auto';};
+  const [detail,setDetail]=useState<Detail>(readDetail);
   const pending = useRef<AbortController | null>(null);
   useEffect(() => () => pending.current?.abort(), []);
+  useEffect(()=>{
+    if(!restored.warning)void execute(restored.draft,'replace',readDetail());
+    const restore=()=>{
+      const next=restoreLapSelection(index,window.location.search);
+      pending.current?.abort();setDraft(next.draft);setError(next.warning??'');setResult(null);setBusy(false);setDetail(readDetail());
+      if(!next.warning)void execute(next.draft,'none',readDetail());
+    };
+    window.addEventListener('popstate',restore);return()=>window.removeEventListener('popstate',restore);
+    // The form is keyed by immutable session/revision. Draft changes are submitted explicitly.
+  },[index]);
   function update(next: Draft) {
     pending.current?.abort();
     setBusy(false);
@@ -87,18 +103,34 @@ function ComparisonForm({ index }: { index: Index }) {
   const valid = !!selectedA && !!selectedB && selectedA.driver_number !== selectedB.driver_number
     && selectedA.capability !== 'unavailable' && selectedB.capability !== 'unavailable' && (!across || draft.independent);
   const sectorOnly = selectedA?.capability === 'sector_only' || selectedB?.capability === 'sector_only';
+  const alternative=sectorOnly?telemetryAlternative(index,draft):null;
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (!valid || busy) return;
+    await execute(draft,'push',detail);
+  }
+  async function execute(next:Draft,historyMode:'push'|'replace'|'none',requestedDetail:Detail) {
+    const first=index.laps.find(lap=>lap.lap_id===next.a.lapId),second=index.laps.find(lap=>lap.lap_id===next.b.lapId);
+    if(!first||!second||first.driver_number===second.driver_number||first.capability==='unavailable'||second.capability==='unavailable'||(first.phase!==second.phase&&!next.independent))return;
     pending.current?.abort();
     const controller = new AbortController();
     pending.current = controller;
     setBusy(true);
     setError('');
+    setResult(null);
     try {
-      const response = await compareLaps({ session_id:index.session.session_id, lap_a_id:draft.a.lapId,
-        lap_b_id:draft.b.lapId, allow_cross_phase:across && draft.independent, detail_level:'auto' }, controller.signal);
-      if (!controller.signal.aborted) setResult(response);
+      const response = await compareLaps({ session_id:index.session.session_id, lap_a_id:next.a.lapId,
+        lap_b_id:next.b.lapId, allow_cross_phase:first.phase!==second.phase&&next.independent, detail_level:requestedDetail }, controller.signal);
+      if (!controller.signal.aborted) {
+        const expected=new URLSearchParams(window.location.search).get('comparison');
+        if(historyMode!=='push'&&expected&&response.artifact.comparison_id!==expected)throw new Error('The exact analysis revision in this link is unavailable. Compare the selected laps to use the current method.');
+        setResult(response);
+        if(historyMode!=='none') {
+          const query=new URLSearchParams(lapSelectionSearch(index,next,window.location.search));query.set('detail',requestedDetail);query.set('comparison',response.artifact.comparison_id);
+          const url=window.location.pathname+'?'+query.toString();
+          if(url!==window.location.pathname+window.location.search)window.history[historyMode==='push'?'pushState':'replaceState']({},'',url);
+        }
+      }
     } catch (failure) {
       if (!controller.signal.aborted) setError(errorMessage(failure));
     } finally {
@@ -121,12 +153,18 @@ function ComparisonForm({ index }: { index: Index }) {
         : 'Select two different drivers with eligible laps.'}</p>}
       {across && <p className="sc-warning">Cross-phase comparison: {selectedA?.phase} vs {selectedB?.phase}. Track conditions, tyres and session timing can differ.</p>}
       {sectorOnly && <p className="sc-muted">Sector timing only. {[...new Set([selectedA,selectedB].flatMap(lap => lap?.capability === 'sector_only' ? lap.reasons : []))].join(' · ')}</p>}
+      {alternative&&<button type="button" className="secondary-button" disabled={busy} onClick={()=>{update(alternative);setDetail('auto');void execute(alternative,'push','auto');}}>Compare fastest telemetry-supported laps</button>}
       <div className="sc-actions"><button type="submit" className="sc-compare" disabled={!valid || busy}>{busy ? 'Comparing…' : 'Compare laps'}</button>
         <button type="button" className="secondary-button" disabled={!valid || busy}
           onClick={() => update({ ...draft, a:draft.b, b:draft.a })}>Swap selections</button>
+        <label>Output<select aria-label="Comparison output" value={detail} onChange={e=>{setDetail(e.target.value as Detail);pending.current?.abort();setBusy(false);setResult(null);setError('');}}><option value="auto">Best available</option><option value="telemetry">Telemetry</option><option value="sector_only">Sectors only</option></select></label>
       </div>
       {error && <p className="sc-warning" role="alert">{error}</p>}
     </form>
+    <details className="session-source-details"><summary>Session data available</summary><p>{index.source_name??'Imported session'} · {index.drivers.length} drivers · {index.laps.length} indexed laps.</p>
+      {index.source_url&&<a href={index.source_url} target="_blank" rel="noreferrer">Source and attribution ↗</a>}
+      <ul>{index.data_points?.map(item=><li key={item}>{item}</li>)}</ul>{index.warnings?.map((warning,i)=><p key={i}>{warning}</p>)}
+    </details>
     {result && <ComparisonResult result={result}/>}
   </>;
 }
@@ -136,12 +174,12 @@ function SessionLaps({ sessionId }: { sessionId: string }) {
   const { resource, retry } = useLoad(load);
   if (resource.state === 'loading') return <p role="status">Loading driver and lap inventory…</p>;
   if (resource.state === 'error') return <div role="alert"><p>{resource.message}</p><button type="button" className="secondary-button" onClick={retry}>Retry lap inventory</button></div>;
-  return <ComparisonForm index={resource.data}/>;
+  return <ComparisonForm key={resource.data.source_snapshot_sha256} index={resource.data}/>;
 }
 
 export default function SessionBrowser({year,round,eventName}: {year?:number;round?:number;eventName?:string} = {}) {
   const { resource, retry } = useLoad(loadSessions);
-  const [sessionId, setSessionId] = useState('');
+  const [sessionId, setSessionId] = useState(()=>new URLSearchParams(window.location.search).get('lapSession')??'');
   if (resource.state === 'loading') return <section className="session-browser"><p role="status">Loading qualifying sessions…</p></section>;
   if (resource.state === 'error') return <section className="session-browser"><h2>Session inventory unavailable</h2><p role="alert">{resource.message}</p><button type="button" className="secondary-button" onClick={retry}>Retry connection</button></section>;
   const sessions = sessionsForRace(resource.data.sessions,year,round);
