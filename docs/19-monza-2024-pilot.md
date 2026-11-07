@@ -1,6 +1,6 @@
 # Monza 2024 working pilot
 
-Updated 8 November 2026. This is the first real telemetry dataset, with the shared editorial theme and persistent dark/light modes. The pilot covers **2024 Italian Grand Prix conventional qualifying**, round 16, OpenF1 session 9586. It does not establish imported telemetry for other races or years. See [year/field coverage](18-data-availability-by-year.md).
+Updated 8 November 2026. The first real telemetry pilot is [live on Vercel](https://lapdna.vercel.app/?year=2024&race=2024-16&view=studio), with the shared editorial theme and persistent dark/light modes. It covers **2024 Italian Grand Prix conventional qualifying**, round 16, OpenF1 session 9586. This does not establish imported telemetry for other races or years. See [year/field coverage](18-data-availability-by-year.md) and [release verification](12-hosting.md).
 
 ## Source decision and repeatability
 

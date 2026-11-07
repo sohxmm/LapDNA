@@ -1,6 +1,6 @@
 # Current handoff
 
-Updated 8 November 2026 · Revision 6. **R01 historical recorded results and the real Monza 2024 telemetry pilot are implemented locally. Final hosted pilot verification is pending.** Shared editorial styling now supports persistent blue dark and off-white light modes. The broader telemetry range remains verified sessions/channels in 2018–2026; older years keep timing comparisons. [Pilot and source decision](19-monza-2024-pilot.md); [year/field coverage](18-data-availability-by-year.md); [rollout](17-approved-ui-and-telemetry-rollout.md).
+Updated 8 November 2026 · Revision 6. **R01 historical recorded results and the real Monza 2024 telemetry pilot are implemented and verified live.** Shared editorial styling supports persistent blue dark and off-white light modes. The broader telemetry range remains verified sessions/channels in 2018–2026; older years keep timing comparisons. [Pilot and source decision](19-monza-2024-pilot.md); [year/field coverage](18-data-availability-by-year.md); [rollout](17-approved-ui-and-telemetry-rollout.md).
 
 The existing hosted app is [lapdna.vercel.app](https://lapdna.vercel.app). See [hosting](12-hosting.md) for the actually deployed commit and QA, rather than assuming local changes are live. R01 remains 1,168 qualifying and 24 Sprint Qualifying classifications across 1950–2026, with 27,581 driver-result rows. Its historical formats, event-specific teams and source restrictions are unchanged. The synthetic demo stays separate.
 
@@ -31,17 +31,18 @@ Compare reads frozen local normalized records only; no upstream download, full-s
 | Check | Result |
 | --- | --- |
 | Python API/contract/import/alignment/selection suite | 183 passed, one Windows symlink test skipped; upstream TestClient deprecation warning |
-| `npm run test:web` | 24 passed, including theme persistence/storage failures, routes, selection/channel support and export/view behavior |
+| `npm run test:web` | 25 passed, including theme persistence/storage failures, routes, exact selection/revision support, native channel views and dense turn grouping |
 | `npm run contracts:check` | Passed |
 | `npm run typecheck` | Passed |
-| `npm run build` | Passed; approximately 519.77 KB lazy ECharts chunk has a non-fatal size advisory |
+| `npm run build` | Passed; approximately 520.20 KB lazy ECharts chunk has a non-fatal size advisory |
 | Source integrity and identities | All 70 source-file hashes checked; 276 driver/lap identities and available lap/sector durations reconciled |
 | Real phase-best comparison matrix | 321 pairs plus reversals: 84 telemetry results with three observations, 237 sector-only results; canonical reverse identity preserved |
 | Independent numerical/API review | No forced sector/time fit; large individual residuals cannot hide through pair cancellation. Offline API comparison/cold immutable lookup pass; same-driver, missing cross-phase consent and traversal IDs reject |
 | Local browser checks completed | Theme persistence across reload, full 20-driver roster, default NOR/PIA fastest eligible timing fallback, explicit telemetry-supported-lap switch, NOR lap 11 / PIA lap 18 traces with three observations, linked map/turn zoom, light 1080×1350 card inspected |
-| Local/hosted checks still pending | Final mobile layout, dark card, hosted pilot QA and release metadata; do not infer these passed from unit tests |
+| Final hosted/browser checks | Actual 1440×900 and 390×844 CSS viewports, no page-level horizontal overflow, dark/light persistence, exact link reload, swap −0.113 s and browser Back, map/graph inspection, inspected dark/light PNGs and full evidence JSON. Live Monza POST returns schema 1.3.0, 1155 points and three observations; Mexico HAM/LEC/LAW source facts remain correct. |
+| Deployed code / CI | `3361e03`, deployment `dpl_2jjmf7tAenA18DRBVZYQfMDk7CYt`; [Ubuntu CI passed](https://github.com/sohxmm/LapDNA/actions/runs/42406657115), 184 Python and 25 client tests |
 
-U01's earlier landing/calendar/results interface was inspected at 1440×900, 768×1024 and 390×844. The current pilot has additional views needing the pending checks above. The preview browser did not apply the tested 200% zoom shortcut; enlarged-text acceptance remains outstanding.
+U01's earlier landing/calendar/results interface was also inspected at 768×1024. The current pilot was checked at desktop and phone sizes above; 200% enlarged-text acceptance remains outstanding.
 
 ## Acceptance examples
 
@@ -63,7 +64,7 @@ U01's earlier landing/calendar/results interface was inspected at 1440×900, 768
 
 ## Next gates and limitations
 
-Finish pending mobile/dark-card/hosted release QA and record the actual deployed commit in doc 12. Monza-local T01–T10 functionality is implemented under the explicit composite source decision. T11 remains open for Silverstone/Suzuka and later verified 2018–2026 session/layout expansion. T12 retains broader durable archive/release work; do not mark the complete programme finished from one pilot.
+Monza T01–T10 functionality and the single-pilot hosted release are verified under the explicit composite source decision. T11 remains open for Silverstone/Suzuka and later verified 2018–2026 session/layout expansion. T12 retains broader durable archive/release work; do not mark the complete programme finished from one pilot. Preserve the live acceptance examples while the user checks them.
 
 The direct supported FastF1 authentication/import adapter, all other native telemetry sessions, durable multi-revision retention/object storage, additional reviewed layouts, optional RPM/DRS graph rows, actual Run 1/Run 2 labelling and LLM rewriting are not complete. The current native-lap contract covers conventional Q; broader SQ lap telemetry remains a separate reviewed extension. Source rights and annotation redistribution remain distinct from software licensing; do not describe combined upstream inputs as unrestricted.
 

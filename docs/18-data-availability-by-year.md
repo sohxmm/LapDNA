@@ -1,10 +1,10 @@
 # Data availability by year and what LapDNA can do with it
 
-Reviewed 8 November 2026. This is a field/coverage guide, not a promise that every source field is present for every driver or event. The classification publication is measurable; Monza 2024 now has a working local real lap/telemetry pilot with 20 drivers, 276 lap records, 79 timing-eligible laps, 40 telemetry laps and 39 eligible sector-only laps. Final hosted pilot verification is pending. See [the pilot guide](19-monza-2024-pilot.md), [source audit](13-data-source-audit.md), [field semantics](15-data-points-and-rollout.md) and [approved rollout](17-approved-ui-and-telemetry-rollout.md).
+Reviewed 8 November 2026. This is a field/coverage guide, not a promise that every source field is present for every driver or event. Monza 2024's real lap/telemetry pilot is verified live: 20 drivers, 276 lap records, 79 timing-eligible laps, 40 telemetry laps and 39 eligible sector-only laps. The wider historical classification publication remains available. See [the pilot guide](19-monza-2024-pilot.md), [hosting verification](12-hosting.md), [source audit](13-data-source-audit.md), [field semantics](15-data-points-and-rollout.md) and [approved rollout](17-approved-ui-and-telemetry-rollout.md).
 
 ## Read the availability labels correctly
 
-- **Published now:** normalized classification snapshots, plus the generated local Monza pilot with source/retrieval stamps. The [hosting record](12-hosting.md) determines what has actually been deployed.
+- **Published now:** normalized classification snapshots and the generated Monza pilot, served live with source/retrieval stamps. The [hosting record](12-hosting.md) identifies the deployed version.
 - **Source coverage:** a provider documents the year range and field. A session import still has to establish actual rows, native presence and quality.
 - **Derived:** LapDNA calculates an estimate from supported source inputs. It is not a new sensor measurement.
 - **Optional context:** useful source fields to retain; their existence does not mean a new graph is implemented.
@@ -25,7 +25,7 @@ The current R01 manifest contains **1,168 qualifying classifications, 24 Sprint 
 | **2020** | Modern timing tier | Same candidate FastF1 field family | Same; source parser explicitly documents position coordinates in tenths of a metre from 2020. |
 | **2021–2022** | Modern qualifying results; no separate invented SQ1/SQ2/SQ3 classification | FastF1 detailed data and actual weekend/session formats | Conventional qualifying lap comparison. Sprint weekends must follow their actual format; sprint race results cannot stand in for sprint qualifying. |
 | **2023** | Qualifying plus six actual Sprint Qualifying/Shootout classifications | FastF1 and OpenF1 historical car/lap/location/context data | Same supported telemetry features, plus actual SQ phase/lap comparison where the imported session supports it. |
-| **2024** | 24 qualifying and six SQ classifications; Monza qualifying's real local lap/telemetry pilot | Same source family; **Monza is the first completed local real-data pilot** | Any two eligible Monza drivers/laps; supported synchronized graphs/map, local gains, tailored observations and export. Genuine quality failures stay sector-only. Other 2024 sessions are not implied. |
+| **2024** | 24 qualifying and six SQ classifications; Monza qualifying's real live lap/telemetry pilot | Same source family; **Monza is the first completed real-data pilot** | Any two eligible Monza drivers/laps; supported synchronized graphs/map, local gains, tailored observations and export. Genuine quality failures stay sector-only. Other 2024 sessions are not implied. |
 | **2025** | 24 qualifying and six SQ classifications | FastF1/OpenF1 candidate data | Expand the same verified pipeline; do not imply the archive has already been imported. |
 | **2026** | 19 qualifying and six SQ classifications in the present snapshot; upcoming events remain absent | Candidate timing/car/location/context data for completed published sessions | Same conditional features. Preserve genuinely absent channels; the pinned FastF1 parser notes that raw DRS channel 45 is no longer included in 2026. |
 
@@ -47,7 +47,7 @@ OpenF1 documents unauthenticated historical access from 2023; this establishes a
 | 2021 | 22 | 0 | Source-supported candidate; actual weekend format required |
 | 2022 | 22 | 0 | Source-supported candidate; actual weekend format required |
 | 2023 | 22 | 6 | Source-supported candidate; not an imported archive |
-| 2024 | 24 | 6 | Monza real-data pilot implemented locally; other sessions and hosted acceptance not implied |
+| 2024 | 24 | 6 | Monza real-data pilot verified live; other telemetry sessions are not implied |
 | 2025 | 24 | 6 | Source-supported candidate; not an imported archive |
 | 2026 | 19 | 6 | Completed published sessions only; no future data |
 
@@ -144,7 +144,7 @@ We also do not have true official mini-sector durations from the selected segmen
 
 ## Monza 2024 verification ledger
 
-**Current local pilot:** 20 event-specific drivers, 276 actual laps (Q1 123 / Q2 94 / Q3 59), 79 timing-eligible laps, 40 telemetry and 39 eligible sector-only laps; 197 ineligible records retain reasons. The source snapshot contains 348,120 native car records, 364,780 position records, 79 weather records and 11 markers. The generated normalized publication is about 2.67 MB plain / 985 KB compressed; approximately 104.3 MB of raw source records remain ignored. Full source/version/hash details, selected FIA timing checks and preparation commands are in [the pilot guide](19-monza-2024-pilot.md).
+**Current live pilot:** 20 event-specific drivers, 276 actual laps (Q1 123 / Q2 94 / Q3 59), 79 timing-eligible laps, 40 telemetry and 39 eligible sector-only laps; 197 ineligible records retain reasons. The source snapshot contains 348,120 native car records, 364,780 position records, 79 weather records and 11 markers. The generated normalized publication is about 2.67 MB plain / 985 KB compressed; approximately 104.3 MB of raw source records remain ignored. Full source/version/hash details, selected FIA timing checks and preparation commands are in [the pilot guide](19-monza-2024-pilot.md).
 
 The working UI provides actual phase/lap selection, four core channels and raw delta, shared cursor/turn/map inspection, separate corner and estimated-mini-sector partitions, class/gross-net evidence, up to three observations and themed PNG/JSON export. Dark/light preference persists. RPM/DRS graphs, inferred Run 1/Run 2 labels and runtime LLM prose are not implemented. Other events/years still need their own publication. Final hosted/mobile/dark-card acceptance is recorded separately, not assumed from local source counts.
 

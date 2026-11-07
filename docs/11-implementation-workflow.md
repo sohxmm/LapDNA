@@ -4,6 +4,8 @@ Use the Desktop checkout and keep this repository as the shared memory between s
 
 Current priority: the user requested [R01 recorded classifications first](16-results-first-milestone.md), now implemented for acceptance using Mexico 2026. Individual laps/runs are deferred to R02. The T01 prompt below applies when that next milestone starts; R01 is not native telemetry ingestion.
 
+**8 November status:** the [real Monza 2024 pilot](19-monza-2024-pilot.md) now implements actual laps and the telemetry/map/evidence/export pipeline, with shared dark/light themes, and is verified live. Do not restart Monza T01 from an older prompt. After user acceptance, the next broader checkpoint is T11's additional circuit/layout validation. Matched run labels, direct FastF1 account access and bulk archive retention remain separate unfinished work. Use the current handoff/status board when choosing a ticket; the T01 copyable example below is retained as an earlier workflow template.
+
 Read the [approved interface and rollout decision](17-approved-ui-and-telemetry-rollout.md) before the next ticket. UI A/G1 is selected; do not reopen the design shortlist. Telemetry targets verified sessions/channels in 2018–2026, with older timing comparisons retained and three validation pilots before archive expansion.
 
 ## Model and effort

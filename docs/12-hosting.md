@@ -1,19 +1,20 @@
 # Hosted preview
 
-Updated 7 November 2026 at [LapDNA on Vercel](https://lapdna.vercel.app). The approved sports-editorial landing opens the studio's current-year calendar, then the selected race's comparison. Existing year/race links still open directly. Open the [telemetry design preview](https://lapdna.vercel.app/?preview=1) to explore the refined G1 stack on the preserved fictional six-turn example. The [approved rollout](17-approved-ui-and-telemetry-rollout.md) limits future real telemetry to verified sessions/channels in 2018–2026; older timing comparisons remain available.
+Updated 8 November 2026 at [LapDNA on Vercel](https://lapdna.vercel.app). The real [Monza 2024 studio](https://lapdna.vercel.app/?year=2024&race=2024-16&view=studio) is live, with persistent blue dark/off-white light themes. The landing opens the current-year calendar; existing direct links remain valid. The [synthetic preview](https://lapdna.vercel.app/?preview=1) remains separate. Telemetry expansion targets verified sessions/channels in 2018–2026; older timing comparisons remain available.
 
-**R01 is live:** [2026 Mexican GP qualifying](https://lapdna.vercel.app/?year=2026&race=2026-19&view=studio). Real recorded classifications cover 1,168 qualifying events from 1950–2026 and 24 Sprint Qualifying sessions from 2023–2026. Event-specific drivers/teams, exact phase bests, historical formats, DSQ/DNS and missing values are preserved. Individual runs/laps and native telemetry remain the next stage.
+**R01 remains live:** [2026 Mexican GP qualifying](https://lapdna.vercel.app/?year=2026&race=2026-19&view=studio). Recorded classifications cover 1,168 qualifying events from 1950–2026 and 24 Sprint Qualifying sessions from 2023–2026. Monza additionally has 20 drivers and 276 actual laps: 40 telemetry, 39 sector-only and 197 unavailable with reasons. [Pilot source and acceptance](19-monza-2024-pilot.md); [data by year](18-data-availability-by-year.md).
 
 ## What is deployed
 
 - The React/Vite frontend and lazy-loaded ECharts telemetry workspace.
 - Sports-editorial landing, compact dark calendar/results studio, expandable Data details/full classification, and G1 with separate binary brake lanes, taller speed and symmetric delta scale.
 - The opt-in synthetic example, including turn selection, shared cursor, local-gain strip, corner-speed summary and sector-only mode.
-- The existing FastAPI scaffold as one same-origin Python function. Health, empty inventory/catalogue and selection validation run on the host.
+- FastAPI as one same-origin Python function, with the complete Monza roster/index and bounded on-demand comparison from pre-normalized local inputs. No request downloads a source session.
 - Sourced Jolpica calendar metadata, default current year, historical season browsing, exact year/round studio filtering and refreshable navigation links. Warm caching and bundled, provenance-stamped 1950–2026 calendars preserve explicit freshness warnings.
 - Per-driver native-channel provenance contracts and availability-aware telemetry rendering. All four preview channels remain synthetic and unchanged; no source data is inferred from speed for production results.
 - Read-only bundled classification publications and their coverage API, with 27,581 driver-result rows. Recorded timing comparisons and gap bars use actual same-phase durations, not a fabricated distance curve. Source-stamped calendars now cover all 77 seasons.
-- No native telemetry session files, raw upstream cache, local QA fixture, source credentials or numerical ingestion dependencies are bundled.
+- A compact generated Monza publication (about 985 KB compressed normalized data plus index/manifest/report) is bundled read-only. Raw 104.3 MB source records, upstream caches, local QA fixtures, credentials and numerical import dependencies remain excluded. Generated pilot files are intentionally ignored by Git and must exist before this manual deployment.
+- Actual-lap/phase selection, native channel traces, a linked performance map, corner/straight and class summaries, supported observations, quality details, PNG/JSON exports and exact selection links.
 
 The ordinary home page displays the landing; Open Studio enters the sourced current-year calendar. Published races open recorded-results comparison; absent/future results remain unavailable. The demo's Sample A/B, lap times, curves, turns and findings are all synthetic. Scheduled qualifying start times do not establish session completion. A recorded phase-best comparison does not establish distance alignment, native telemetry quality or a particular run identity.
 
@@ -31,11 +32,11 @@ npx --yes vercel@65.12.1 deploy --prod --yes --scope sohxm44s-projects
 
 The stable production alias is used for this preview. Provider preview URLs may require the owner's Vercel sign-in; the stable alias was verified by unauthenticated HTTP. GitHub push and hosting deployment are separate steps until a Git integration is configured.
 
-The current deployed application code is commit `4fcdc86`, deployment `dpl_GJuGpqL1wC6rLeAJV3tza4uj85Un`. Later documentation-only commits do not require redeployment. [Deployment inspection](https://vercel.com/sohxm44s-projects/lapdna/GJuGpqL1wC6rLeAJV3tza4uj85Un).
+The current deployed application code is commit `3361e03`, deployment `dpl_2jjmf7tAenA18DRBVZYQfMDk7CYt`. Later documentation-only commits do not require redeployment. [Deployment inspection](https://vercel.com/sohxm44s-projects/lapdna/2jjmf7tAenA18DRBVZYQfMDk7CYt).
 
 ## Verification
 
-U01 checks: 17 client tests, TypeScript checking and production build passed locally. The chart chunk retains a non-fatal size advisory. [Ubuntu CI on the deployed commit passed](https://github.com/sohxmm/LapDNA/actions/runs/42367418088), including 145 Python tests and generated-contract checks. No backend behavior changed in U01; the previous Windows Python run had 144 passes and one symlink skip.
+Pilot checks: 183 Python tests passed locally with one Windows symlink skip; 25 client tests, generated contracts, TypeScript and production build passed. [Ubuntu CI on the deployed commit passed](https://github.com/sohxmm/LapDNA/actions/runs/42406657115): 184 Python tests and 25 client tests. The lazy chart chunk is about 520.20 KB, with a non-fatal size advisory. The real 321-pair/reverse matrix is recorded separately in doc 19.
 
 Hosted HTTP checks:
 
@@ -47,7 +48,7 @@ Hosted HTTP checks:
 | GET /api/v1/seasons | 200, schema 1.0.0, current year 2026 |
 | GET /api/v1/calendar/2026 | 200, schema 1.0.0, 23 events in the retrieved source calendar |
 | GET /api/v1/calendar/2024 | 200, schema 1.0.0, 24 events in the retrieved source calendar |
-| GET /api/v1/sessions | 200, schema 1.2.0, empty sessions |
+| GET /api/v1/sessions | 200, one Monza session, 20 drivers and 79 selectable laps |
 | GET /api/v1/catalog | 200, schema 1.2.0, empty comparisons |
 | GET /api/v1/classifications/coverage | 200, 77 years, 1,168 qualifying + 24 Sprint Qualifying sessions |
 | GET /api/v1/classifications/2026/19 | 200, 22 drivers, F1DB source; HAM Q3 76514 ms, LEC 76633 ms, LAW disqualified |
@@ -57,20 +58,23 @@ Hosted HTTP checks:
 | GET /api/v1/classifications/2005/1 | 200, first/second historical qualifying components |
 | GET /api/v1/sessions/missing/laps | 404, session_not_found |
 | POST /api/v1/compare without imported data | 409, data_not_imported |
+| POST /api/v1/compare Monza NOR lap 11 / RUS lap 17 | 200, schema 1.3.0 telemetry, 1155 points, 3 observations, raw final delta approximately +113 ms |
 | GET the built /assets/index-*.js referenced by home HTML | 200 JavaScript |
 
 Browser verification covers the current-year default, historical calendar change, race studio, deep-link refresh/back navigation and honest unimported-race state. Desktop/mobile checks cover the preserved demo, T3 selection, keyboard cursor, synthetic channel labels and discrete sector-only crossings. Opening a race resets page position and moves keyboard focus to the studio title. Keep source code and the hosted result separate: API health proves serving, not ingestion or analysis accuracy.
 
 U01 was inspected at 1440×900, 768×1024 and 390×844, with no page-level horizontal overflow observed. Hosted checks confirm the new landing, the separate G1 synthetic preview, and Mexico Q3 Hamilton 1:16.514 versus Leclerc 1:16.633 with a +0.119 s B−A gap and Timing only status. The 200% text-zoom accessibility check remains outstanding; the preview browser did not apply the tested zoom shortcut.
 
+The live real pilot was additionally checked at actual CSS viewport sizes 1440×900 and 390×844. Dark/light choice survives reload; exact shared NOR/RUS selection restores automatically; swap produces −0.113 s and browser Back restores the original pair. Map/turn selection updates the shared graph interval/cursor. Light and dark 1080×1350 cards were downloaded and inspected, and the evidence JSON contains the original artifact, orientation, theme and all 70 source components. Mobile expanded quality details do not cause page-level horizontal overflow. Source units remain explicit. This does not close the separate 200% text-zoom or additional-circuit acceptance gates.
+
 ## Current limitations
 
-1. Final phase/session classifications are imported, but individual qualifying laps/runs and native telemetry have not been imported. They cannot identify matched run 1/run 2 attempts or support local corner/braking claims.
-2. The cold comparison engine is unfinished. The service can serve prepared validated artifacts; a cache miss returns an explicit preparation error. T01–T05 implement import, native eligibility, alignment, reconciliation, metrics and evidence.
-3. Real reference track maps, production map/chart synchronization, dense turn-label handling, complete evidence/quality details, saved comparison URLs and export cards remain later tickets. The demo uses a fictional loop without a real circuit map.
-4. The high/medium/low findings visible in the demo are constructed. Actual class findings need reviewed reference windows, sufficient native samples, coverage and sensitivity gates.
+1. Real telemetry is imported only for Monza 2024 conventional qualifying. Other races/years keep their actual recorded timing comparisons. The importer is intentionally allowlisted; 2018–2026 source coverage is not imported archive coverage.
+2. Source gaps genuinely reduce capability: Piastri's fastest Q3 lap remains sector-only because of a 1.119 s native speed gap. His later Q3 lap supports telemetry. A selected alternate lap is labelled, never presented as his phase best. Piastri Q1 has no eligible lap under the source validity/green-track gates.
+3. Geometry and projected turn markers are approximate; OpenF1 source coordinates are not surveyed metres. Integrated-speed distance, local gains and boundary sensitivity remain estimates. The direct FastF1 account adapter is still unimplemented; actual source lineage is the explicit verified composite.
+4. The labelled demo remains synthetic. Real category/observation text is generated from the selected numerical evidence; mixed/unknown regions and sparse classes remain qualified, and unsupported claims are withheld.
 5. Steering angle and brake pressure are unavailable in the chosen public channels. Brake is on/off. Estimated 100 m mini-sectors are not recorded timing splits, and sector timing alone cannot locate a loss inside a corner.
-6. R01 uses committed read-only classification publications bundled with the function; it needs no writable runtime store. Larger normalized telemetry datasets and writable comparison caches still require a reviewed durable storage/worker design. Import jobs remain outside page requests. Current result refresh/publication is an explicit operator command; F1DB release updates are reviewed and pinned.
-7. Demo prose is fixed; prepared real artifacts render saved evidence summaries. No LLM provider is configured or called. The optional fresh-narrative design in [analysis generation](14-analysis-generation.md) follows validated numerical evidence; it cannot invent missing measurements or establish why time was lost.
+6. The compact frozen pilot can regenerate exact comparison IDs across a cold process. Bulk archive storage, persistent multi-revision retention and broad automatic post-session updates remain future work. The disposable process cache is not durable storage. Ordinary deployment requires the generated pilot publication; no source import runs during a request or Vercel build.
+7. No LLM provider is configured or called. The numerical engine generates comparison-specific summaries/templates; optional LLM wording remains an extension after those facts. Individual laps are selectable, but matched Run 1 / Run 2 labels are not inferred.
 
-The user acceptance milestone is R01 at Mexico 2026. The subsequent individual-run milestone R02 resumes T01/T02 before the full telemetry pipeline. [Scope and commands](16-results-first-milestone.md).
+Current user acceptance is the real Monza pilot alongside R01's Mexico 2026 regression. Follow [pilot commands and boundaries](19-monza-2024-pilot.md) before expanding to another source/layout.
