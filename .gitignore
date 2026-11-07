@@ -19,6 +19,7 @@ data/artifacts/*
 !data/artifacts/.gitkeep
 data/reports/
 data/sessions/
+services/api/src/lapdna/pilot_data/
 work/
 *.log
 .DS_Store
