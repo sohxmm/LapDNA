@@ -9,8 +9,8 @@ import type {SignalName, TraceView} from './view';
 
 use([LineChart, GridComponent, TooltipComponent, MarkLineComponent, AxisPointerComponent, CanvasRenderer]);
 const A='#56dce8', B='#ffb06b', INK='#96a5ae';
-const layout = [[24,128],[186,48],[270,40],[350,23],[416,80]];
-const axisNames = ['SPEED  ·  KM/H','THROTTLE  ·  %','GEAR','BRAKE  ·  ON/OFF','CUMULATIVE Δ  ·  S'];
+const layout = [[24,160],[218,48],[300,40],[374,46],[454,86]];
+const axisNames = ['SPEED  ·  KM/H','THROTTLE  ·  %','GEAR','BRAKE  ·  BINARY STATES','CUMULATIVE Δ  ·  S'];
 const labels = (v:number|null|undefined) => v == null ? '—' : String(Math.round(v));
 
 export function chartRows(view:TraceView) {
@@ -27,6 +27,7 @@ export function chartRows(view:TraceView) {
 
 function options(v:TraceView, start:number, end:number):EChartsCoreOption {
   const series:Record<string,unknown>[]=[];
+  const deltaExtent=Math.max(.02,...v.delta.flatMap((value,i)=>value!==null&&v.distance[i]>=start&&v.distance[i]<=end?[Math.abs(value/1000)]:[]))*1.12;
   const rows=chartRows(v), marked=new Set<number>();
   const divisions = v.boundaries.filter(d=>d>=start && d<=end).map(d=>({xAxis:d}));
   const add=(index:number, vals:(number|null)[], name:string, color:string, dashed=false, step=false, extraLine=false)=>{
@@ -46,8 +47,8 @@ function options(v:TraceView, start:number, end:number):EChartsCoreOption {
   add(0,v.a.speed,v.nameA,A); add(0,v.b.speed,v.nameB,B,true);
   add(1,v.a.throttle,v.nameA,A); add(1,v.b.throttle,v.nameB,B,true);
   add(2,v.a.gear,v.nameA,A,false,true); add(2,v.b.gear,v.nameB,B,true,true);
-  const binary=(b:(boolean|null)[])=>b.map(k=>k===null?null:Number(k));
-  add(3,binary(v.a.brake),v.nameA,A,false,true); add(3,binary(v.b.brake),v.nameB,B,true,true);
+  const binary=(b:(boolean|null)[],offset=0)=>b.map(k=>k===null?null:Number(k)+offset);
+  add(3,binary(v.a.brake),v.nameA,A,false,true); add(3,binary(v.b.brake,2),v.nameB,B,true,true);
   add(4,v.delta.map(x=>x===null?null:x/1000),'B − A','#d6c5fb',false,false,true);
   return {animation:false,backgroundColor:'transparent',textStyle:{fontFamily:'system-ui, sans-serif',color:INK},
     grid:rows.map(({top,height})=>({top,height,left:55,right:25,outerBoundsMode:'none'})),
@@ -58,8 +59,8 @@ function options(v:TraceView, start:number, end:number):EChartsCoreOption {
       axisTick:{show:false},axisLine:{show:i===rows.length-1,lineStyle:{color:'#3b4953'}},splitLine:{show:false}})),
     yAxis:rows.map(({original},i)=>({type:'value',gridIndex:i,name:axisNames[original],nameGap:8,nameLocation:'end',
       nameTextStyle:{align:'left',fontSize:9,color:'#becbd3',fontWeight:600},scale:original===0 || original===4,
-      ...(original===1?{min:0,max:100,interval:50}:original===2?{min:0,max:8,interval:4}:original===3?{min:0,max:1,interval:1}:{}),
-      splitNumber:2,axisLabel:{color:INK,fontSize:9,formatter:original===3?(n:number)=>n?'On':'Off':undefined},
+      ...(original===1?{min:0,max:100,interval:50}:original===2?{min:0,max:8,interval:4}:original===3?{min:0,max:3,interval:1}:original===4?{min:-deltaExtent,max:deltaExtent}:{}),
+      splitNumber:2,axisLabel:{color:INK,fontSize:9,formatter:original===3?(n:number)=>['A off','A on','B off','B on'][n]:undefined},
       axisLine:{show:false},axisTick:{show:false},splitLine:{lineStyle:{color:'#233039',width:0.65}}})),
     series};
 }
@@ -105,10 +106,10 @@ export function TraceBoard({view}:{view:TraceView}) {
       : provenance.status==='synthetic'?'Synthetic preview fixture':provenance.reason??'No source measurement';
   }
   return <section className="trace-board" aria-label="Distance-aligned telemetry">
-    <div className="trace-tools"><div><p className="eyebrow">TELEMETRY / DISTANCE</p><h2>Where the gap develops</h2></div>
+    <div className="trace-tools"><div><p className="eyebrow">TELEMETRY / DISTANCE</p><h2>The lap, side by side.</h2></div>
       <label>Inspect turn <select value={zoom} onChange={e=>select(e.target.value)}><option value="">Full lap</option>{view.turns.map(t=><option key={t.label} value={t.label}>{t.label} · {t.speedClass} speed</option>)}</select></label></div>
     <div className="trace-legend"><span className="key-a">{view.nameA} · solid</span><span className="key-b">{view.nameB} · dashed</span><span>Positive Δ: {view.nameA} ahead</span></div>
-    <div className="strip-label">Estimated local gain <span>100 m bins · grey = within 0.01 s · striped = unsupported</span></div>
+    <div className="strip-label">Estimated minisector gain <span>100 m · grey: within 0.01 s · striped: unavailable</span></div>
     <div className="trace-rail bins">{view.bins.map(b=>{
       const a=Math.max(start,b.start), z=Math.min(end,b.end);if(a>=z)return null;
       const tone=b.gain===null?'unknown':Math.abs(b.gain)<10?'tie':b.gain>0?'a':'b';
@@ -127,6 +128,6 @@ export function TraceBoard({view}:{view:TraceView}) {
       <p>{turn?turn.label+' · '+turn.speedClass+' speed':'Full lap'} · Δ {view.delta[index]===null?'—':signed(view.delta[index]!)} s</p></div>
     <table className="readout"><caption>Source-supported channels at the cursor</caption><thead><tr><th>Driver</th>{signals.map(name=><th key={name}>{signalLabels[name]}</th>)}</tr></thead>
     <tbody>{([['a',view.nameA],['b',view.nameB]] as const).map(([slot,name])=><tr key={slot}><th>{name}</th>{signals.map(channel=><td key={channel} title={source(slot,channel)}>{cell(slot,channel)}</td>)}</tr>)}</tbody></table>
-    <details><summary>Channel availability and sources</summary><ul>{signalOrder.map(name=><li key={name}>{signalLabels[name]} · {view.nameA}: {source('a',name)} · {view.nameB}: {source('b',name)}{!signals.includes(name)?' · Trace hidden because neither lap has a measured signal.':''}</li>)}</ul></details>
+    <details className="trace-data-details"><summary>Data details</summary><p>Brake displays on/off states in separate A and B lanes. This channel does not measure brake pressure.</p><ul>{signalOrder.map(name=><li key={name}>{signalLabels[name]} · {view.nameA}: {source('a',name)} · {view.nameB}: {source('b',name)}{!signals.includes(name)?' · Trace hidden because neither lap has a measured signal.':''}</li>)}</ul></details>
   </section>;
 }

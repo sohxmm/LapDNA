@@ -46,6 +46,10 @@ function qualifyingLabel(race: CalendarRace) {
 function Metadata({ calendar }: { calendar: RaceCalendar }) {
   return (
     <div className="calendar-provenance">
+      {calendar.stale && (
+        <strong>Saved calendar · source refresh unavailable</strong>
+      )}
+      <details><summary>Calendar details</summary>
       <p>
         Calendar via{" "}
         <a href={calendar.source_url} target="_blank" rel="noreferrer">
@@ -53,14 +57,12 @@ function Metadata({ calendar }: { calendar: RaceCalendar }) {
         </a>{" "}
         · Retrieved {timestamp(calendar.retrieved_at)}
       </p>
-      {calendar.stale && (
-        <strong>Saved calendar · source refresh unavailable</strong>
-      )}
       {calendar.warnings.map((text) => (
         <p className="calendar-warning" key={text}>
           {text}
         </p>
       ))}
+      </details>
     </div>
   );
 }
@@ -75,15 +77,11 @@ function RaceCards({
     <section aria-labelledby="race-calendar-title">
       <div className="calendar-section-title">
         <div>
-          <p className="eyebrow">02 / SELECT A RACE</p>
-          <h2 id="race-calendar-title">{calendar.year} race calendar</h2>
+          <p className="eyebrow">02 / RACE</p>
+          <h2 id="race-calendar-title">The calendar.</h2>
         </div>
-        <span>{calendar.races.length} events in source calendar</span>
+        <span>{calendar.year} · {calendar.races.length} events</span>
       </div>
-      <p className="calendar-explanation">
-        Choose a race to compare its recorded qualifying results. Calendar
-        entries may include upcoming events.
-      </p>
       {!calendar.races.length ? (
         <div className="calendar-empty">
           <h3>No races published for this season</h3>
@@ -110,9 +108,9 @@ function RaceCards({
               <span className="race-place">
                 {race.locality}, {race.country}
               </span>
-              <span className="race-quali">{qualifyingLabel(race)}</span>
+              <span className="race-quali">{race.qualifying_status === "upcoming" ? "Upcoming qualifying" : "Qualifying · " + dateLabel(race.qualifying_date)}</span>
               <span className="race-enter">
-                Open qualifying studio <span aria-hidden="true">↗</span>
+                Compare <span aria-hidden="true">↗</span>
               </span>
             </button>
           ))}
@@ -137,38 +135,24 @@ function Studio({
   return (
     <section className="selected-studio" aria-labelledby="studio-title">
       <div className="studio-event">
-        <p className="eyebrow">03 / QUALIFYING STUDIO</p>
+        <p className="eyebrow">{race.year} / ROUND {String(race.round).padStart(2,"0")}</p>
         <h1 id="studio-title" ref={title} tabIndex={-1}>
-          Qualifying studio
+          {race.name}
         </h1>
-        <h2>
-          {race.year} · {race.name}
-        </h2>
         <p>
-          {race.circuit_name} · Round {race.round} · {race.country}
-        </p>
-        <p className="calendar-quali-context">
-          {qualifyingLabel(race)} · {timestamp(race.qualifying_start_at)}
-        </p>
-        <p className="calendar-explanation">
-          Compare imported session and phase-best timings first. Individual runs
-          and distance-aligned telemetry will follow as separate data stages.
+          {race.circuit_name} · {race.country}
         </p>
         <div className="studio-links">
           <button type="button" className="calendar-button" onClick={onBack}>
-            ← Back to race calendar
+            ← Race calendar
           </button>
           <a className="calendar-button" href="?preview=1">
-            Explore the fictional demo ↗
+            Synthetic demo ↗
           </a>
         </div>
       </div>
       {race.year < 2018 && (
-        <p className="calendar-warning">
-          This season predates the usual FastF1 telemetry archive. Calendar
-          coverage does not promise car-channel data. Recorded qualifying
-          classifications can cover earlier years; see imported coverage below.
-        </p>
+        <p className="calendar-tier">Timing only · telemetry coverage begins in 2018.</p>
       )}
       <Suspense
         fallback={<p role="status">Loading this race's recorded results…</p>}
@@ -183,12 +167,7 @@ function Studio({
         className="results-later"
         onToggle={(event) => setShowLapWorkspace(event.currentTarget.open)}
       >
-        <summary>Individual laps and telemetry · next stage</summary>
-        <p>
-          Phase-best classifications do not identify matched run 1 or run 2
-          attempts. The detailed lap workspace remains separate until actual
-          laps and telemetry have been imported and validated.
-        </p>
+        <summary>Individual lap data</summary>
         {showLapWorkspace && (
           <Suspense
             fallback={<p role="status">Loading detailed lap workspace…</p>}
@@ -201,6 +180,7 @@ function Studio({
           </Suspense>
         )}
       </details>
+      <details className="calendar-schedule-details"><summary>Session schedule</summary><p>{qualifyingLabel(race)} · {timestamp(race.qualifying_start_at)}</p></details>
       <Metadata calendar={calendar} />
     </section>
   );
@@ -341,12 +321,8 @@ export default function CalendarWorkspace() {
       >
         {!studio && (
           <div>
-            <p className="eyebrow">01 / CHOOSE A YEAR</p>
-            <h1>Start with a season.</h1>
-            <p>
-              The current year is selected by default. Browse that year's
-              calendar, then choose a race.
-            </p>
+            <p className="eyebrow">01 / SEASON</p>
+            <h1>Pick your season.</h1>
           </div>
         )}
         <label>

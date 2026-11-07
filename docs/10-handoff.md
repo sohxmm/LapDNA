@@ -1,6 +1,6 @@
 # Current handoff
 
-Updated 7 November 2026 · Revision 5. **R01 recorded qualifying-results import and comparison are implemented. Native telemetry remains T01–T12 work.** The user has selected A sports-editorial landing and G1 stacked overlays, with detailed telemetry limited to verified sessions/channels in 2018–2026; older years retain timing comparisons. See [the approved decision and rollout](17-approved-ui-and-telemetry-rollout.md). U01 interface work is in progress.
+Updated 7 November 2026 · Revision 5. **R01 recorded qualifying-results import/comparison and U01 approved interface are implemented. Native telemetry remains T01–T12 work.** The user has selected A sports-editorial landing and G1 stacked overlays, with detailed telemetry limited to verified sessions/channels in 2018–2026; older years retain timing comparisons. See [the approved decision and rollout](17-approved-ui-and-telemetry-rollout.md).
 
 Hosted on Vercel at [lapdna.vercel.app](https://lapdna.vercel.app). The explicit user acceptance case is [2026 Mexico qualifying](https://lapdna.vercel.app/?year=2026&race=2026-19&view=studio). Published classifications cover 1,168 qualifying events from 1950–2026 plus 24 Sprint Qualifying sessions from 2023–2026, with 27,581 driver-result rows. The detailed lap/telemetry catalogues remain empty. The [synthetic demo](https://lapdna.vercel.app/?preview=1) stays separate. [R01 scope and future run selection](16-results-first-milestone.md); [hosting](12-hosting.md).
 
@@ -9,6 +9,8 @@ Hosted on Vercel at [lapdna.vercel.app](https://lapdna.vercel.app). The explicit
 Use the Desktop LapDNA checkout selected by the user. It has the original Git history and the remote https://github.com/sohxmm/LapDNA.git. The original Documents checkout is retained as an earlier copy; continue work in the Desktop checkout.
 
 ## Implemented and checked
+
+- U01: sports-editorial landing at `/`, Open Studio enters `?view=calendar` using the current-year default, existing year/race/comparison deep links preserved. Compact dark calendar/results studio; expandable full classification and Data details retain source/licence, coverage and retrieval metadata, while Timing only, DSQ/partial/historical warnings stay visible. G1 demo has a taller speed row, stepped gear, separate binary brake lanes and symmetric delta scale. Its underlying synthetic fixture is unchanged. No real telemetry importer or derived real comparison was added by U01.
 
 - Real classification acquisition, normalization, publication and typed API. Jolpica supplies phase bests; F1DB backfills 631 missing historical events and preserves native exclusions in 23 complete replacement classifications; OpenF1 supplies 24 Sprint Qualifying classifications. Sources are kept distinct by complete event/session, not per-driver data splicing. All 77 source-stamped calendars are bundled.
 - Recorded-results studio: session → exact phase → two eligible event-specific drivers; historical teams, no-time/DSQ/DNS states, phase tables, signed gaps, gap bars, source/coverage labels, URL restoration/back and swap. No continuous telemetry or corner attribution is inferred from phase bests.
@@ -29,11 +31,11 @@ Use the Desktop LapDNA checkout selected by the user. It has the original Git hi
 | Check | Recorded result |
 | --- | --- |
 | Python API/contract/selection/calendar/classification suite | 144 passed, 1 Windows symlink test skipped; one upstream TestClient deprecation warning |
-| `npm run test:web` | 16 passed: lap selection/channel support, year/race routes, recorded timing/phase/URL/history logic |
+| `npm run test:web` | U01: 17 passed, including landing/calendar entry and existing deep links, lap/channel support and recorded timing/phase/URL/history logic |
 | `npm run contracts:check` | Passed |
 | `npm run typecheck` | Passed |
 | `npm run build` | Passed; lazy chart chunk produces a non-fatal size advisory |
-| Browser preview | Desktop/mobile inspected; year default, historical calendar, race studio/refresh, turn selection, keyboard cursor, source labels and sector-only mode checked |
+| Browser preview | U01 inspected at 1440×900, 768×1024 and 390×844: landing → current-year calendar, Mexican Q3/Q2 exact timings, keyboard swap/browser back/refresh, historical 2005 format warnings, actual China SQ phases, synthetic turn selection/shared keyboard cursor/brake lanes and discrete sector-only mode. No page-level horizontal overflow observed. 200% text zoom remains a later accessibility acceptance check; the preview browser did not change zoom on the tested shortcut. |
 | Isolated UI fixture | Full roster, unavailable phase/driver, cached sector-only output, swap, cross-phase warning and cache miss checked |
 | Detailed lap/telemetry folders | No native lap/telemetry sessions imported; classifications are published separately and synthetic QA stays isolated |
 | GitHub CI on deployed code c9a8a75 | [Passed on Ubuntu](https://github.com/sohxmm/LapDNA/actions/runs/42293091029) |
@@ -60,7 +62,7 @@ The user will check **R01**, explicitly using 2026 Mexican GP qualifying. Hamilt
 
 Individual runs/laps are deferred to **R02**, documented in [the results-first milestone](16-results-first-milestone.md). Its first source gate remains **T01**; R01 does not satisfy it. Start GPT-6.1 Sol at High; use Extra High for T03–T05 numerical work. [Workflow and copyable prompts](11-implementation-workflow.md).
 
-Before that gate, finish/check U01 against the approved A/G1 decision. A bounded unauthenticated 2024 Monza qualifying SessionInfo request returned primary HTTP 401 and mirror HTTP 404; the full installed adapter/access path has not been tested. Do not call the whole archive blocked or verified from that probe. No source credentials were requested or changed.
+U01 is complete against the approved A/G1 decision; the next feature is T01. A bounded unauthenticated 2024 Monza qualifying SessionInfo request returned primary HTTP 401 and mirror HTTP 404; the full installed adapter/access path has not been tested. Do not call the whole archive blocked or verified from that probe. No source credentials were requested or changed. The import environment still needs its separate pinned numerical/data dependency lock; Vercel's lightweight serving environment stays unchanged.
 
 T01 must create a reproducible full-session source adapter/snapshot with actual access behavior, provenance and failure handling. The OpenF1 availability probe does not replace it. FastF1 3.9.2 access/cache interfaces require installed-release verification. Never invent source data to bypass an access issue.
 

@@ -57,15 +57,11 @@ function Coverage({
   const coverage = resource.data;
   return (
     <>
-      <p className="results-muted">
-        Historical formats and missing values vary; see imported coverage.
-        Current-season calendars may include upcoming events.
-      </p>
       <details className="results-coverage">
         <summary>
-          Imported years · Qualifying {yearRanges(coverage.qualifying_years)} ·
-          Sprint Qualifying {yearRanges(coverage.sprint_qualifying_years)}
+          Imported coverage
         </summary>
+        <p>Qualifying {yearRanges(coverage.qualifying_years)} · Sprint Qualifying {yearRanges(coverage.sprint_qualifying_years)}</p>
         <p>
           Coverage describes imported classifications. A recorded phase best is
           not an inventory of individual runs. Earlier formats and missing
@@ -124,7 +120,7 @@ function TimingCard({
   return (
     <article className={"results-time-card results-slot-" + slot}>
       <p>
-        {slot.toUpperCase()} / {phaseLabel(phase)} BEST
+        {slot.toUpperCase()} / {phaseLabel(phase)}
       </p>
       <h3>{driver.driver_name}</h3>
       <span>
@@ -173,7 +169,7 @@ function GapChart({
     <figure className="results-gap-chart">
       <figcaption>
         Gap to fastest recorded {phaseLabel(phase)} time{" "}
-        <span>{lapTime(fastest)} · same-phase timing only</span>
+        <span>{lapTime(fastest)}</span>
       </figcaption>
       <div className="results-gap-axis">
         <span>0.000 s</span>
@@ -194,10 +190,6 @@ function GapChart({
           </div>
         );
       })}
-      <p className="results-muted">
-        These bars compare recorded phase-best durations. They do not show where
-        the time was gained on track.
-      </p>
     </figure>
   );
 }
@@ -216,9 +208,9 @@ function ClassificationTable({
     >
       <div className="results-section-heading">
         <div>
-          <p className="eyebrow">SOURCE CLASSIFICATION</p>
+          <p className="eyebrow">CLASSIFICATION</p>
           <h3 id="classification-title">
-            Every driver, their team, each recorded phase
+            {session.label}
           </h3>
         </div>
         <span>{session.drivers.length} drivers</span>
@@ -308,10 +300,9 @@ function EventResults({ event }: { event: ClassificationEvent }) {
     return (
       <section className="recorded-results results-empty">
         <p className="eyebrow">RECORDED RESULTS</p>
-        <h2>No qualifying classification imported for this race</h2>
+        <h2>Results unavailable</h2>
         <p>
-          Choose another race or retry after the source publishes its results.
-          Calendar scheduling does not establish data availability.
+          Choose another race or check back after qualifying.
         </p>
         {event.warnings.map((text, i) => (
           <p className="results-muted" key={i}>
@@ -367,16 +358,11 @@ function EventResults({ event }: { event: ClassificationEvent }) {
     >
       <div className="results-section-heading">
         <div>
-          <p className="eyebrow">RECORDED QUALIFYING / PHASE BESTS</p>
-          <h2 id="recorded-results-title">Compare the recorded times</h2>
+          <p className="eyebrow">QUALIFYING / PHASE BESTS</p>
+          <h2 id="recorded-results-title">Head to head.</h2>
         </div>
-        <span className="results-real-tag">Imported source results</span>
+        <span className="results-real-tag">Timing only</span>
       </div>
-      <p className="results-intro">
-        Choose a session, a qualifying phase and two drivers. Each time is that
-        driver's recorded best in the selected phase. Individual runs and
-        telemetry are the next stage.
-      </p>
       <div className="results-session-controls">
         <label>
           Session
@@ -414,7 +400,7 @@ function EventResults({ event }: { event: ClassificationEvent }) {
                   )
                 }
               >
-                {phaseLabel(phase)} · best recorded time
+                {phaseLabel(phase)}
                 {session.drivers.some(
                   (driver) => phaseTime(driver, phase) !== null,
                 )
@@ -425,15 +411,6 @@ function EventResults({ event }: { event: ClassificationEvent }) {
           </select>
         </label>
       </div>
-      {!event.sessions.some(
-        (item) => item.session_type === "sprint_qualifying",
-      ) && (
-        <p className="results-muted">
-          No Sprint Qualifying classification is imported for this event.
-          Sessions that are absent are not created from regular qualifying
-          results.
-        </p>
-      )}
       {selected.warning && (
         <p className="results-warning" role="alert">
           {selected.warning}
@@ -489,7 +466,7 @@ function EventResults({ event }: { event: ClassificationEvent }) {
           disabled={!selected.a || !selected.b}
           onClick={() => update({ ...selected, a: selected.b, b: selected.a })}
         >
-          Swap drivers ⇄
+          Swap ⇄
         </button>
       </div>
       <div className="results-time-cards">
@@ -498,7 +475,7 @@ function EventResults({ event }: { event: ClassificationEvent }) {
       </div>
       {comparison && a && b ? (
         <div className="results-comparison" aria-live="polite">
-          <p className="results-gap-label">{label} / RECORDED GAP</p>
+          <p className="results-gap-label">{label} / GAP</p>
           <strong
             className={
               comparison.winner === "tie"
@@ -522,16 +499,11 @@ function EventResults({ event }: { event: ClassificationEvent }) {
                 "."}
           </h3>
           <p>
-            {a.driver_name}: {lapTime(timeA)} · {b.driver_name}:{" "}
-            {lapTime(timeB)}. B − A: {signedGap(comparison.deltaMs)}; positive
-            favours {a.driver_code ?? a.driver_name}.
+            B − A: {signedGap(comparison.deltaMs)} · Positive favours {a.driver_code ?? a.driver_name}.
           </p>
           <GapChart session={session} a={a} b={b} phase={selected.phase} />
           <p className="results-analysis-note">
-            Recorded timing establishes this phase's gap. It cannot identify a
-            corner loss, braking pattern or cause without the corresponding lap
-            telemetry. These phase bests are not matched “run 1” or “run 2”
-            attempts.
+            Recorded phase bests. Track-distance analysis requires verified lap telemetry.
           </p>
         </div>
       ) : (
@@ -548,7 +520,7 @@ function EventResults({ event }: { event: ClassificationEvent }) {
           </p>
         </div>
       )}
-      <ClassificationTable session={session} selected={selected} />
+      <details className="results-all-drivers"><summary>Full classification <span>{session.drivers.length} drivers</span></summary><ClassificationTable session={session} selected={selected} /></details>
       <div className="results-source">
         <p>
           Source:{" "}
@@ -559,19 +531,9 @@ function EventResults({ event }: { event: ClassificationEvent }) {
               ]
             }
           </a>{" "}
-          · Retrieved {retrieval(session.retrieved_at)} ·{" "}
-          {session.status === "completed"
-            ? "Completed classification snapshot"
-            : "Partial classification snapshot"}
-        </p>
-        <p>
-          Drivers and teams come from this event's results, including historical
-          team changes. Qualifying classification can differ from the race
-          starting grid.
-        </p>
         {session.source === "f1db" && (
-          <p>
-            F1DB data ·{" "}
+          <>
+            ·{" "}
             <a
               href="https://creativecommons.org/licenses/by/4.0/"
               target="_blank"
@@ -579,9 +541,15 @@ function EventResults({ event }: { event: ClassificationEvent }) {
             >
               CC BY 4.0
             </a>{" "}
-            · normalized for LapDNA.
-          </p>
+          </>
         )}
+        </p>
+        <details className="results-data-details"><summary>Data details</summary>
+          <p>Retrieved {retrieval(session.retrieved_at)} · {session.status === "completed" ? "Completed classification snapshot" : "Partial classification snapshot"}</p>
+          <p>Each time is the driver's best in the selected phase. Individual laps and matched runs are not imported. Drivers and teams belong to this event. Source classification may differ from the starting grid.</p>
+          {!event.sessions.some(item => item.session_type === "sprint_qualifying") && <p>No Sprint Qualifying classification is imported for this event.</p>}
+          {[...new Set([...event.warnings, ...session.warnings])].map((text, i) => <p key={i}>{text}</p>)}
+        </details>
       </div>
     </section>
   );
@@ -628,7 +596,6 @@ export default function ResultsBrowser({
   }, []);
   return (
     <div className="results-workspace">
-      <Coverage resource={coverage} />
       {results.status === "loading" ? (
         <section className="recorded-results" role="status">
           Loading this race's recorded qualifying results…
@@ -647,6 +614,7 @@ export default function ResultsBrowser({
       ) : (
         <EventResults key={year + "-" + round} event={results.data} />
       )}
+      <Coverage resource={coverage} />
     </div>
   );
 }

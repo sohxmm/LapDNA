@@ -69,9 +69,9 @@
 .year-selection select {
   font-size: 15px;
   min-height: 46px;
-  background: #142029;
+  background: #182024;
   color: #e5eff5;
-  border: 1px solid #455966;
+  border: 1px solid #3f4d53;
   padding: 10px 35px 10px 12px;
   min-width: 175px;
 }
@@ -134,7 +134,7 @@
   gap: 14px;
 }
 .race-card {
-  background: #111b22;
+  background: #151c20;
   border: 1px solid #2a3a46;
   text-align: left;
   color: #e5edf3;
@@ -184,7 +184,7 @@
   color: var(--a);
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid #2c3e49;
+  border-top: 1px solid #303b40;
   padding-top: 11px;
 }
 .calendar-provenance {
@@ -212,8 +212,8 @@
 .calendar-empty,
 .calendar-loading {
   padding: 30px 22px;
-  border: 1px solid #2b3e4c;
-  background: #111b22;
+  border: 1px solid #303d43;
+  background: #151c20;
   margin: 18px 0;
   color: #aabecb;
   font-size: 13px;
@@ -240,8 +240,8 @@
   justify-content: center;
   min-height: 42px;
   padding: 10px 13px;
-  border: 1px solid #475e6d;
-  background: #172630;
+  border: 1px solid #3f4d53;
+  background: #1b272c;
   color: #dcebf4;
   font: 12px system-ui;
   cursor: pointer;
@@ -331,3 +331,6 @@
     overflow-wrap: anywhere;
   }
 }
+.calendar-workspace{padding-top:22px}.calendar-progress ol{margin-bottom:25px;font-size:10px;letter-spacing:.7px}.calendar-progress button{padding:8px 0}.year-selection{padding-top:6px;padding-bottom:25px;margin-bottom:25px}.year-selection h1{font-family:Impact,'Arial Narrow',sans-serif;font-size:clamp(44px,5.2vw,72px);letter-spacing:-.3px;text-transform:uppercase;font-weight:700;line-height:1}.year-selection .eyebrow{font-size:9px;letter-spacing:1.6px}.year-selection select{min-width:145px;background:#161d20;border-color:#3c494e}.calendar-section-title h2{font-size:23px;margin-top:8px}.calendar-section-title{margin-bottom:20px}.race-grid{gap:12px}.race-card{border-radius:2px;background:#141b1e;border:1px solid #303b40;padding:20px;min-height:225px;transition:background .15s,border-color .15s}.race-card:hover{background:#1b252a;border-color:#627b86}.race-card strong{font-size:19px}.race-card-top{font-size:9px;letter-spacing:1px}.race-place{font-size:10px}.race-quali{font-size:10px;color:#94a8b1}.race-enter{font-size:11px;padding-top:12px}.studio-event{margin:2px 0 24px;position:relative}.studio-event h1{font-size:clamp(34px,4.6vw,62px);line-height:1.04;letter-spacing:.1px;max-width:1000px}.studio-event>p:not(.eyebrow){font-size:12px;color:#8fa5af;margin:13px 0}.studio-event .eyebrow{font-size:9px;margin-bottom:12px;letter-spacing:1.5px}.studio-links{margin:17px 0 0;gap:22px}.studio-links .calendar-button{border:0;padding:5px 0;background:none;font-size:11px;min-height:30px;color:#8ea5b0}.studio-links .calendar-button:hover{color:#e8ecec}.calendar-provenance{padding:10px 0;font-size:11px}.calendar-provenance summary,.calendar-schedule-details summary{color:#97aab4;font-size:11px;min-height:32px;display:list-item;padding:7px 0}.calendar-provenance p{margin:8px 0}.calendar-schedule-details{font-size:11px;line-height:1.8;color:#8ea3af;margin-top:10px}.calendar-tier{display:inline-block;font-size:10px;color:#b0bfba;padding:8px 11px;border:1px solid #37453f;margin:0 0 10px}.year-selection.year-selection-compact{padding:0 0 14px;margin-bottom:20px}.year-selection-compact label{font-size:10px}.year-selection-compact select{min-width:115px}.calendar-loading{border:0;background:#141b1e;padding:36px;color:#91a6b1}.results-later{margin-top:14px}
+@media(max-width:650px){.year-selection h1{font-size:42px}.calendar-progress ol{margin-bottom:18px}.year-selection label{margin-top:20px}.year-selection-compact label{margin-top:0}.studio-event h1{font-size:39px}.race-card{min-height:215px}.calendar-section-title{display:flex;align-items:center;gap:10px}.calendar-section-title>span{margin:0;font-size:10px}.calendar-section-title h2{font-size:21px}.studio-links{gap:20px}.calendar-workspace{padding-top:16px}}
+@media(prefers-reduced-motion:reduce){.race-card{transition:none}}

@@ -4,6 +4,8 @@ Decision: user selection, 7 November 2026. **A — Sports editorial** is the lan
 
 This decision supersedes the earlier three-circuit product limit. Monza, Silverstone and Suzuka remain validation pilots, followed by all source-supported qualifying events/layouts in the eligible years. Preserve recorded qualifying comparisons for older years. R01 remains complete; native telemetry T01–T12 remains unfinished.
 
+U01 is implemented: editorial landing, current-year calendar entry, compact recorded-results studio and the refined labelled G1 synthetic preview. Node tests (17), TypeScript and production build pass. Desktop/tablet/mobile, exact timing/phase selection, keyboard swap/cursor, turn selection and sector-only presentation were inspected. This verifies the interface, not real data ingestion; see [handoff](10-handoff.md) for current limits.
+
 ## 1. Capability policy
 
 | Selection | Available output after the relevant import gates pass |

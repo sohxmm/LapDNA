@@ -11,7 +11,7 @@ T00 is the runnable scaffold. T01–T12 are implementation work. Take the first 
 | Ticket | Deliverable | Requires | Day | Status |
 | --- | --- | --- | --- | --- |
 | T00 | Contracts, local selection boundary, synthetic chart preview and source probe | — | Setup | Complete |
-| U01 | Approved landing and compact recorded-results studio | R01 | UI | In progress |
+| U01 | Approved landing and compact recorded-results studio | R01 | UI | Complete; real telemetry remains T01–T12 |
 | T01 | Pinned FastF1 session import | T00 | 1 | Not started |
 | T02 | Full qualifying roster, actual phase/lap inventory and eligibility | T01 | 2 | Not started |
 | T03 | Frozen reference geometry, turn markers and reviewed windows | T02 | 3 | Not started |
