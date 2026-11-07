@@ -1,6 +1,6 @@
 # Current handoff
 
-Updated 7 November 2026 · Revision 4. **R01 recorded qualifying-results import and comparison are implemented. Individual laps/runs and native telemetry are deferred to R02/T01–T12.**
+Updated 7 November 2026 · Revision 5. **R01 recorded qualifying-results import and comparison are implemented. Native telemetry remains T01–T12 work.** The user has selected A sports-editorial landing and G1 stacked overlays, with detailed telemetry limited to verified sessions/channels in 2018–2026; older years retain timing comparisons. See [the approved decision and rollout](17-approved-ui-and-telemetry-rollout.md). U01 interface work is in progress.
 
 Hosted on Vercel at [lapdna.vercel.app](https://lapdna.vercel.app). The explicit user acceptance case is [2026 Mexico qualifying](https://lapdna.vercel.app/?year=2026&race=2026-19&view=studio). Published classifications cover 1,168 qualifying events from 1950–2026 plus 24 Sprint Qualifying sessions from 2023–2026, with 27,581 driver-result rows. The detailed lap/telemetry catalogues remain empty. The [synthetic demo](https://lapdna.vercel.app/?preview=1) stays separate. [R01 scope and future run selection](16-results-first-milestone.md); [hosting](12-hosting.md).
 
@@ -51,7 +51,7 @@ The narrowly scoped OpenF1 probe retrieved one historical sample and complete re
 5. Corner classes derive from reviewed reference apex windows with configurable 150/250 km/h thresholds. Retain mixed/unknown, gross gains/losses, coverage, independent units and sensitivity.
 6. Sector-only results provide recorded timing and discrete cumulative boundary deltas. They cannot support turn-level or class findings.
 7. Python generates supported facts and driver-identity-based text. React/ECharts renders them; the synthetic fixture generator is isolated.
-8. Three circuits remain the target; no fixed four-driver or 18-artifact cap remains. Validate complete per-lap accounting and representative pair/phase matrices.
+8. Telemetry targets verified qualifying sessions in 2018–2026. Monza/Silverstone/Suzuka are validation pilots before all supported layouts, not a permanent three-circuit limit. No fixed four-driver or artifact cap remains. Validate complete per-lap accounting and representative pair/phase matrices. Earlier years keep recorded timing comparisons.
 9. Source audit precedes dropping a feature. Preserve the labelled demo; production data needs the actual native channel. FastF1's inserted numeric zero/brake False and absent 2026 DRS defaults are missing-data hazards, not measured states. T01 must retain raw masks and per-source presence before normalization.
 
 ## Next implementation gate
@@ -59,6 +59,8 @@ The narrowly scoped OpenF1 probe retrieved one historical sample and complete re
 The user will check **R01**, explicitly using 2026 Mexican GP qualifying. Hamilton Q3 is 1:16.514, Leclerc Q3 is 1:16.633, B−A is +0.119 s. Q2 reverses the advantage: Leclerc 1:16.944 vs Hamilton 1:16.953. Lawson's source DSQ is visible and blocks selection. Historical 1950 driver/team data, actual SQ sessions, 2005 components, missing phases and restored links have separate checks.
 
 Individual runs/laps are deferred to **R02**, documented in [the results-first milestone](16-results-first-milestone.md). Its first source gate remains **T01**; R01 does not satisfy it. Start GPT-6.1 Sol at High; use Extra High for T03–T05 numerical work. [Workflow and copyable prompts](11-implementation-workflow.md).
+
+Before that gate, finish/check U01 against the approved A/G1 decision. A bounded unauthenticated 2024 Monza qualifying SessionInfo request returned primary HTTP 401 and mirror HTTP 404; the full installed adapter/access path has not been tested. Do not call the whole archive blocked or verified from that probe. No source credentials were requested or changed.
 
 T01 must create a reproducible full-session source adapter/snapshot with actual access behavior, provenance and failure handling. The OpenF1 availability probe does not replace it. FastF1 3.9.2 access/cache interfaces require installed-release verification. Never invent source data to bypass an access issue.
 

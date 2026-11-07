@@ -4,11 +4,14 @@ T00 is the runnable scaffold. T01–T12 are implementation work. Take the first 
 
 **User priority update, 7 November:** [R01 recorded results first](16-results-first-milestone.md) precedes the telemetry tickets. It imports final phase/session bests, event-specific driver/team records and same-phase comparisons across available years. Individual runs/laps are explicitly deferred to R02, which resumes T01/T02 before numerical telemetry work. Do not mistake classification ingestion for completion of T01.
 
+**Approved follow-up:** [UI and scope decision](17-approved-ui-and-telemetry-rollout.md): A sports-editorial landing, G1 stacked overlays, detailed telemetry limited to verified sessions/channels in 2018–2026, older timing comparisons preserved. The three original circuits are validation pilots before all source-supported events/layouts. U01 is the interface checkpoint; it does not satisfy T01 or real telemetry acceptance.
+
 ## Status board
 
 | Ticket | Deliverable | Requires | Day | Status |
 | --- | --- | --- | --- | --- |
 | T00 | Contracts, local selection boundary, synthetic chart preview and source probe | — | Setup | Complete |
+| U01 | Approved landing and compact recorded-results studio | R01 | UI | In progress |
 | T01 | Pinned FastF1 session import | T00 | 1 | Not started |
 | T02 | Full qualifying roster, actual phase/lap inventory and eligibility | T01 | 2 | Not started |
 | T03 | Frozen reference geometry, turn markers and reviewed windows | T02 | 3 | Not started |
@@ -19,7 +22,7 @@ T00 is the runnable scaffold. T01–T12 are implementation work. Take the first 
 | T08 | Performance map linked to shared distance | T07 | 7 | Not started |
 | T09 | Category analysis, corner/straight ranking and evidence | T08 | 8 | Not started |
 | T10 | Shareable comparisons and PNG/JSON cards | T09 | 8 | Not started |
-| T11 | Three complete inventories and representative validations | T10 | 9 | Not started |
+| T11 | Three pilot inventories, then verified 2018–2026 session/layout expansion | T10 | Pilot day 9; archive separately scoped | Not started |
 | T12 | Release packaging and verification | T11 | 10 | Not started |
 
 ## T00 — Existing foundation

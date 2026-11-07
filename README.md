@@ -12,6 +12,7 @@ Where did the lap time go? Compare two qualifying laps on a common track-distanc
 - [Implementation tickets](docs/06-implementation-plan.md)
 - [Current handoff](docs/10-handoff.md)
 - [Results-first scope, coverage, import commands and later run selection](docs/16-results-first-milestone.md)
+- [Approved UI and verified 2018–2026 telemetry rollout](docs/17-approved-ui-and-telemetry-rollout.md)
 - [Implementing with GPT-6.1 Sol](docs/11-implementation-workflow.md)
 - [20-source qualifying data audit](docs/13-data-source-audit.md)
 - [Detailed data-point inventory and rollout](docs/15-data-points-and-rollout.md)

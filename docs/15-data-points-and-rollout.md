@@ -1,6 +1,6 @@
 # Data-point inventory and implementation plan
 
-Reviewed 7 November 2026. This is the working inventory for the sources evaluated in [the source audit](13-data-source-audit.md), with a rollout that preserves the existing two-driver, three-circuit scope. A field existing in a provider's schema does not establish availability for every driver, lap or year. This document adds no runtime importer or sensor panels.
+Reviewed 7 November 2026. This is the working inventory for the sources evaluated in [the source audit](13-data-source-audit.md). The subsequent [approved scope](17-approved-ui-and-telemetry-rollout.md) targets two-driver telemetry comparisons for verified sessions/channels in 2018–2026, with three pilot circuits before all supported layouts; older years retain timing comparisons. A field existing in a provider's schema does not establish availability for every driver, lap or year. This document adds no runtime importer or sensor panels.
 
 **Subsequent user priority:** [R01](16-results-first-milestone.md) now imports recorded qualifying classifications across 1950–2026 and Sprint Qualifying from 2023–2026. Its event-specific rosters, phase bests and comparison UI precede individual-run/native-telemetry work. The full sensor/method inventory below remains the plan for R02/T01–T12, not a claim that telemetry has been imported.
 

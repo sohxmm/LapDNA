@@ -1,6 +1,6 @@
 # LapDNA implementation blueprint
 
-Revision 4 · 7 November 2026. Status: **recorded qualifying-results comparison implemented; native telemetry processing remains work**. The user's [results-first priority](16-results-first-milestone.md) precedes the full telemetry plan below. R01 covers recorded classifications across 1950–2026; individual laps/runs are deferred to R02. The reference image remains the visual direction for the later synchronized telemetry workspace.
+Revision 5 · 7 November 2026. Status: **recorded qualifying-results comparison implemented; native telemetry processing remains work**. The user's [results-first priority](16-results-first-milestone.md) precedes the full telemetry plan below. R01 covers recorded classifications across 1950–2026. The [approved design and rollout](17-approved-ui-and-telemetry-rollout.md) selects the sports-editorial landing and G1 stacked overlays, and limits detailed telemetry to verified sessions/channels in **2018–2026**. Earlier years retain timing comparisons.
 
 ## The product
 
@@ -8,7 +8,7 @@ Start with the current year, choose a race from that year's sourced calendar, th
 
 Choose any two different drivers from an imported qualifying session, choose each driver's Q1/Q2/Q3 phase independently, and select eligible laps. The app explains where their elapsed-time difference developed and which supported telemetry patterns accompany it. Same-phase selection is the default; cross-phase comparisons require explicit opt-in and persistent context warnings.
 
-All imported drivers appear in the roster. An eliminated driver's absent phase is unavailable with an explanation. No four-driver shortlist or six-pair restriction remains. The three starting circuits are Monza, Silverstone and Suzuka; the 2024 qualifying sessions remain candidate datasets awaiting full ingestion/eligibility/profile validation.
+All imported drivers appear in the roster. An eliminated driver's absent phase is unavailable with an explanation. No four-driver shortlist or six-pair restriction remains. All source-supported qualifying events in 2018–2026 are the telemetry target, with session-level verification rather than a blanket year guarantee. Monza, Silverstone and Suzuka are validation pilots; their 2024 qualifying sessions remain candidates awaiting full ingestion/eligibility/profile validation. Actual SQ sessions are included where supported. New or changed layouts require their own reviewed profiles.
 
 ## Core outputs
 
@@ -36,7 +36,7 @@ The [20-source survey](13-data-source-audit.md) confirms native speed, throttle,
 | Map/export | SVG reference map and dedicated card renderer |
 | Backend | FastAPI + Pydantic, Python owns analytical numbers |
 | Data | Whole-session offline import and per-lap normalization; cached local comparison on demand |
-| Scope | Two drivers, all eligible imported laps, independent Q phases, three starting circuits |
+| Scope | Two drivers, all eligible imported laps, independent Q/SQ phases; verified 2018–2026 telemetry, older timing only; three validation pilots then all supported layouts |
 | Alignment | Frozen session reference, integrated-speed normalized distance, nominal 5 m display grid |
 | Delta | B elapsed minus A elapsed, milliseconds; positive favours A |
 | Observations | Deterministic evidence first; optional validated LLM narrative after the evidence engine |
@@ -62,6 +62,7 @@ The [20-source survey](13-data-source-audit.md) confirms native speed, throttle,
 14. [Analysis generation and optional LLM layer](14-analysis-generation.md)
 15. [Data-point inventory and implementation rollout](15-data-points-and-rollout.md)
 16. [Results-first milestone and future run-by-run selection](16-results-first-milestone.md)
+17. [Approved sports-editorial UI and verified 2018–2026 telemetry rollout](17-approved-ui-and-telemetry-rollout.md)
 
 Python models govern field names; methodology governs numerical meaning; tickets govern current status. Resolve contradictions in one small documented change before dependent implementation.
 
@@ -86,6 +87,6 @@ R01 adds real final classification import, historical event-specific rosters/tea
 
 ## Delivery sequence
 
-Ten working days remains a stretch target for the expanded scope. First finish one real session end to end, then extend the same engine to the other two circuits. Do not replace complete driver selection or evidence checks with a hard-coded showcase.
+The original ten-working-day estimate applies to the pilot pipeline and is not a promise for nine seasons of reviewed layouts. First finish one real session end to end, then validate the other two pilot circuits and expand by verified session/layout across 2018–2026. Do not replace complete driver selection or evidence checks with a hard-coded showcase.
 
 Days 1–2: full-session import and lap inventory. Days 3–4: reference, alignment and reconciliation. Day 5: local comparison engine, mini-sectors and class evidence. Days 6–7: production chart/map integration. Day 8: tailored analysis and exports. Days 9–10: three-circuit acceptance and release. Preserve buffer for upstream access and numerical issues. Clustering remains deferred.

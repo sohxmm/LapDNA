@@ -31,6 +31,8 @@ Run meaningful tests for changed behavior. For contract/API changes run Python t
 
 ## Current scope
 
-The user has prioritized recorded session/phase-best results before individual laps and telemetry. Follow `docs/16-results-first-milestone.md`: R01 imports classifications and event-specific rosters/teams; R02 later adds actual run/lap selection through the existing T01–T12 gates. R01 is not completion of real telemetry ingestion. Preserve the synthetic preview and never infer distance traces or corner claims from classification bests alone.
+The user has prioritized recorded session/phase-best results before individual laps and telemetry. Follow `docs/16-results-first-milestone.md`: R01 imports classifications and event-specific rosters/teams; R02 adds actual run/lap selection through the existing T01–T12 gates. R01 is not completion of real telemetry ingestion. Preserve the synthetic preview and never infer distance traces or corner claims from classification bests alone.
+
+The approved design/scope decision is `docs/17-approved-ui-and-telemetry-rollout.md`: sports-editorial landing (A), G1 stacked overlays, and telemetry only for verified sessions/channels in 2018–2026. Earlier years retain timing comparisons. Monza/Silverstone/Suzuka are validation pilots, not a permanent three-circuit coverage limit. Year/source support never proves an individual session or channel is verified. Keep bulk telemetry out of Git and the Vercel bundle.
 
 The scaffold already contains session selectors, cached result rendering and a synthetic ECharts preview. Extend those components in T06–T09 instead of rebuilding them. `docs/11-implementation-workflow.md` gives the requested model/effort workflow; it does not replace ticket acceptance checks.

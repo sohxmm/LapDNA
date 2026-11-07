@@ -2,6 +2,8 @@
 
 Decision: user instruction, 7 November 2026. Implement recorded qualifying classifications first, then add individual laps/runs and full telemetry. This explicitly changes the immediate ticket order; R01 precedes the existing T01–T12 telemetry programme.
 
+Follow-up approved that day: [sports-editorial UI, stacked overlays and verified 2018–2026 telemetry](17-approved-ui-and-telemetry-rollout.md). Retain R01 timing comparisons before 2018. Detailed telemetry coverage is verified per actual session/lap/channel; older years and unimported sessions never receive synthetic continuous traces. The three pilot circuits precede expansion across supported events/layouts.
+
 ## R01 — Working recorded-results comparison
 
 The first real-data release imports published phase/session best times and event-specific participant/team records. It supports any available circuit in the source archive, rather than restricting this timing tier to the three future telemetry profiles.

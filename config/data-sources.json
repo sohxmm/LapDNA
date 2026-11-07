@@ -1,5 +1,5 @@
 {
-  "registry_version": "1.1.0",
+  "registry_version": "1.2.0",
   "reviewed_on": "2026-11-07",
   "scope": "Finite practical source survey; not an exhaustive internet or private-contract inventory",
   "integration_status": "R01 recorded classifications imported; native telemetry import remains unimplemented",
@@ -11,7 +11,12 @@
     "missing_channel": "unavailable; never substitute an inferred measurement",
     "mini_sector_status_codes_are_durations": false,
     "derived_outputs_require_labels": true,
-    "calendar_coverage_implies_telemetry_coverage": false
+    "calendar_coverage_implies_telemetry_coverage": false,
+    "telemetry_candidate_years": {"from": 2018, "through": 2026},
+    "before_telemetry_range": "recorded timing comparison only",
+    "publication_requires": ["session_verification", "lap_eligibility", "per_driver_native_channel_support", "quality_gates"],
+    "approved_ui": {"landing": "sports_editorial", "primary_graph": "stacked_overlays"},
+    "scope_decision": "docs/17-approved-ui-and-telemetry-rollout.md"
   },
   "sources": [
     {

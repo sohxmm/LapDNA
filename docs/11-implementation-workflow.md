@@ -4,6 +4,8 @@ Use the Desktop checkout and keep this repository as the shared memory between s
 
 Current priority: the user requested [R01 recorded classifications first](16-results-first-milestone.md), now implemented for acceptance using Mexico 2026. Individual laps/runs are deferred to R02. The T01 prompt below applies when that next milestone starts; R01 is not native telemetry ingestion.
 
+Read the [approved interface and rollout decision](17-approved-ui-and-telemetry-rollout.md) before the next ticket. UI A/G1 is selected; do not reopen the design shortlist. Telemetry targets verified sessions/channels in 2018–2026, with older timing comparisons retained and three validation pilots before archive expansion.
+
 ## Model and effort
 
 **Project recommendation: GPT-6.1 Sol at High for most implementation tickets.** Extra High is appropriate for alignment/reconciliation and hard cross-panel state problems. Use Max for a stubborn numerical defect that benefits from deeper work on one problem. Use Ultra when a milestone has independent parts with frozen interfaces that can be implemented or checked in parallel.

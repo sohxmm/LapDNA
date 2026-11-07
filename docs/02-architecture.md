@@ -4,6 +4,8 @@
 
 Python computes lap eligibility, reference alignment, delta, mini-sectors, class metrics and findings. React renders those supplied facts. Cursor and zoom operations never request upstream data or recompute scientific metrics.
 
+The [approved interface/scope decision](17-approved-ui-and-telemetry-rollout.md) fixes the sports-editorial landing and G1 stack. Real telemetry is eligible only for verified sessions/channels in 2018–2026; older timing comparisons continue. Three circuits are validation pilots before broader layout coverage. Pilot local storage precedes measured durable archive publication; bulk telemetry never enters the Vercel bundle or Git.
+
 ```text
 apps/web/src/
   App.tsx                         Home and explicit preview routing
