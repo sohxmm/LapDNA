@@ -38,7 +38,7 @@ Use the Desktop LapDNA checkout selected by the user. It has the original Git hi
 | Browser preview | U01 inspected at 1440×900, 768×1024 and 390×844: landing → current-year calendar, Mexican Q3/Q2 exact timings, keyboard swap/browser back/refresh, historical 2005 format warnings, actual China SQ phases, synthetic turn selection/shared keyboard cursor/brake lanes and discrete sector-only mode. No page-level horizontal overflow observed. 200% text zoom remains a later accessibility acceptance check; the preview browser did not change zoom on the tested shortcut. |
 | Isolated UI fixture | Full roster, unavailable phase/driver, cached sector-only output, swap, cross-phase warning and cache miss checked |
 | Detailed lap/telemetry folders | No native lap/telemetry sessions imported; classifications are published separately and synthetic QA stays isolated |
-| GitHub CI on deployed code c9a8a75 | [Passed on Ubuntu](https://github.com/sohxmm/LapDNA/actions/runs/42293091029) |
+| GitHub CI on deployed code 4fcdc86 | [Passed on Ubuntu](https://github.com/sohxmm/LapDNA/actions/runs/42367418088), including 145 Python tests and contract checks |
 
 Local preview used port 5273 because 5173 was unavailable. Override with `npm run dev --workspace @lapdna/web -- --port 5273` when needed; same-origin proxy behavior is unchanged.
 

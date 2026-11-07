@@ -1,12 +1,13 @@
 # Hosted preview
 
-Updated 7 November 2026 at [LapDNA on Vercel](https://lapdna.vercel.app). The app starts with the current year, loads that year's race calendar, then opens the selected race's studio. Open the [telemetry design preview](https://lapdna.vercel.app/?preview=1) to explore the preserved fictional six-turn example.
+Updated 7 November 2026 at [LapDNA on Vercel](https://lapdna.vercel.app). The approved sports-editorial landing opens the studio's current-year calendar, then the selected race's comparison. Existing year/race links still open directly. Open the [telemetry design preview](https://lapdna.vercel.app/?preview=1) to explore the refined G1 stack on the preserved fictional six-turn example. The [approved rollout](17-approved-ui-and-telemetry-rollout.md) limits future real telemetry to verified sessions/channels in 2018–2026; older timing comparisons remain available.
 
 **R01 is live:** [2026 Mexican GP qualifying](https://lapdna.vercel.app/?year=2026&race=2026-19&view=studio). Real recorded classifications cover 1,168 qualifying events from 1950–2026 and 24 Sprint Qualifying sessions from 2023–2026. Event-specific drivers/teams, exact phase bests, historical formats, DSQ/DNS and missing values are preserved. Individual runs/laps and native telemetry remain the next stage.
 
 ## What is deployed
 
 - The React/Vite frontend and lazy-loaded ECharts telemetry workspace.
+- Sports-editorial landing, compact dark calendar/results studio, expandable Data details/full classification, and G1 with separate binary brake lanes, taller speed and symmetric delta scale.
 - The opt-in synthetic example, including turn selection, shared cursor, local-gain strip, corner-speed summary and sector-only mode.
 - The existing FastAPI scaffold as one same-origin Python function. Health, empty inventory/catalogue and selection validation run on the host.
 - Sourced Jolpica calendar metadata, default current year, historical season browsing, exact year/round studio filtering and refreshable navigation links. Warm caching and bundled, provenance-stamped 1950–2026 calendars preserve explicit freshness warnings.
@@ -14,7 +15,7 @@ Updated 7 November 2026 at [LapDNA on Vercel](https://lapdna.vercel.app). The ap
 - Read-only bundled classification publications and their coverage API, with 27,581 driver-result rows. Recorded timing comparisons and gap bars use actual same-phase durations, not a fabricated distance curve. Source-stamped calendars now cover all 77 seasons.
 - No native telemetry session files, raw upstream cache, local QA fixture, source credentials or numerical ingestion dependencies are bundled.
 
-The ordinary home page displays a sourced race calendar. Published races open recorded-results comparison; absent/future results remain unavailable. The demo's Sample A/B, lap times, curves, turns and findings are all synthetic. Scheduled qualifying start times do not establish session completion. A recorded phase-best comparison does not establish distance alignment, native telemetry quality or a particular run identity.
+The ordinary home page displays the landing; Open Studio enters the sourced current-year calendar. Published races open recorded-results comparison; absent/future results remain unavailable. The demo's Sample A/B, lap times, curves, turns and findings are all synthetic. Scheduled qualifying start times do not establish session completion. A recorded phase-best comparison does not establish distance alignment, native telemetry quality or a particular run identity.
 
 ## Configuration
 
@@ -30,11 +31,11 @@ npx --yes vercel@65.12.1 deploy --prod --yes --scope sohxm44s-projects
 
 The stable production alias is used for this preview. Provider preview URLs may require the owner's Vercel sign-in; the stable alias was verified by unauthenticated HTTP. GitHub push and hosting deployment are separate steps until a Git integration is configured.
 
-The current deployed application code is commit `c9a8a75`, deployment `dpl_HzNFBd6TghXuFWRiotwskMcHiv1C`. Later documentation-only commits do not require redeployment. [Deployment inspection](https://vercel.com/sohxm44s-projects/lapdna/HzNFBd6TghXuFWRiotwskMcHiv1C).
+The current deployed application code is commit `4fcdc86`, deployment `dpl_GJuGpqL1wC6rLeAJV3tza4uj85Un`. Later documentation-only commits do not require redeployment. [Deployment inspection](https://vercel.com/sohxm44s-projects/lapdna/GJuGpqL1wC6rLeAJV3tza4uj85Un).
 
 ## Verification
 
-Local checks: 144 Python tests passed with one Windows symlink test skipped; 16 client tests, generated-contract checking, TypeScript checking and production build passed. The chart chunk retains a non-fatal size advisory. [Ubuntu CI passed](https://github.com/sohxmm/LapDNA/actions/runs/42293091029).
+U01 checks: 17 client tests, TypeScript checking and production build passed locally. The chart chunk retains a non-fatal size advisory. [Ubuntu CI on the deployed commit passed](https://github.com/sohxmm/LapDNA/actions/runs/42367418088), including 145 Python tests and generated-contract checks. No backend behavior changed in U01; the previous Windows Python run had 144 passes and one symlink skip.
 
 Hosted HTTP checks:
 
@@ -59,6 +60,8 @@ Hosted HTTP checks:
 | GET the built /assets/index-*.js referenced by home HTML | 200 JavaScript |
 
 Browser verification covers the current-year default, historical calendar change, race studio, deep-link refresh/back navigation and honest unimported-race state. Desktop/mobile checks cover the preserved demo, T3 selection, keyboard cursor, synthetic channel labels and discrete sector-only crossings. Opening a race resets page position and moves keyboard focus to the studio title. Keep source code and the hosted result separate: API health proves serving, not ingestion or analysis accuracy.
+
+U01 was inspected at 1440×900, 768×1024 and 390×844, with no page-level horizontal overflow observed. Hosted checks confirm the new landing, the separate G1 synthetic preview, and Mexico Q3 Hamilton 1:16.514 versus Leclerc 1:16.633 with a +0.119 s B−A gap and Timing only status. The 200% text-zoom accessibility check remains outstanding; the preview browser did not apply the tested zoom shortcut.
 
 ## Current limitations
 
