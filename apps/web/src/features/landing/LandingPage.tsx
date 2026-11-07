@@ -1,4 +1,5 @@
 import './landing.css';
+import {ThemeToggle} from '../theme/ThemeToggle';
 
 function CircuitArtwork() {
   return <div className="landing-circuit" aria-label="Decorative circuit illustration; schematic, not a measured track map" role="img">
@@ -26,7 +27,7 @@ function CircuitArtwork() {
 export default function LandingPage() {
   return <div className="landing-page">
     <a className="skip-link" href="#landing-main">Skip to content</a>
-    <header className="landing-header"><a href="/" className="landing-wordmark" aria-label="LapDNA home">LAP<span>DNA</span><i aria-hidden="true"/></a><span>FORMULA 1 / LAP COMPARISON</span><a className="landing-demo" href="?preview=1">Explore the demo <span aria-hidden="true">↗</span></a></header>
+    <header className="landing-header"><a href="/" className="landing-wordmark" aria-label="LapDNA home">LAP<span>DNA</span><i aria-hidden="true"/></a><span>FORMULA 1 / LAP COMPARISON</span><div className="landing-header-actions"><a className="landing-demo" href="?preview=1">Explore the demo <span aria-hidden="true">↗</span></a><ThemeToggle/></div></header>
     <main id="landing-main" className="landing-main">
       <div className="landing-kicker"><span>THE TIME IS ONLY THE BEGINNING.</span><span>EST. 2026</span></div>
       <section className="landing-hero" aria-labelledby="landing-title">

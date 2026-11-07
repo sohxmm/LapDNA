@@ -1,9 +1,18 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0b1014" />
+    <script>
+      (() => {
+        let theme = 'dark';
+        try { if (localStorage.getItem('lapdna.theme') === 'light') theme = 'light'; } catch {}
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', theme === 'dark' ? '#0b131c' : '#f0efe7');
+      })();
+    </script>
     <meta name="description" content="Compare qualifying laps by track distance. LapDNA project foundation." />
     <title>LapDNA — Where did the lap time go?</title>
   </head>

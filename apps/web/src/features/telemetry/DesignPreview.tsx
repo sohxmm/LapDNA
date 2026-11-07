@@ -5,6 +5,7 @@ import {SectorPoints} from './SectorPoints';
 import {seconds, signed} from './view';
 import type {SignalProvenanceSet, TraceView} from './view';
 import './trace.css';
+import {ThemeToggle} from '../theme/ThemeToggle';
 
 const previewProvenance:SignalProvenanceSet={
   speed:{status:'synthetic',sourceChannel:null,reason:'Constructed preview fixture; no source measurement'},
@@ -16,7 +17,7 @@ const preview:TraceView={...fixture,nameA:'Sample A',nameB:'Sample B',provenance
 
 export default function DesignPreview() {
   const [mode,setMode]=useState<'trace'|'sector'>('trace');
-  return <><header className="site-header"><a className="wordmark" href="/" aria-label="LapDNA home">LAP<span>DNA</span><i aria-hidden="true"/></a><a className="back-link" href="?view=calendar">Open Studio ↗</a></header>
+  return <><header className="site-header"><a className="wordmark" href="/" aria-label="LapDNA home">LAP<span>DNA</span><i aria-hidden="true"/></a><div className="preview-header-actions"><a className="back-link" href="?view=calendar">Open Studio ↗</a><ThemeToggle/></div></header>
     <main className="studio"><p className="eyebrow">THE TELEMETRY STUDIO / DEMO</p><h1>Every detail. Together.</h1>
     <div className="synthetic-banner"><strong>Synthetic demo</strong> Fictional drivers, track, timings and findings.</div>
     <div className="studio-toolbar"><div className="lap-id"><span className="key-a">A / Q3</span><strong>Sample A</strong><small>{seconds(fixture.elapsedAMs)} s</small></div><div className="lap-id"><span className="key-b">B / Q3</span><strong>Sample B</strong><small>{seconds(fixture.elapsedBMs)} s</small></div>
