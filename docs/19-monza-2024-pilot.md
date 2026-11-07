@@ -18,12 +18,12 @@ The reviewed immutable source snapshot is `work/monza2024/snapshots/20ffd525c5a0
 Run from the Desktop repository:
 
 ```powershell
-.venv\Scripts\python scripts/import_telemetry.py --help
+.venv\Scripts\python scripts/import_telemetry.py --cache-dir work/monza2024
 .venv\Scripts\python scripts/publish_telemetry.py --snapshot work/monza2024/snapshots/20ffd525c5a06e19d51d41d5/snapshot.json
 .venv\Scripts\python scripts/validate_telemetry.py
 ```
 
-Use the import command's help for the actual supported source/cache options. Cached source reruns made zero OpenF1 requests; publication and validation make no upstream requests. The importer is deliberately allowlisted to Monza 2024, not an unverified general archive importer.
+The publication command above uses this checkout's reviewed snapshot. On a fresh download, replace that argument with the final snapshot path printed by the importer; retrieval/source changes may create a different immutable revision. `--refresh` deliberately refetches while retaining prior snapshots. Cached source reruns made zero OpenF1 requests; publication and validation make no upstream requests. The importer is deliberately allowlisted to Monza 2024, not an unverified general archive importer.
 
 ## Actual coverage
 
