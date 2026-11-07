@@ -10,6 +10,8 @@ The survey does not justify removing these features, including from the clearly 
 
 Recommended order: FastF1 for whole-session ingestion; OpenF1 as a separately validated alternative; TracingInsights as a maintained archive/backfill candidate; Jolpica for calendar/results; FIA documents for external timing checks. Several options share upstream measurements, so multiple downloads do not necessarily provide independent validation.
 
+Results-first follow-up, 7 November: real classification import is implemented in [R01](16-results-first-milestone.md). F1DB v2026.19.0 supplies actual historical qualifying timings back to 1950, not just calendar metadata, and fills the older Jolpica gaps. The publication has 1,168 qualifying events from 1950–2026 and 24 OpenF1 Sprint Qualifying sessions from 2023–2026. Complete F1DB classifications also preserve native exclusions where Jolpica's qualifying shape lacks status. This is final-results ingestion, not car telemetry ingestion. F1DB's imported data carries attribution/CC BY 4.0 and a verified pinned archive checksum.
+
 ## Source inventory
 
 | Source and primary documentation | Verified contribution | Recurring import assessment and decision |

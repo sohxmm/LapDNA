@@ -2,6 +2,8 @@
 
 LapDNA compares two qualifying laps and answers three questions. Where did the time difference develop? Which measured inputs changed there? Did the selected laps gain and lose time in different types of corners?
 
+The user's immediate release priority is [R01 recorded session/phase results](16-results-first-milestone.md), now implemented across available circuits from 1950–2026. It compares recorded timings without local telemetry claims. Individual attempts/runs are deferred to R02; the three-circuit reference/telemetry scope below applies to that later numerical release.
+
 A reader can choose any two different drivers in an imported event, pick each driver's Q1, Q2 or Q3 lap, and inspect the result by turn. “Any” covers every eligible imported lap, including a slower lap selected explicitly. A driver who did not reach Q3 has no Q3 selection. Each exclusion has a visible reason.
 
 Enter through a year selector, defaulting to the current year. Load that year's actual calendar, choose a race, then open its studio. Preserve the year/race in the URL and browser history. A listed race is scheduling metadata, not a claim that qualifying has completed or its telemetry is ready. Only imported sessions matching that year and round populate the studio. Display source freshness and an honest empty state for unimported races.

@@ -2,15 +2,16 @@
 
 Where did the lap time go? Compare two qualifying laps on a common track-distance axis and connect approximate local gains to observed telemetry.
 
-**Hosted preview:** [LapDNA](https://lapdna.vercel.app) · [Synthetic telemetry demo](https://lapdna.vercel.app/?preview=1). The hosted API has an empty real-session inventory. See [deployment status and limitations](docs/12-hosting.md).
+**Hosted app:** [LapDNA](https://lapdna.vercel.app) · [2026 Mexican GP qualifying](https://lapdna.vercel.app/?year=2026&race=2026-19&view=studio) · [Synthetic telemetry demo](https://lapdna.vercel.app/?preview=1). Recorded qualifying classifications are imported; the detailed telemetry inventory remains empty. See [deployment status and limitations](docs/12-hosting.md).
 
-**Status: expanded blueprint and runnable foundation.** Start with the current year, select a race from its sourced calendar, then enter that race's studio. The scaffold has a typed local API, full-session driver/lap selection, independent Q1/Q2/Q3 controls, cached comparison delivery, and an opt-in synthetic telemetry preview with all four channels and turn labels. FastF1 ingestion, the numerical comparison engine, real circuit maps and export remain implementation tickets. No real telemetry is bundled and no real comparison has been validated yet.
+**Status: recorded-results comparison is implemented.** Choose year, race, actual qualifying session, phase and two drivers. The app compares recorded phase-best times, preserves event-specific teams, source classification and missing/DSQ/DNS states, and restores selections from the URL. The publication covers 1,168 qualifying events from 1950–2026 and 24 Sprint Qualifying sessions from 2023–2026. Historical formats and missing values remain explicit. The user-prioritized [results-first milestone](docs/16-results-first-milestone.md) defers individual runs/laps to R02. Native telemetry ingestion, numerical distance comparison, real track maps and export remain unfinished; the four-channel design preview stays labelled synthetic.
 
 ## Start here
 
 - [Blueprint and reading order](docs/00-blueprint.md)
 - [Implementation tickets](docs/06-implementation-plan.md)
 - [Current handoff](docs/10-handoff.md)
+- [Results-first scope, coverage, import commands and later run selection](docs/16-results-first-milestone.md)
 - [Implementing with GPT-6.1 Sol](docs/11-implementation-workflow.md)
 - [20-source qualifying data audit](docs/13-data-source-audit.md)
 - [Detailed data-point inventory and rollout](docs/15-data-points-and-rollout.md)

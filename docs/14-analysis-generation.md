@@ -2,6 +2,8 @@
 
 ## What the current app does
 
+The R01 recorded-results studio generates a short deterministic comparison from the two selected phase times: exact durations, signed gap, faster driver or tie. It updates with the selection; it is not a prewritten paragraph for each driver pair and makes no LLM call. Recorded classifications alone cannot support turn/braking explanations or the later corner-category analysis.
+
 The synthetic preview contains a fixed illustrative paragraph and a precomputed fictional metric fixture. It does not call an LLM. Real-result components currently read `artifact.analysis.text` and `artifact.observations` from the selected immutable comparison artifact. Different artifacts can contain different summaries; the browser does not ask a model to write a new one on every view.
 
 The planned numerical engine computes the evidence for the exact selected laps, then produces deterministic templates from those facts. It is unfinished until the actual-import/alignment/evidence tickets pass. The current saved-artifact renderer is not evidence that those computations already exist.

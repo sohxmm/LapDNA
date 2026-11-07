@@ -9,6 +9,8 @@ Python is authoritative: `services/api/src/lapdna/models.py`, `inventory.py` and
 | GET /api/v1/health | Process health only |
 | GET /api/v1/seasons | Current year and selectable calendar years, 1950–current |
 | GET /api/v1/calendar/{year} | Sourced race calendar, retrieval timestamp, freshness and scheduled qualifying status |
+| GET /api/v1/classifications/coverage | Actual imported classification years, per-season counts/calendar denominators and sources |
+| GET /api/v1/classifications/{year}/{round} | Published Qualifying/Sprint Qualifying classifications with event-specific drivers, teams and phase times |
 | GET /api/v1/catalog | Summaries of schema-valid prepared telemetry and sector-only artifacts |
 | GET /api/v1/comparisons/{id} | Discriminated immutable result |
 | GET /api/v1/sessions | Imported event inventory, initially empty |
@@ -17,6 +19,14 @@ Python is authoritative: `services/api/src/lapdna/models.py`, `inventory.py` and
 | GET /openapi.json, /docs | Generated API documentation |
 
 Only the calendar route requests upstream metadata, through a bounded cache. Comparison/session routes do not fetch telemetry. A comparison cache miss is HTTP 409 until the T05 local normalized-data engine is implemented. This is explicit unfinished behavior, not a silently substituted sample.
+
+## Recorded-results tier (R01)
+
+Classification models in classifications.py use their own schema 1.0.0 and are independent of telemetry contracts. Read-only published season snapshots and coverage.json live under classification_snapshots. No result request fetches upstream data. Optional LAPDNA_CLASSIFICATION_DIR overrides the default directory; missing event data returns an explicit empty classification, while corrupt data returns a repair error.
+
+Each session declares actual phases, source Jolpica/OpenF1/F1DB, retrieval UTC, completed/partial status and its own driver/team roster. Phase values are positive integer milliseconds or null. Driver status is timed/no_time/disqualified/did_not_start; native restrictions retain source values but block eligible comparisons. B−A arithmetic compares the exact same phase. Missing Q3 never becomes Q2; provider positions are not re-ranked from minimum times. Driver IDs are source-scoped; the event/session determines historical team assignment.
+
+Legacy QUALIFYING_1/QUALIFYING_2 remain distinct from modern Q1/Q2. A F1DB legacy source may also include a separately published overall QUALIFYING value; it is not a computed synthetic lap. latest_timed_phase/latest_time_ms point to the last declared supported field, not a source lap ID or proof of the final phase attempted. The results UI supports session/phase/a/b URL parameters. [Full scope and source precedence](16-results-first-milestone.md).
 
 ## Calendar navigation
 

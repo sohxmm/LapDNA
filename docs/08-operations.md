@@ -2,6 +2,8 @@
 
 ## Current scaffold
 
+Recorded-results operation now precedes native telemetry ingestion. Follow [R01 import/publication commands](16-results-first-milestone.md) to refresh the ignored source cache and publish validated season classifications. The source archive and packaged read-only publications have separate locations. Individual-lap commands later in this document remain planned T01–T05 work.
+
 Use the [README](../README.md) setup for Node 24, Python 3.11, the root virtual environment and locked dependencies. From the repository root, start the API and client in separate terminals:
 
 ```powershell

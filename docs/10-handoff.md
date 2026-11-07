@@ -1,8 +1,8 @@
 # Current handoff
 
-Updated 7 November 2026 · Revision 3 with source audit and calendar navigation. **Blueprint and expanded scaffold complete; real-data implementation starts at T01.**
+Updated 7 November 2026 · Revision 4. **R01 recorded qualifying-results import and comparison are implemented. Individual laps/runs and native telemetry are deferred to R02/T01–T12.**
 
-Hosted on Vercel at [lapdna.vercel.app](https://lapdna.vercel.app), with the [synthetic demo](https://lapdna.vercel.app/?preview=1) and the existing FastAPI scaffold under `/api/v1`. Real session and comparison catalogues remain empty. See [hosting and limitations](12-hosting.md). This deployment is a preview milestone, not completion of T01–T12.
+Hosted on Vercel at [lapdna.vercel.app](https://lapdna.vercel.app). The explicit user acceptance case is [2026 Mexico qualifying](https://lapdna.vercel.app/?year=2026&race=2026-19&view=studio). Published classifications cover 1,168 qualifying events from 1950–2026 plus 24 Sprint Qualifying sessions from 2023–2026, with 27,581 driver-result rows. The detailed lap/telemetry catalogues remain empty. The [synthetic demo](https://lapdna.vercel.app/?preview=1) stays separate. [R01 scope and future run selection](16-results-first-milestone.md); [hosting](12-hosting.md).
 
 ## Working folder
 
@@ -10,13 +10,15 @@ Use the Desktop LapDNA checkout selected by the user. It has the original Git hi
 
 ## Implemented and checked
 
+- Real classification acquisition, normalization, publication and typed API. Jolpica supplies phase bests; F1DB backfills 631 missing historical events and preserves native exclusions in 23 complete replacement classifications; OpenF1 supplies 24 Sprint Qualifying classifications. Sources are kept distinct by complete event/session, not per-driver data splicing. All 77 source-stamped calendars are bundled.
+- Recorded-results studio: session → exact phase → two eligible event-specific drivers; historical teams, no-time/DSQ/DNS states, phase tables, signed gaps, gap bars, source/coverage labels, URL restoration/back and swap. No continuous telemetry or corner attribution is inferred from phase bests.
 - Pydantic/OpenAPI/TypeScript comparison/inventory contract 1.2.0, with per-lap Q1/Q2/Q3 identity, explicit cross-phase context, telemetry and sector-only result variants, and required native channel provenance per driver. Missing channels stay null. Channel-backed claims require positive native sample counts and local displayed support; these structural checks do not prove the native-data computation.
-- Separate 1.0.0 calendar contract, Jolpica adapter with bounded cache/timeouts/backoff, and source-stamped 2024/2026 fallback snapshots. Current year first, actual race calendar next, then the selected race's studio; URL/back/refresh support and exact year/round session filtering.
+- Separate 1.0.0 calendar and classification contracts, with bounded calendar cache/timeouts/backoff and source-stamped 1950–2026 snapshots. Recent bundled calendars share the six-hour cache window on cold starts. Current year first, actual race next, then the selected race's studio.
 - Session roster and lap inventory endpoints, strict local selection validation, cached compare POST, canonical storage ordering and swapped view indication. Cache misses return an honest 409.
 - Session browser with full imported roster, phase/lap choices, fastest eligible common-phase defaults, excluded-lap reasons, explicit cross-phase opt-in, aborted stale requests, result invalidation on changed selection and cached result rendering.
 - Lazy-loaded ECharts Canvas trace stack: speed, throttle, gear, binary brake and raw cumulative delta; aligned sector/turn rails, estimated mini-sector strip, turn-window selection and shared numeric cursor.
 - Actual result adapter for stored telemetry, class summaries and observations; recorded sector table and separate boundary delta points for both tiers.
-- Opt-in synthetic design preview at `?preview=1`, using a fictional loop and Sample A/B. It demonstrates a high/medium-gain versus low-speed-loss profile. The default application remains empty until a real dataset is imported.
+- Opt-in synthetic design preview at `?preview=1`, using a fictional loop and Sample A/B. It demonstrates a high/medium-gain versus low-speed-loss profile. It remains separate from the real recorded-results studio.
 - Source availability probe, research, revised numerical methodology, full implementation tickets, verification/operations guides and GPT-6.1 Sol workflow.
 - [20-source audit](13-data-source-audit.md) plus a machine-readable registry. Actual native speed, throttle, gear and binary brake are verified, so no demo channel was removed. Trace rows/readouts follow per-driver source availability, with synthetic provenance for all four unchanged preview channels.
 - [Analysis generation specification](14-analysis-generation.md). Current preview prose is fixed; cached real results render saved evidence text. Optional fresh LLM wording is specified after the numerical evidence engine, with no configured provider or runtime model calls today.
@@ -26,15 +28,15 @@ Use the Desktop LapDNA checkout selected by the user. It has the original Git hi
 
 | Check | Recorded result |
 | --- | --- |
-| Python API/contract/selection/calendar suite | 89 passed; one upstream TestClient deprecation warning |
-| `npm run test:web` | 8 passed: selection/orientation/channel support and year/race route validation |
+| Python API/contract/selection/calendar/classification suite | 144 passed, 1 Windows symlink test skipped; one upstream TestClient deprecation warning |
+| `npm run test:web` | 16 passed: lap selection/channel support, year/race routes, recorded timing/phase/URL/history logic |
 | `npm run contracts:check` | Passed |
 | `npm run typecheck` | Passed |
 | `npm run build` | Passed; lazy chart chunk produces a non-fatal size advisory |
 | Browser preview | Desktop/mobile inspected; year default, historical calendar, race studio/refresh, turn selection, keyboard cursor, source labels and sector-only mode checked |
 | Isolated UI fixture | Full roster, unavailable phase/driver, cached sector-only output, swap, cross-phase warning and cache miss checked |
-| Empty production-data folders | No sessions imported; synthetic QA indexes remain outside default data paths |
-| GitHub CI on deployed code 5e6e7d1 | [Passed on Ubuntu](https://github.com/sohxmm/LapDNA/actions/runs/42279132624) |
+| Detailed lap/telemetry folders | No native lap/telemetry sessions imported; classifications are published separately and synthetic QA stays isolated |
+| GitHub CI on deployed code c9a8a75 | [Passed on Ubuntu](https://github.com/sohxmm/LapDNA/actions/runs/42293091029) |
 
 Local preview used port 5273 because 5173 was unavailable. Override with `npm run dev --workspace @lapdna/web -- --port 5273` when needed; same-origin proxy behavior is unchanged.
 
@@ -54,7 +56,9 @@ The narrowly scoped OpenF1 probe retrieved one historical sample and complete re
 
 ## Next implementation gate
 
-Implement **T01** from the updated plan. Start GPT-6.1 Sol at High; use Extra High for T03–T05 numerical work. Use Ultra for independently owned parallel work after interfaces are fixed. [Workflow and copyable prompts](11-implementation-workflow.md).
+The user will check **R01**, explicitly using 2026 Mexican GP qualifying. Hamilton Q3 is 1:16.514, Leclerc Q3 is 1:16.633, B−A is +0.119 s. Q2 reverses the advantage: Leclerc 1:16.944 vs Hamilton 1:16.953. Lawson's source DSQ is visible and blocks selection. Historical 1950 driver/team data, actual SQ sessions, 2005 components, missing phases and restored links have separate checks.
+
+Individual runs/laps are deferred to **R02**, documented in [the results-first milestone](16-results-first-milestone.md). Its first source gate remains **T01**; R01 does not satisfy it. Start GPT-6.1 Sol at High; use Extra High for T03–T05 numerical work. [Workflow and copyable prompts](11-implementation-workflow.md).
 
 T01 must create a reproducible full-session source adapter/snapshot with actual access behavior, provenance and failure handling. The OpenF1 availability probe does not replace it. FastF1 3.9.2 access/cache interfaces require installed-release verification. Never invent source data to bypass an access issue.
 

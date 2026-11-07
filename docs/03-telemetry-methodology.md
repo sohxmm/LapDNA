@@ -2,6 +2,8 @@
 
 This implementation specification uses method identifier `distance-v2`. Numerical thresholds are proposed project policy. T01 onward will validate them on real comparisons. This revision adds independent Q-phase selection, explicit data tiers, estimated minisectors and stable corner-speed categories.
 
+The prior user milestone [R01](16-results-first-milestone.md) now serves recorded qualifying classifications and same-phase duration differences. It does not run distance-v2 or establish any corner/telemetry evidence. Historical and SQ classification fields live in separate contracts; future native SQ/lap support needs explicit per-lap contract and eligibility review.
+
 ## 1. What the product can claim
 
 The official recorded lap gap answers **how much** time separated the laps. LapDNA estimates **where** that gap developed and shows simultaneous channel patterns. A channel difference is evidence of an observed pattern, not proof of its cause. Fuel load, setup, wind, traffic, grip, electrical deployment and line choice remain uncontrolled.

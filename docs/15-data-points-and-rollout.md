@@ -2,6 +2,8 @@
 
 Reviewed 7 November 2026. This is the working inventory for the sources evaluated in [the source audit](13-data-source-audit.md), with a rollout that preserves the existing two-driver, three-circuit scope. A field existing in a provider's schema does not establish availability for every driver, lap or year. This document adds no runtime importer or sensor panels.
 
+**Subsequent user priority:** [R01](16-results-first-milestone.md) now imports recorded qualifying classifications across 1950–2026 and Sprint Qualifying from 2023–2026. Its event-specific rosters, phase bests and comparison UI precede individual-run/native-telemetry work. The full sensor/method inventory below remains the plan for R02/T01–T12, not a claim that telemetry has been imported.
+
 ## 1. Product decisions
 
 - Preserve the four preview channels: speed, throttle, gear and binary brake. Their synthetic curves stay explicitly labelled.
@@ -223,6 +225,6 @@ Provider publication delay and access can vary. The audit records expected post-
 
 ## 14. Immediate next deliverable
 
-The next feature remains T01: one reproducible full qualifying-session snapshot with a truthful field-coverage report. Inspect what was actually returned before enabling any additional panel or claim. Then complete one Monza comparison end to end before expanding circuits or optional channels.
+The current user acceptance milestone is R01, with 2026 Mexico qualifying as the explicit check. Individual runs/laps remain deferred to R02, whose first data gate is T01: one reproducible full native qualifying-session snapshot with a truthful field-coverage report. Then complete one telemetry comparison end to end before expanding circuit profiles or optional sensor panels.
 
 Detailed scientific rules remain in [methodology](03-telemetry-methodology.md), wire names in [contracts](05-contracts.md), and exact ticket gates in [implementation plan](06-implementation-plan.md). Optional narrative behavior is in [analysis generation](14-analysis-generation.md).

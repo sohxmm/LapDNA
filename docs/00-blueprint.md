@@ -1,6 +1,6 @@
 # LapDNA implementation blueprint
 
-Revision 3 · 6 November 2026. Status: **expanded blueprint, calendar navigation and runnable scaffold**. Real-session processing remains implementation work. The user's reference image defines the visual direction: stacked synchronized traces, sector dividers, a local-performance strip, turn numbers, and a cumulative delta.
+Revision 4 · 7 November 2026. Status: **recorded qualifying-results comparison implemented; native telemetry processing remains work**. The user's [results-first priority](16-results-first-milestone.md) precedes the full telemetry plan below. R01 covers recorded classifications across 1950–2026; individual laps/runs are deferred to R02. The reference image remains the visual direction for the later synchronized telemetry workspace.
 
 ## The product
 
@@ -61,6 +61,7 @@ The [20-source survey](13-data-source-audit.md) confirms native speed, throttle,
 13. [Recurring qualifying data-source audit](13-data-source-audit.md)
 14. [Analysis generation and optional LLM layer](14-analysis-generation.md)
 15. [Data-point inventory and implementation rollout](15-data-points-and-rollout.md)
+16. [Results-first milestone and future run-by-run selection](16-results-first-milestone.md)
 
 Python models govern field names; methodology governs numerical meaning; tickets govern current status. Resolve contradictions in one small documented change before dependent implementation.
 
@@ -81,7 +82,7 @@ flowchart LR
 
 ## What exists now
 
-The scaffold has a typed local API, complete-inventory selection contracts, cached comparison lookup, telemetry/sector-only schemas, turn/minisector/class fields, and a synthetic design preview of the chart layout. The preview uses a fictional six-turn loop with Sample A/B and cannot be mistaken for real F1 results. It provides turn selection, a shared distance cursor and discrete sector-only presentation. Production analysis, real track geometry, source import, URL persistence and export remain ticketed work.
+R01 adds real final classification import, historical event-specific rosters/teams, Qualifying/Sprint Qualifying phase selection, recorded-time comparison, gap bars, a full phase table, coverage/source labels and URL restoration. Its read-only publication covers 1,168 qualifying events and 24 Sprint Qualifying sessions. The older scaffold still provides typed individual-lap contracts, prepared telemetry/sector-only rendering and a separate synthetic chart preview. Native telemetry import, distance analysis, real track geometry and exports remain ticketed work; classification bests cannot supply those outputs.
 
 ## Delivery sequence
 

@@ -1,8 +1,8 @@
 {
-  "registry_version": "1.0.1",
+  "registry_version": "1.1.0",
   "reviewed_on": "2026-11-07",
   "scope": "Finite practical source survey; not an exhaustive internet or private-contract inventory",
-  "integration_status": "Research inventory; full telemetry import not implemented",
+  "integration_status": "R01 recorded classifications imported; native telemetry import remains unimplemented",
   "audit_document": "docs/13-data-source-audit.md",
   "feature_policy": {
     "preserve_labelled_synthetic_demo": true,
@@ -49,6 +49,7 @@
     },
     {
       "id": "openf1",
+      "classification_integration": "Sprint Qualifying results imported for 2023-2026; telemetry adapter remains planned",
       "role": "alternative_planned_session_adapter",
       "documentation": "https://openf1.org/docs/",
       "upstream_family": "formula1_livetiming_community_api",
@@ -95,6 +96,7 @@
     },
     {
       "id": "jolpica",
+      "classification_integration": "11386 source qualifying rows imported, 1994-2026; source event gaps before 2003 are backfilled separately",
       "role": "calendar_and_classification",
       "documentation": "https://github.com/jolpica/jolpica-f1/blob/main/docs/README.md",
       "coverage_kind": "historical metadata, not car telemetry",
@@ -139,9 +141,13 @@
     },
     {
       "id": "f1db",
-      "role": "metadata_backfill_candidate",
+      "role": "imported_historical_classification_and_exclusion_aware_event_source",
       "documentation": "https://github.com/f1db/f1db",
       "metadata_from_year": 1950,
+      "qualifying_from_year": 1950,
+      "imported_release": "v2026.19.0",
+      "archive_sha256": "92372221dccd37d9807790a23a090fd946735050b8ff4d6140f0f66bfb764b37",
+      "classification_scope": "631 whole-event backfills and 23 whole-event publications preserving native exclusions; no per-driver provider splicing",
       "formats": ["JSON", "CSV", "SQL", "SQLite"],
       "publisher_data_licence": "CC-BY-4.0",
       "native_car_channels_verified": false,
