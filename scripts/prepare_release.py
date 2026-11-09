@@ -12,6 +12,7 @@ import time
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "services/api/src"))
 from lapdna.analysis.store import PilotStore
 from lapdna.inventory import SessionLapIndex
+from lapdna.analysis.remote import read_normalized
 
 
 def freeze_data(source: Path, target: Path):
@@ -38,7 +39,7 @@ def freeze_data(source: Path, target: Path):
                     path = source / relative
                     if not path.resolve().is_relative_to(source):
                         raise ValueError("Publication file escaped the root")
-                    raw = path.read_bytes()
+                    raw = (read_normalized(source, relative, expected) if relative.startswith("normalized/") and not path.exists() else path.read_bytes())
                     if sha256(raw).hexdigest() != expected:
                         raise ValueError("A publication is being activated; retry a stable snapshot")
                     payloads[relative] = raw

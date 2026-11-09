@@ -15,6 +15,7 @@ from lapdna.analysis.engine import build_comparison, comparison_identity, canoni
 from lapdna.store import ArtifactNotFound, ID_PATTERN, InvalidArtifact, MAX_ARTIFACT_BYTES
 from lapdna.models import DriverChannels, LapMetadata
 from lapdna.analysis.limits import MAX_NORMALIZED_LAPS, MAX_DISTANCE_POINTS
+from lapdna.analysis.remote import read_normalized
 
 
 class ComparisonBusy(Exception):
@@ -93,9 +94,7 @@ class PilotStore:
                 path = self.directory / relative
                 if not path.resolve().is_relative_to(self.directory) or path.resolve().parent != (self.directory / "normalized").resolve():
                     raise InvalidArtifact("normalized publication path escaped root")
-                if path.stat().st_size > MAX_ARTIFACT_BYTES:
-                    raise InvalidArtifact("compressed publication exceeds size limit")
-                compressed = path.read_bytes()
+                compressed = read_normalized(self.directory, relative, manifest["files"][relative])
                 if sha256(compressed).hexdigest() != manifest["files"][relative]:
                     raise InvalidArtifact("normalized publication digest mismatch")
                 with gzip.GzipFile(fileobj=BytesIO(compressed), mode="rb") as handle:
