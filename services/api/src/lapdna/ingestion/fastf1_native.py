@@ -144,6 +144,11 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
     token = token_manager.get_stored()
     if token is None or not token.is_valid():
         raise ImportFailure("access_required", "Sign in locally first: python -m fastf1 auth f1tv --authenticate. Do not put credentials in chat or repository files.")
+    # The pinned transport otherwise starts an interactive password prompt
+    # when a token is revoked mid-batch. Operator jobs must stop instead.
+    def require_local_sign_in():
+        raise ImportFailure("access_required", "The Formula 1 sign-in needs renewal in your local terminal; completed imports are retained")
+    token_manager._default_auth_func = require_local_sign_in
     (cache / "library").mkdir(parents=True, exist_ok=True)
     Cache.configure(cache_dir=str(cache / "library"), force_renew=refresh)
     records = []
@@ -202,6 +207,9 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
         raise
     except Exception as exc:
         from fastf1.exceptions import RateLimitExceededError
+        stored = token_manager.get_stored()
+        if stored is None or not stored.is_valid():
+            raise ImportFailure("access_required", "The Formula 1 sign-in needs renewal in your local terminal; completed imports are retained") from None
         if isinstance(exc, RateLimitExceededError) or budget.status()[1] > 0:
             raise ImportFailure("rate_limited", "FastF1's source rate window is exhausted; keep cached progress and resume after the provider window resets") from None
         # Authentication/network exceptions may contain sensitive request
