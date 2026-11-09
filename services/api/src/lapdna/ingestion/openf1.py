@@ -133,6 +133,16 @@ class OpenF1Client:
                 if exc.code in (401, 403):
                     raise ImportFailure("access_required", f"OpenF1 denied historical access with HTTP {exc.code}") from None
                 if exc.code == 404:
+                    if endpoint in ("car_data", "location") and start is not None and end is not None:
+                        # A filtered historical range can legitimately have
+                        # no records (e.g. beyond the final timing update).
+                        # Preserve absence; later coverage gates decide its use.
+                        raw = b"[]"
+                        meta = {"source_url": url, "retrieved_at": utc_now(), "sha256": hashlib.sha256(raw).hexdigest(), "rows": 0, "bytes": 2, "http_status": 404, "availability": "no_native_rows_in_requested_range"}
+                        atomic_json(raw_path, [])
+                        atomic_json(metadata_path, meta)
+                        self.records.append(meta)
+                        return []
                     raise ImportFailure("source_missing", "The requested historical source resource was not found") from None
                 if exc.code not in (429, 500, 502, 503, 504) or attempt == 2:
                     raise ImportFailure("source_http_error", f"Historical source returned HTTP {exc.code}") from None
@@ -313,6 +323,7 @@ def import_session(cache_dir: Path, *, year: int = 2024, round_number: int = 16,
     if not drivers or len({driver["driver_number"] for driver in drivers}) != len(drivers):
         raise ImportFailure("roster_invalid", "Source roster is empty or duplicated")
     car_data, position_data = {}, {}
+    unrostered_native = {"car_data": Counter(), "location": Counter()}
     if bulk:
         roster = {str(driver["driver_number"]) for driver in drivers}
         edges = [(timestamp(row.get("date_start")), milliseconds(row.get("lap_duration"))) for row in metadata["laps"]]
@@ -337,7 +348,12 @@ def import_session(cache_dir: Path, *, year: int = 2024, round_number: int = 16,
                 for row in records:
                     number = str(row.get("driver_number"))
                     if number not in roster:
-                        raise ImportFailure("foreign_driver", "Native stream contains a driver absent from the verified session roster")
+                        # Bulk feeds can retain a withdrawn driver's stream
+                        # (e.g. Sargeant, Australia 2024). Preserve its raw file
+                        # and count; never create a driver or selectable lap
+                        # from a stream absent from the source session roster.
+                        unrostered_native[endpoint][number] += 1
+                        continue
                     target.setdefault(number, []).append(row)
                 count += len(records)
                 cursor = stop
@@ -355,6 +371,7 @@ def import_session(cache_dir: Path, *, year: int = 2024, round_number: int = 16,
     markers, marker_meta = fetch_markers(cache_dir / "source", refresh=refresh, **({"circuit_key": spec["circuit_key"], "year": year, "turn_count": spec["turn_count"]} if spec else {}))
     client.records.append(marker_meta)
     manifest = {"schema_version": "1.0.0", "source": "openf1", "source_session": str(session_key), "year": year, "round": round_number, "circuit": expected_circuit, "retrieved_at": utc_now(),
+        "unrostered_native_rows_excluded": {endpoint: dict(counts) for endpoint, counts in unrostered_native.items()},
         "eligibility_policy": POLICY_VERSION, "source_records": sorted(client.records, key=lambda record: record["source_url"]), "driver_count": len(drivers), "lap_count": len(normalized_laps), "timing_candidates": sum(lap["timing_candidate"] for lap in normalized_laps),
         "car_data": {number: channel_statistics(rows) for number, rows in car_data.items()}, "position_counts": {number: len(rows) for number, rows in position_data.items()},
         "native_channel_units": {"speed": "km/h", "throttle": "%", "n_gear": "integer", "brake": "0/100 binary; other raw values unavailable", "rpm": "rev/min", "drs": "raw code"},

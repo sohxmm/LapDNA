@@ -238,3 +238,14 @@ def test_catalogue_loads_two_sessions_and_resolves_only_matching_session(tmp_pat
     (tmp_path / "publication.json").write_text(json.dumps(catalogue))
     with pytest.raises(InvalidArtifact, match="digest"):
         PilotStore(tmp_path).load(publication["session"]["session_id"])
+
+
+def test_primary_fastf1_provenance_does_not_claim_composite_sources(publication):
+    publication["method"] = "distance-v4-fastf1-native"
+    publication["provenance"].update(source="fastf1", fastf1_version="3.9.2", provider_version="FastF1 3.9.2 raw native")
+    result = build_comparison(publication, "test-A", "test-B")
+    assert result.provenance.source == "fastf1"
+    assert result.provenance.methodology_version == "distance-v4-fastf1-native"
+    assert result.channel_provenance_a.speed_kph.source_channel == "Speed"
+    assert result.channel_provenance_a.brake.source_channel == "Brake"
+    assert all("from OpenF1" not in text and "identity-matched TracingInsights" not in text for text in result.quality.warnings)

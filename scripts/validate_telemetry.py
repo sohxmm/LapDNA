@@ -50,8 +50,15 @@ def main():
         "openf1_9586_4_11": (79327., [26492., 26579., 26256.]),
         "openf1_9586_81_15": (79436., [26407., 26643., 26386.]),
     }
+    official_source = "FIA 2024 Italian Grand Prix qualifying sector analysis; NOR and PIA Q3 best rows checked separately."
+    official_url = "https://www.fia.com/sites/default/files/2024_16_ita_f1_q0_timing_qualifyingsessionsectoranalysis_v01.pdf"
+    if session_id == "2018-14-monza-Q":
+        official = {"fastf1_2018_14_Q_7_19": (79119., [26519., 26594., 26006.]),
+                    "fastf1_2018_14_Q_5_18": (79280., [26604., 26548., 26128.])}
+        official_source = "F1 published Monza 2018 Q3 lap times and FIA qualifying best sector report; each selected driver's sector triple matches its lap duration. Best-sector records alone are not per-lap ground truth."
+        official_url = "https://www.fia.com/file/72377/download?token=v_jkOHSG"
     for identifier, (lap_ms, sectors) in official.items():
-        if session_id != "2024-16-monza-Q":
+        if session_id not in ("2024-16-monza-Q", "2018-14-monza-Q"):
             break
         metadata = publication["laps"][identifier]["metadata"]
         assert metadata["lap_time_ms"] == lap_ms and metadata["sector_times_ms"] == sectors
@@ -64,12 +71,12 @@ def main():
               "phase_counts": dict(Counter(result["phase"] for result in results)),
               "observation_counts": dict(Counter(str(result["observations"]) for result in results if result["tier"] == "telemetry")),
               "cold_calculation_ms": {"median": median(elapsed), "maximum": max(elapsed)},
-              "official_spot_checks": {"source": "FIA 2024 Italian Grand Prix qualifying sector analysis; NOR and PIA Q3 best rows checked separately.",
-                                      "url": "https://www.fia.com/sites/default/files/2024_16_ita_f1_q0_timing_qualifyingsessionsectoranalysis_v01.pdf",
+              "official_spot_checks": {"source": official_source,
+                                      "url": official_url,
                                       "lap_number_note": "FIA report ordinals differ from provider ordinals; matching uses driver, phase, duration and sector triple.",
                                       "records": {identifier: {"lap_time_ms": duration, "sector_times_ms": sectors} for identifier, (duration, sectors) in official.items()}},
               "results": results}
-    if session_id != "2024-16-monza-Q":
+    if session_id not in ("2024-16-monza-Q", "2018-14-monza-Q"):
         report["official_spot_checks"] = None
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2), encoding="utf-8")

@@ -66,8 +66,6 @@ class PilotStore:
         if not ID_PATTERN.fullmatch(session_id):
             raise ArtifactNotFound
         with self._lock:
-            if session_id in self._publications:
-                return self._publications[session_id]
             manifest_path = self.directory / "publication.json"
             try:
                 if manifest_path.resolve().parent != self.directory:
@@ -77,6 +75,10 @@ class PilotStore:
                 manifest = self.manifests().get(session_id)
                 if manifest is None:
                     raise ArtifactNotFound
+                cached = self._publications.get(session_id)
+                if cached is not None and cached["publication_sha256"] == manifest["publication_sha256"]:
+                    self._publications.move_to_end(session_id)
+                    return cached
                 relative = manifest.get("normalized", f"normalized/{session_id}.json.gz")
                 path = self.directory / relative
                 if not path.resolve().is_relative_to(self.directory) or path.resolve().parent != (self.directory / "normalized").resolve():
@@ -99,7 +101,7 @@ class PilotStore:
                         or any(type(value) not in (int, float) or not isfinite(value) for value in grid)
                         or any(right <= left for left, right in zip(grid, grid[1:]))):
                     raise InvalidArtifact("normalized publication distance grid is invalid")
-                if not isinstance(publication["laps"], dict) or len(publication["laps"]) > 200:
+                if not isinstance(publication["laps"], dict) or len(publication["laps"]) > 256:
                     raise InvalidArtifact("normalized publication exceeds bounded lap count")
                 if len(publication["regions"]) > 128 or len(publication["corners"]) > 200:
                     raise InvalidArtifact("normalized publication exceeds bounded region count")
@@ -179,7 +181,7 @@ class PilotStore:
                 continue
             publication = self.load(session_id)
             candidates = sorted(publication["laps"])
-            if len(candidates) > 200:
+            if len(candidates) > 256:
                 raise InvalidArtifact("identity resolver exceeds bounded lap count")
             for a, b in combinations(candidates, 2):
                 if publication["laps"][a]["metadata"]["driver_number"] == publication["laps"][b]["metadata"]["driver_number"]:

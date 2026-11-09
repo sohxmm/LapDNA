@@ -39,7 +39,7 @@ def check(driver, metric, basis, official, observed, passing=50., warning=150.):
 def comparison_identity(publication: dict, a: str, b: str, tier: str) -> str:
     tag = canonical_hash(publication["session"]["session_id"])[:8]
     return "cmp_" + tag + "_" + canonical_hash({"laps": sorted((a, b)), "publication": publication["publication_sha256"],
-                                    "method": METHOD, "pipeline": PIPELINE, "schema": "1.3.0", "tier": tier})[:24]
+                                    "method": publication.get("method", METHOD), "pipeline": PIPELINE, "schema": "1.3.0", "tier": tier})[:24]
 
 
 def pairing(a, b):
@@ -64,7 +64,7 @@ def provenance(publication: dict, telemetry: bool):
         "source", "fastf1_version", "provider_version", "source_retrieved_at", "source_urls",
         "verification_scope", "components", "source_session", "source_snapshot_sha256", "generated_at",
     )}
-    value.update(pipeline_version=PIPELINE, methodology_version=METHOD)
+    value.update(pipeline_version=PIPELINE, methodology_version=publication.get("method", METHOD))
     if telemetry:
         value.update(reference_sha256=publication["reference_sha256"],
                      circuit_revision=publication.get("circuit_revision", "monza-2024-projected-v1"), reference_lap_id=publication["reference_lap_id"])
@@ -113,6 +113,8 @@ def quality(publication, a, b):
     warnings = ["Approximate local timing from native public telemetry; this is not causal proof or surveyed track position.",
                 "Timing clocks/eligibility are from the identity-matched TracingInsights archive; car and location streams are from OpenF1.",
                 "Start/finish values are timing constraints; endpoint agreement does not independently validate the interior curve."]
+    if publication["provenance"]["source"] == "fastf1":
+        warnings[1] = "Timing clocks/eligibility use the pinned FastF1 parser; native car/location rows are decoded before library default filling."
     if any(item["status"] == "warn" for item in checks):
         warnings.append("Interior or timing residuals exceed a pass threshold; inspect the unadjusted checks in Data details.")
     if "warn" in gaps:
@@ -306,6 +308,8 @@ def build_comparison(publication: dict, lap_a: str, lap_b: str, detail_level="au
         start = end
     def channels(record):
         raw_fields = {"speed_kph": "speed", "throttle_pct": "throttle", "gear": "n_gear", "brake": "brake"}
+        if publication["provenance"]["source"] == "fastf1":
+            raw_fields = {"speed_kph": "Speed", "throttle_pct": "Throttle", "gear": "nGear", "brake": "Brake"}
         return {name: {"status": "measured", "source_channel": raw, "reason": None}
                 if any(value is not None for value in record["channels"][name]) else
                 {"status": "missing", "source_channel": None, "reason": "No valid native source observations for this channel."}

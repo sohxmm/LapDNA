@@ -1,11 +1,14 @@
 """Offline normalization of one identity-checked session; serving never calls this."""
 
 from datetime import datetime, timezone
+from contextlib import contextmanager
 import gzip
 from hashlib import sha256
 import json
 import re
 from pathlib import Path
+import os
+import time
 
 from lapdna.alignment.native import (
     AlignmentError, aligned_channels, distance_at, linear, prepare_lap, support, utc_seconds,
@@ -17,6 +20,39 @@ from lapdna.inventory import SessionLapIndex
 
 SESSION = {"session_id": "2024-16-monza-Q", "year": 2024, "round": 16,
            "session_type": "Q", "circuit_id": "monza", "event_name": "Italian Grand Prix"}
+
+
+@contextmanager
+def activation_lock(output):
+    """Short cross-process lock; the OS releases it if an operator job exits."""
+    output.mkdir(parents=True, exist_ok=True)
+    with (output / ".activation.lock").open("a+b") as handle:
+        if handle.tell() == 0:
+            handle.write(b"0")
+            handle.flush()
+        handle.seek(0)
+        if os.name == "nt":
+            import msvcrt
+            for attempt in range(100):
+                try:
+                    msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+                    break
+                except OSError:
+                    if attempt == 99:
+                        raise ValueError("Another publication is being activated; retry with the retained snapshot") from None
+                    time.sleep(.05)
+            try:
+                yield
+            finally:
+                handle.seek(0)
+                msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 
 def roster_and_laps(snapshot):
@@ -121,15 +157,17 @@ def _components(snapshot):
                                "license_name": "CC BY-NC-SA 4.0" if source == "openf1" else "Archive licence and underlying data rights remain distinct; review the pinned licence" if source == "tracinginsights" else "Public endpoint; redistribution terms not verified",
                                "license_url": "https://github.com/br-g/openf1/blob/main/LICENSE" if source == "openf1" else
                                archive_license if source == "tracinginsights" else None})
-    if not {"openf1", "tracinginsights"}.issubset({item["source"] for item in components}):
+    required = {"fastf1"} if snapshot.get("source") == "fastf1" else {"openf1", "tracinginsights"}
+    if not required.issubset({item["source"] for item in components}):
         raise ValueError("composite snapshot requires explicit provider component hashes")
     return components
 
 
 def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
-    if snapshot.get("source") != "openf1_tracinginsights":
+    if snapshot.get("source") not in ("openf1_tracinginsights", "fastf1"):
         raise ValueError("Publication requires identity-checked composite timing and native telemetry")
     components = _components(snapshot)
+    primary = snapshot["source"] == "fastf1"
     spec = snapshot.get("import_spec")
     session = ({"session_id": f"{spec['year']}-{spec['round']}-{spec['circuit_id']}-Q",
                 **{key: spec[key] for key in ("year", "round", "session_type", "circuit_id", "event_name")}} if spec else SESSION)
@@ -191,9 +229,16 @@ def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
                                   "components": components, "source_snapshot_sha256": source_hash,
                                   "verification_scope": "Complete source driver/lap identities and available timings matched, native support and raw sector reconciliation checked. Local estimates are approximate; source agreement is not independent physical validation. Source licences do not independently grant all underlying F1 redistribution rights.",
                                   "source_session": f"{session['year']} {session['event_name']} Qualifying / OpenF1 session {snapshot['session']['session_key']} / TracingInsights {session['year']}"}}
+    if primary:
+        version = source_provenance["fastf1_version"]
+        geometry["coordinate_note"] = "Primary native position coordinates retained in their year-specific source frame. The map is approximate; the distance axis is integrated speed, not map coordinates."
+        publication["method"] = "distance-v4-fastf1-native"
+        publication["provenance"].update(source="fastf1", fastf1_version=version, provider_version=f"FastF1 {version}; raw-presence-v1 decoder",
+            verification_scope="Native primary car/position rows decoded before library filling. Lap clocks, phases and validity use the pinned FastF1 parser. Native support and unadjusted timing consistency must pass; no independent physical validation is claimed.",
+            source_session=f"{session['year']} {session['event_name']} Qualifying / primary timing session {snapshot['session']['session_key']}")
     publication["reference_sha256"] = canonical_hash({"reference_lap_id": reference_id, "geometry": geometry,
                                                       "regions": regions, "corners": publication["corners"], "grid": grid,
-                                                      "method": METHOD})
+                                                      "method": publication.get("method", METHOD)})
     length = grid[-1]
     option_map = {option["lap_id"]: option for option in options}
     for candidate in candidates:
@@ -241,6 +286,8 @@ def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
              "warnings": ["Public telemetry supports approximate local analysis; brake is binary, not pressure.",
                           "Map coordinates remain in their source frame. Timing distance is integrated speed.",
                           "Eligible laps can still fall back to sectors when pair reconciliation fails."]}
+    if primary:
+        index.update(source_name="FastF1 / primary native records", source_url="https://docs.fastf1.dev/")
     if profile == "marker-windows-v1":
         note = "Turn vicinities use fixed ±120 m source-marker windows; overlapping windows form a complex. They are approximate analysis zones, not measured corner boundaries."
         index["warnings"].append(note)
@@ -266,12 +313,14 @@ def write_publication(snapshot_path: Path, output: Path):
     normalized_name = f"{session_id}-{revision}.json.gz"
     if len(normalized) > 20 * 1024 * 1024:
         raise ValueError("normalized pilot publication exceeds bounded reader size")
+    if len(publication["laps"]) > 256 or len(publication["distance_m"]) > 5000:
+        raise ValueError("normalized publication exceeds bounded lap/grid count")
     outputs = {
         output / "sessions" / f"{session_id}.json": index.model_dump_json().encode(),
         output / "normalized" / normalized_name: gzip.compress(normalized, mtime=0),
         output / "reports" / f"{session_id}.json": json.dumps(report, indent=2, allow_nan=False).encode(),
     }
-    manifest = {"session_id": session_id, "schema_version": "1.3.0", "method": METHOD,
+    manifest = {"session_id": session_id, "schema_version": "1.3.0", "method": publication.get("method", METHOD),
                 "normalized": f"normalized/{normalized_name}",
                 "source_snapshot_sha256": index.source_snapshot_sha256,
                 "publication_sha256": publication["publication_sha256"],
@@ -288,11 +337,12 @@ def write_publication(snapshot_path: Path, output: Path):
     temporary = manifest_path.with_suffix(".tmp")
     temporary.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     temporary.replace(manifest_path)
-    root = output / "publication.json"
-    prior = json.loads(root.read_text(encoding="utf-8")) if root.exists() else {}
-    catalogue = prior if prior.get("catalogue_version") == 2 else {"catalogue_version": 2, "sessions": {}}
-    catalogue["sessions"][session_id] = {"manifest": str(manifest_path.relative_to(output)).replace("\\", "/"), "sha256": sha256(manifest_path.read_bytes()).hexdigest()}
-    temporary = root.with_suffix(".tmp")
-    temporary.write_text(json.dumps(catalogue, indent=2), encoding="utf-8")
-    temporary.replace(root)
+    with activation_lock(output):
+        root = output / "publication.json"
+        prior = json.loads(root.read_text(encoding="utf-8")) if root.exists() else {}
+        catalogue = prior if prior.get("catalogue_version") == 2 else {"catalogue_version": 2, "sessions": {}}
+        catalogue["sessions"][session_id] = {"manifest": str(manifest_path.relative_to(output)).replace("\\", "/"), "sha256": sha256(manifest_path.read_bytes()).hexdigest()}
+        temporary = root.with_suffix(".tmp")
+        temporary.write_text(json.dumps(catalogue, indent=2), encoding="utf-8")
+        temporary.replace(root)
     return report, len(normalized), len(outputs[output / "normalized" / normalized_name])

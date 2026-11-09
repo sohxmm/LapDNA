@@ -222,3 +222,16 @@ def test_generalized_archive_identity_still_rejects_another_event():
     assert error.value.code == "archive_session_mismatch"
     info["session_info"].update(Key=9492, Meeting={"Key":1232}, Path=spec["archive_session_path"])
     assert combine_laps([row], drivers, archives, info, spec=spec)[1]["session_identity_verified"]
+
+
+def test_empty_filtered_native_range_stays_empty_without_masking_missing_metadata(tmp_path):
+    from datetime import datetime, timezone, timedelta
+    def missing(request, timeout):
+        raise HTTPError(request.full_url, 404, "No matching records", {}, None)
+    start = datetime(2024, 1, 1, tzinfo=timezone.utc)
+    client = OpenF1Client(tmp_path, opener=missing, sleep=lambda _: None)
+    assert client.fetch("car_data", 9586, start=start, end=start+timedelta(minutes=10)) == []
+    assert client.records[-1]["http_status"] == 404
+    with pytest.raises(ImportFailure) as error:
+        client.fetch("laps", 9586)
+    assert error.value.code == "source_missing"
