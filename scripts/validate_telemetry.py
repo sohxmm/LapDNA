@@ -46,22 +46,26 @@ def main():
                             "comparison_id": artifact.comparison_id, "tier": artifact.detail_level,
                             "quality": artifact.quality.status, "observations": len(getattr(artifact, "observations", [])),
                             "fallback_reason": getattr(artifact, "fallback_reason", None)})
-    official = {
-        "openf1_9586_4_11": (79327., [26492., 26579., 26256.]),
-        "openf1_9586_81_15": (79436., [26407., 26643., 26386.]),
+    official_by_driver = {
+        "NOR": (79327., [26492., 26579., 26256.]),
+        "PIA": (79436., [26407., 26643., 26386.]),
     }
     official_source = "FIA 2024 Italian Grand Prix qualifying sector analysis; NOR and PIA Q3 best rows checked separately."
     official_url = "https://www.fia.com/sites/default/files/2024_16_ita_f1_q0_timing_qualifyingsessionsectoranalysis_v01.pdf"
     if session_id == "2018-14-monza-Q":
-        official = {"fastf1_2018_14_Q_7_19": (79119., [26519., 26594., 26006.]),
-                    "fastf1_2018_14_Q_5_18": (79280., [26604., 26548., 26128.])}
+        official_by_driver = {"RAI": (79119., [26519., 26594., 26006.]),
+                              "VET": (79280., [26604., 26548., 26128.])}
         official_source = "F1 published Monza 2018 Q3 lap times and FIA qualifying best sector report; each selected driver's sector triple matches its lap duration. Best-sector records alone are not per-lap ground truth."
         official_url = "https://www.fia.com/file/72377/download?token=v_jkOHSG"
-    for identifier, (lap_ms, sectors) in official.items():
-        if session_id not in ("2024-16-monza-Q", "2018-14-monza-Q"):
-            break
-        metadata = publication["laps"][identifier]["metadata"]
-        assert metadata["lap_time_ms"] == lap_ms and metadata["sector_times_ms"] == sectors
+    official = {}
+    if session_id in ("2024-16-monza-Q", "2018-14-monza-Q"):
+        # Source lap ordinals differ. Match the actual driver/phase/time and
+        # sector triple, including timing-eligible records without telemetry.
+        for driver, (lap_ms, sectors) in official_by_driver.items():
+            matches = [lap for lap in index.laps if lap.driver_code == driver and lap.phase == "Q3"
+                       and lap.lap_time_ms == lap_ms and list(lap.sector_times_ms) == sectors]
+            assert len(matches) == 1, f"Official spot check does not match a unique source lap: {driver}"
+            official[matches[0].lap_id] = (lap_ms, sectors)
     report = {"session_id": session_id, "source_snapshot_sha256": index.source_snapshot_sha256,
               "publication_sha256": publication["publication_sha256"],
               "scope": "All distinct-driver, fastest eligible same-phase pairs; source download disabled/not used. This does not exhaust every actual lap pair.",
