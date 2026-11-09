@@ -57,3 +57,14 @@ def test_complete_primary_snapshot_can_be_reused_offline_before_loading_optional
         "provenance":{"fastf1_version":"3.9.2","native_mask_policy":"raw-presence-v1"}}))
     (tmp_path / "snapshot-pointer.json").write_text(json.dumps({"snapshot_path":str(snapshot)}))
     assert import_fastf1_session(tmp_path, 2018, 14, progress=lambda _:None) == snapshot
+
+
+def test_lap_window_excludes_stale_samples_but_rejects_unknown_driver_during_laps():
+    from lapdna.ingestion.fastf1_native import lap_window_rows
+    stream = {"1": [{"date":"2019-07-27T12:27:00Z", "speed":100}],
+              "44": [{"date":"2019-07-27T13:00:00Z", "speed":200}]}
+    kept, excluded = lap_window_rows(stream, {"44"}, "2019-07-27T13:00:00Z", "2019-07-27T13:02:00Z")
+    assert excluded == 1 and kept == {"44":stream["44"]}
+    stream["1"][0]["date"] = "2019-07-27T13:01:00Z"
+    with pytest.raises(ImportFailure, match="unknown driver inside"):
+        lap_window_rows(stream, {"44"}, "2019-07-27T13:00:00Z", "2019-07-27T13:02:00Z")

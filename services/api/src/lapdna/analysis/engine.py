@@ -10,7 +10,8 @@ from lapdna.models import ComparisonArtifact, SectorComparisonArtifact
 
 METHOD = "distance-v5-openf1-native-composite"
 LEGACY_METHOD = "distance-v4-openf1-native-composite"
-PIPELINE = "native-composite-3"
+PIPELINE = "native-sessions-4"
+SCHEMA = "1.4.0"
 SEVERITY = {"pass": 0, "warn": 1, "block": 2}
 
 
@@ -40,7 +41,7 @@ def check(driver, metric, basis, official, observed, passing=50., warning=150.):
 def comparison_identity(publication: dict, a: str, b: str, tier: str) -> str:
     tag = canonical_hash(publication["session"]["session_id"])[:8]
     return "cmp_" + tag + "_" + canonical_hash({"laps": sorted((a, b)), "publication": publication["publication_sha256"],
-                                    "method": publication.get("method", LEGACY_METHOD), "pipeline": PIPELINE, "schema": "1.3.0", "tier": tier})[:24]
+                                    "method": publication.get("method", LEGACY_METHOD), "pipeline": PIPELINE, "schema": SCHEMA, "tier": tier})[:24]
 
 
 def pairing(a, b, records=()):
@@ -86,7 +87,7 @@ def sector_result(publication: dict, first: str, second: str, reason: str):
     if any(item["status"] == "block" for item in checks):
         raise ComparisonUnavailable("Recorded sector timing does not reconcile with the lap duration; this pair is unavailable.")
     delta = [right - left for left, right in zip(a["sector_times_ms"], b["sector_times_ms"])]
-    result = {"schema_version": "1.3.0", "comparison_id": comparison_identity(publication, first, second, "sector_only"),
+    result = {"schema_version": SCHEMA, "comparison_id": comparison_identity(publication, first, second, "sector_only"),
               "detail_level": "sector_only", "session": publication["session"], "lap_a": a, "lap_b": b,
               "pairing": pairing(a, b, [publication["laps"][first], publication["laps"][second]]), "provenance": provenance(publication, False),
               "quality": {"status": worst(*(item["status"] for item in checks)),
@@ -297,7 +298,7 @@ def build_comparison(publication: dict, lap_a: str, lap_b: str, detail_level="au
     if detail_level == "sector_only" or missing:
         return sector_result(publication, first, second,
                              "Sector timing selected; this view contains recorded split differences only." if detail_level == "sector_only" else
-                             "One or both selected laps lack a verified distance alignment; recorded sectors remain available.")
+                             publication.get("telemetry_unavailable_reason", "One or both selected laps lack a verified distance alignment; recorded sectors remain available."))
     report = quality(publication, a, b)
     if report["status"] == "block":
         if detail_level == "telemetry":
@@ -323,7 +324,7 @@ def build_comparison(publication: dict, lap_a: str, lap_b: str, detail_level="au
                 if any(value is not None for value in record["channels"][name]) else
                 {"status": "missing", "source_channel": None, "reason": "No valid native source observations for this channel."}
                 for name, raw in raw_fields.items()}
-    result = {"schema_version": "1.3.0", "comparison_id": comparison_identity(publication, first, second, "telemetry"),
+    result = {"schema_version": SCHEMA, "comparison_id": comparison_identity(publication, first, second, "telemetry"),
               "detail_level": "telemetry", "session": publication["session"], "lap_a": a["metadata"], "lap_b": b["metadata"],
               "pairing": pairing(a["metadata"], b["metadata"], [a, b]), "provenance": provenance(publication, True),
               "distance_m": grid, "channels_a": a["channels"], "channels_b": b["channels"],

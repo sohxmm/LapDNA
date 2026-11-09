@@ -13,7 +13,10 @@ def main():
     args = parser.parse_args()
     report, raw_bytes, compressed_bytes = write_publication(args.snapshot, args.output)
     print(f"Published {report['roster_count']} drivers; {report['telemetry_laps']} telemetry, {report['sector_only_laps']} sector-only, {report['unavailable_laps']} unavailable laps")
-    print(f"Reference {report['reference_lap_id']}; integrated length {report['reference_length_m']:.1f} m")
+    if report['reference_lap_id']:
+        print(f"Reference {report['reference_lap_id']}; integrated length {report['reference_length_m']:.1f} m")
+    else:
+        print("No verified spatial reference; recorded timing only")
     print(f"Normalized bytes {raw_bytes}; compressed {compressed_bytes}")
     print(f"Reports: {args.output / 'reports'}")
 

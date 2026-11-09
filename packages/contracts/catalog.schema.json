@@ -101,7 +101,10 @@
           "enum": [
             "Q1",
             "Q2",
-            "Q3"
+            "Q3",
+            "SQ1",
+            "SQ2",
+            "SQ3"
           ],
           "title": "Phase",
           "type": "string"
@@ -212,8 +215,11 @@
           "type": "string"
         },
         "session_type": {
-          "const": "Q",
           "default": "Q",
+          "enum": [
+            "Q",
+            "SQ"
+          ],
           "title": "Session Type",
           "type": "string"
         },
@@ -248,7 +254,8 @@
       "default": "1.2.0",
       "enum": [
         "1.2.0",
-        "1.3.0"
+        "1.3.0",
+        "1.4.0"
       ],
       "title": "Schema Version",
       "type": "string"

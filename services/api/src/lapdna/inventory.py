@@ -43,7 +43,7 @@ class LapOption(LapIdentity):
 
 
 class SessionLapIndex(Contract):
-    schema_version: SchemaVersion = "1.2.0"
+    schema_version: SchemaVersion = "1.4.0"
     session: SessionIdentity
     source_snapshot_sha256: Sha256
     drivers: list[DriverEntry]
@@ -55,10 +55,14 @@ class SessionLapIndex(Contract):
 
     @model_validator(mode="after")
     def check_identity(self) -> Self:
+        if self.session.session_type == "SQ" and self.schema_version != "1.4.0":
+            raise ValueError("Sprint Qualifying inventory requires contract 1.4.0")
         drivers = {driver.driver_number: driver for driver in self.drivers}
         if len(drivers) != len(self.drivers) or len({lap.lap_id for lap in self.laps}) != len(self.laps):
             raise ValueError("duplicate driver or lap ID")
         for lap in self.laps:
+            if lap.phase.startswith("SQ") != (self.session.session_type == "SQ"):
+                raise ValueError("lap phase must match the actual session format")
             driver = drivers.get(lap.driver_number)
             if driver is None or (driver.driver_code, driver.driver_name) != (lap.driver_code, lap.driver_name):
                 raise ValueError("lap driver must match the session roster")
@@ -72,7 +76,7 @@ class SessionSummary(Contract):
 
 
 class SessionInventory(Contract):
-    schema_version: SchemaVersion = "1.2.0"
+    schema_version: SchemaVersion = "1.4.0"
     sessions: list[SessionSummary]
 
 

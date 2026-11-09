@@ -174,7 +174,7 @@ function Studio({
       )}
       <div className="studio-view-tabs" role="group" aria-label="Comparison view">
         <button type="button" aria-pressed={activeMode==='timing'} onClick={()=>changeView('timing')}>Recorded timings</button>
-        <button type="button" aria-pressed={activeMode==='telemetry'} disabled={availability==='missing'||race.year<2018} title={availability==='missing'?'Lap telemetry is not imported for this event':undefined} onClick={()=>changeView('telemetry')}>Lap telemetry{availability==='available'?' · Available':''}</button>
+        <button type="button" aria-pressed={activeMode==='telemetry'} disabled={availability==='missing'||race.year<2018} title={availability==='missing'?'Lap data is not imported for this event':undefined} onClick={()=>changeView('telemetry')}>Lap comparisons{availability==='available'?' · Imported':''}</button>
       </div>
       {availability==='loading'&&!mode?<p role="status">Loading available comparisons…</p>:activeMode==='telemetry'?<Suspense fallback={<p role="status">Loading lap comparison…</p>}><SessionBrowser year={race.year} round={race.round} eventName={race.name}/></Suspense>:
       <Suspense

@@ -8,6 +8,9 @@ export type SlotName = 'a' | 'b';
 export type Slot = { driver: string; phase: Phase | ''; lapId: string };
 export type Draft = { a: Slot; b: Slot; independent: boolean };
 export const phases: Phase[] = ['Q1', 'Q2', 'Q3'];
+export function sessionPhases(index:Index):Phase[] {
+  return index.session?.session_type==='SQ'?['SQ1','SQ2','SQ3']:phases;
+}
 
 export function available(index: Index, driver: string, phase?: Phase | '') {
   return index.laps.filter(lap => lap.driver_number === driver && lap.capability !== 'unavailable'
@@ -21,12 +24,12 @@ function choose(index: Index, driver: string, phase: Phase | '', current = ''): 
 }
 
 function highest(index: Index, driver: string): Phase | '' {
-  return [...phases].reverse().find(phase => available(index, driver, phase).length > 0) ?? '';
+  return [...sessionPhases(index)].reverse().find(phase => available(index, driver, phase).length > 0) ?? '';
 }
 
 export function synchronize(index: Index, draft: Draft, preferred: Phase | '' = ''): Draft {
   if (draft.independent) return draft;
-  const common = phases.filter(phase => available(index, draft.a.driver, phase).length > 0
+  const common = sessionPhases(index).filter(phase => available(index, draft.a.driver, phase).length > 0
     && available(index, draft.b.driver, phase).length > 0);
   const phase = preferred && common.includes(preferred) ? preferred : common.at(-1) ?? '';
   return {

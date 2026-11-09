@@ -263,3 +263,57 @@ def test_wet_pairing_preserves_native_channels_and_reports_unknown_conditions(pu
     assert any("rainfall within 90 seconds" in warning for warning in result.pairing.warnings)
     assert any("unavailable" in warning for warning in result.pairing.warnings)
     assert result.channels_a.model_dump() == original
+
+
+def test_sprint_comparison_preserves_sq_phases_and_rejects_mislabeled_q(publication):
+    publication["session"].update(session_type="SQ", session_id="2024-16-monza-SQ")
+    for record in publication["laps"].values(): record["metadata"]["phase"]="SQ3"
+    result=build_comparison(publication,"test-A","test-B")
+    assert result.schema_version == "1.4.0" and result.lap_a.phase == "SQ3"
+    publication["laps"]["test-A"]["metadata"]["phase"]="Q3"
+    with pytest.raises(ValueError, match="session format"):
+        build_comparison(publication,"test-A","test-B")
+
+
+def test_timing_only_publication_requires_no_fabricated_grid_or_map(tmp_path, publication):
+    publication["capability"]="sector_only"
+    publication["telemetry_unavailable_reason"]="Native speed gaps exceed the allowed threshold."
+    for key in ["distance_m","geometry","regions","corners","sector_boundaries_m","reference_lap_id","reference_sha256"]:
+        publication.pop(key,None)
+    for record in publication["laps"].values():record.pop("channels")
+    write_bundle(tmp_path,publication)
+    result=PilotStore(tmp_path).compare(publication["session"]["session_id"],"test-A","test-B","auto")
+    assert result.detail_level == "sector_only"
+    assert "speed gaps" in result.fallback_reason
+    assert "distance_m" not in result.model_dump()
+    with pytest.raises(ComparisonUnavailable):
+        PilotStore(tmp_path).compare(publication["session"]["session_id"],"test-A","test-B","telemetry")
+
+
+def test_cached_publication_observes_an_atomic_activation_change(tmp_path,publication):
+    path=write_bundle(tmp_path,publication)
+    store=PilotStore(tmp_path)
+    assert store.load(publication["session"]["session_id"])["publication_sha256"] == "2"*64
+    replacement=deepcopy(publication);replacement["publication_sha256"]="4"*64
+    compressed=gzip.compress(json.dumps(replacement).encode());path.write_bytes(compressed)
+    manifest={"session_id":publication["session"]["session_id"],"publication_sha256":"4"*64,
+        "files":{str(path.relative_to(tmp_path)).replace("\\","/"):sha256(compressed).hexdigest()}}
+    temporary=tmp_path/"activation.tmp";temporary.write_text(json.dumps(manifest));temporary.replace(tmp_path/"publication.json")
+    assert store.load(publication["session"]["session_id"])["publication_sha256"] == "4"*64
+
+
+def test_large_qualifying_inventory_fits_resource_bound_without_removing_laps(tmp_path, publication):
+    template = deepcopy(publication["laps"]["test-A"])
+    for number in range(280):
+        record = deepcopy(template)
+        record["metadata"]["lap_id"] = f"large-{number}"
+        publication["laps"][f"large-{number}"] = record
+    write_bundle(tmp_path, publication)
+    assert len(PilotStore(tmp_path).load(publication["session"]["session_id"])["laps"]) == 282
+
+
+def test_oversized_lap_inventory_still_rejects_before_decoding_channels(tmp_path, publication):
+    publication["laps"] = {str(i): {} for i in range(513)}
+    write_bundle(tmp_path, publication)
+    with pytest.raises(InvalidArtifact):
+        PilotStore(tmp_path).load(publication["session"]["session_id"])

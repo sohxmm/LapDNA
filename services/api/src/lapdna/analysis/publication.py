@@ -14,8 +14,9 @@ from lapdna.alignment.native import (
     AlignmentError, aligned_channels, distance_at, linear, prepare_lap, support, utc_seconds,
 )
 from lapdna.alignment.reference import canonical_grid, geometry_at, monza_regions, marker_regions, project_markers
-from lapdna.analysis.engine import METHOD, PIPELINE, canonical_hash, grade, quality
+from lapdna.analysis.engine import METHOD, PIPELINE, SCHEMA, canonical_hash, grade, quality
 from lapdna.inventory import SessionLapIndex
+from lapdna.analysis.limits import MAX_NORMALIZED_LAPS, MAX_DISTANCE_POINTS
 
 
 SESSION = {"session_id": "2024-16-monza-Q", "year": 2024, "round": 16,
@@ -89,7 +90,7 @@ def roster_and_laps(snapshot):
     options = []
     for row in snapshot["laps"]:
         phase = row.get("phase")
-        if phase not in ("Q1", "Q2", "Q3"):
+        if phase not in ("Q1", "Q2", "Q3", "SQ1", "SQ2", "SQ3"):
             continue
         number = str(row["driver_number"])
         driver = drivers[number]
@@ -189,15 +190,50 @@ def _components(snapshot):
     return components
 
 
+def timing_publication(snapshot, session, roster, options, metadata, report, components, source_hash):
+    """Keep real lap selection without inventing a distance/reference axis."""
+    if len({row["driver_number"] for row in metadata.values()}) < 2:
+        raise ValueError("Fewer than two drivers have source-eligible recorded lap timing")
+    primary, source = snapshot["source"] == "fastf1", snapshot["provenance"]
+    retrieved = source.get("retrieved_at") or source.get("source_retrieved_at")
+    if not retrieved:
+        raise ValueError("Source retrieval timestamp is missing")
+    reasons = sorted({reason for row in report["laps"].values() for reason in row.get("reasons", [])})
+    reason = ("No eligible lap supplies a verified distance/position reference. " + "; ".join(reasons[:2]))[:600]
+    rows = {row["lap_id"]: row for row in snapshot["laps"]}
+    publication = {"schema_version": SCHEMA, "session": session, "capability": "sector_only",
+        "method": "distance-v5-fastf1-native" if primary else METHOD, "telemetry_unavailable_reason": reason,
+        "laps": {identifier: {"metadata": value, "weather_context": weather_context(snapshot, rows[identifier])} for identifier, value in metadata.items()},
+        "provenance": {"source": snapshot["source"], "fastf1_version": source.get("fastf1_version") if primary else None,
+            "provider_version": f"FastF1 {source.get('fastf1_version')} raw primary" if primary else f"OpenF1 v1 + TracingInsights {session['year']} pinned archive",
+            "source_retrieved_at": retrieved, "generated_at": retrieved, "source_snapshot_sha256": source_hash,
+            "source_urls": source.get("source_urls", [item["url"] for item in components]), "components": components,
+            "verification_scope": "Recorded lap/sector clocks and original validity checks only. Native/reference quality gates failed; no continuous distance, turn-local or corner-class claims are published.",
+            "source_session": f"{session['year']} {session['event_name']} {session['session_type']} / source session {snapshot['session']['session_key']}"}}
+    publication["publication_sha256"] = canonical_hash(publication)
+    for option in options:
+        if option["lap_id"] in metadata:
+            option.update(capability="sector_only", reasons=report["laps"].get(option["lap_id"], {}).get("reasons") or [reason])
+    index = {"schema_version": SCHEMA, "session": session, "source_snapshot_sha256": source_hash, "drivers": roster, "laps": options,
+        "source_name": "FastF1 / primary timing" if primary else "OpenF1 + TracingInsights",
+        "source_url": "https://docs.fastf1.dev/" if primary else "https://openf1.org/",
+        "data_points": ["Recorded lap and sector timing", "Actual qualifying phases and source validity", "Event-specific drivers, teams and colours", "Source compound and tyre-life context"],
+        "warnings": [reason, "Sector crossings are discrete timing observations; no intermediate curve or corner attribution is inferred."]}
+    report.update(reference_lap_id=None, reference_length_m=None, telemetry_laps=0,
+                  sector_only_laps=len(metadata), unavailable_laps=len(options)-len(metadata), telemetry_unavailable_reason=reason)
+    return publication, SessionLapIndex.model_validate_json(json.dumps(index)), report
+
+
 def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
     if snapshot.get("source") not in ("openf1_tracinginsights", "fastf1"):
         raise ValueError("Publication requires identity-checked composite timing and native telemetry")
     components = _components(snapshot)
     primary = snapshot["source"] == "fastf1"
     spec = snapshot.get("import_spec")
-    session = ({"session_id": f"{spec['year']}-{spec['round']}-{spec['circuit_id']}-Q",
+    session = ({"session_id": f"{spec['year']}-{spec['round']}-{spec['circuit_id']}-{spec['session_type']}",
                 **{key: spec[key] for key in ("year", "round", "session_type", "circuit_id", "event_name")}} if spec else SESSION)
     profile = spec.get("profile", "marker-windows-v1") if spec else "monza-v1"
+    session_label = "Sprint Qualifying" if session["session_type"] == "SQ" else "Qualifying"
     source_hash = canonical_hash(snapshot)
     roster, options, metadata = roster_and_laps(snapshot)
     source_laps = {row["lap_id"]: row for row in snapshot["laps"]}
@@ -237,12 +273,12 @@ def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
         except AlignmentError as exc:
             report["reference_attempts"].append({"lap_id": identifier, "status": "rejected", "reason": str(exc)})
     if reference_id is None:
-        raise ValueError("no timing-eligible lap supplies a usable reference geometry/profile")
+        return timing_publication(snapshot, session, roster, options, metadata, report, components, source_hash)
     source_provenance = snapshot["provenance"]
     retrieved = source_provenance.get("retrieved_at") or source_provenance.get("source_retrieved_at")
     if not retrieved:
         raise ValueError("snapshot must retain actual retrieval timestamp")
-    publication = {"schema_version": "1.3.0", "session": session, "reference_lap_id": reference_id, "method": METHOD,
+    publication = {"schema_version": SCHEMA, "session": session, "reference_lap_id": reference_id, "method": METHOD,
                    "circuit_revision": f"{session['circuit_id']}-{session['year']}-{profile}",
                    "profile": profile,
                    "distance_m": grid, "geometry": geometry, "regions": regions,
@@ -261,7 +297,7 @@ def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
         publication["method"] = "distance-v5-fastf1-native"
         publication["provenance"].update(source="fastf1", fastf1_version=version, provider_version=f"FastF1 {version}; raw-presence-v1 decoder",
             verification_scope="Native primary car/position rows decoded before library filling. Lap clocks, phases and validity use the pinned FastF1 parser. Native support and unadjusted timing consistency must pass; no independent physical validation is claimed.",
-            source_session=f"{session['year']} {session['event_name']} Qualifying / primary timing session {snapshot['session']['session_key']}")
+            source_session=f"{session['year']} {session['event_name']} {session_label} / primary timing session {snapshot['session']['session_key']}")
     publication["reference_sha256"] = canonical_hash({"reference_lap_id": reference_id, "geometry": geometry,
                                                       "regions": regions, "corners": publication["corners"], "grid": grid,
                                                       "method": publication.get("method", METHOD)})
@@ -302,11 +338,11 @@ def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
             report["laps"][identifier] = {"capability": "sector_only", "reasons": [str(exc)]}
             option_map[identifier]["reasons"] = [str(exc)]
     publication["publication_sha256"] = canonical_hash(publication)
-    data_points = ["Recorded lap and sector timing", "Q1/Q2/Q3 and source validity", "Native speed (km/h)",
+    data_points = ["Recorded lap and sector timing", ("SQ1/SQ2/SQ3" if session["session_type"] == "SQ" else "Q1/Q2/Q3") + " and source validity", "Native speed (km/h)",
                    "Native throttle (%)", "Native gear", "Native binary brake", f"Approximate location and {len(markers)} source turn markers",
                    "Event-specific drivers/teams", "Compound and tyre age", "Source lap clocks and weather/race control context",
                    "Derived distance, delta, local gains and evidence-backed observations"]
-    index = {"schema_version": "1.3.0", "session": session, "source_snapshot_sha256": source_hash,
+    index = {"schema_version": SCHEMA, "session": session, "source_snapshot_sha256": source_hash,
              "drivers": roster, "laps": options, "source_name": "OpenF1 + TracingInsights",
              "source_url": "https://openf1.org/docs/", "data_points": data_points,
              "warnings": ["Public telemetry supports approximate local analysis; brake is binary, not pressure.",
@@ -340,14 +376,14 @@ def write_publication(snapshot_path: Path, output: Path):
     normalized_name = f"{session_id}-{revision}.json.gz"
     if len(normalized) > 20 * 1024 * 1024:
         raise ValueError("normalized pilot publication exceeds bounded reader size")
-    if len(publication["laps"]) > 256 or len(publication["distance_m"]) > 5000:
+    if len(publication["laps"]) > MAX_NORMALIZED_LAPS or len(publication.get("distance_m", [])) > MAX_DISTANCE_POINTS:
         raise ValueError("normalized publication exceeds bounded lap/grid count")
     outputs = {
         output / "sessions" / f"{session_id}.json": index.model_dump_json().encode(),
         output / "normalized" / normalized_name: gzip.compress(normalized, mtime=0),
         output / "reports" / f"{session_id}.json": json.dumps(report, indent=2, allow_nan=False).encode(),
     }
-    manifest = {"session_id": session_id, "schema_version": "1.3.0", "method": publication.get("method", METHOD),
+    manifest = {"session_id": session_id, "schema_version": SCHEMA, "method": publication.get("method", METHOD),
                 "normalized": f"normalized/{normalized_name}",
                 "source_snapshot_sha256": index.source_snapshot_sha256,
                 "publication_sha256": publication["publication_sha256"],

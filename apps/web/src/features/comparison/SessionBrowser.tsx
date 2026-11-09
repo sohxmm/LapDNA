@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import { compareLaps, loadLaps, loadSessions } from './api';
 import ComparisonResult from './ComparisonResult';
 import type { PairResponse } from './resultView';
-import { available, changeDriver, changeMode, changePhase, lapTime, phases, lapSelectionSearch, restoreLapSelection, telemetryAlternative } from './selection';
+import { available, changeDriver, changeMode, changePhase, lapTime, sessionPhases, lapSelectionSearch, restoreLapSelection, telemetryAlternative } from './selection';
 import type { Draft, Index, Phase, SlotName } from './selection';
 import { sessionsForRace } from '../navigation/routing';
 import './comparison.css';
@@ -50,7 +50,7 @@ function SlotPicker({ index, draft, name, update }: {
     <label>Qualifying phase<select aria-label={'Phase ' + name.toUpperCase()} value={slot.phase}
       onChange={e => update(changePhase(index, draft, name, e.target.value as Phase))}>
       {!slot.phase && <option value="">No shared eligible phase</option>}
-      {phases.map(phase => {
+      {sessionPhases(index).map(phase => {
         const own = available(index, slot.driver, phase).length > 0;
         const shared = draft.independent || available(index, other.driver, phase).length > 0;
         return <option key={phase} value={phase} disabled={!own || !shared}>
@@ -180,6 +180,15 @@ function SessionLaps({ sessionId }: { sessionId: string }) {
 export default function SessionBrowser({year,round,eventName}: {year?:number;round?:number;eventName?:string} = {}) {
   const { resource, retry } = useLoad(loadSessions);
   const [sessionId, setSessionId] = useState(()=>new URLSearchParams(window.location.search).get('lapSession')??'');
+  useEffect(()=>{
+    const restore=()=>setSessionId(new URLSearchParams(window.location.search).get('lapSession')??'');
+    window.addEventListener('popstate',restore);return()=>window.removeEventListener('popstate',restore);
+  },[]);
+  function selectSession(id:string) {
+    const query=new URLSearchParams(window.location.search);
+    for(const key of ['lapA','lapB','dataset','comparison','cross','detail','session','phase','a','b'])query.delete(key);
+    query.set('lapSession',id);window.history.pushState({},'',window.location.pathname+'?'+query.toString());setSessionId(id);
+  }
   if (resource.state === 'loading') return <section className="session-browser"><p role="status">Loading qualifying sessions…</p></section>;
   if (resource.state === 'error') return <section className="session-browser"><h2>Session inventory unavailable</h2><p role="alert">{resource.message}</p><button type="button" className="secondary-button" onClick={retry}>Retry connection</button></section>;
   const sessions = sessionsForRace(resource.data.sessions,year,round);
@@ -187,7 +196,7 @@ export default function SessionBrowser({year,round,eventName}: {year?:number;rou
   const selected = sessions.find(entry => entry.session.session_id === sessionId) ?? sessions[0];
   return <section className="session-browser"><h2>Compare qualifying laps</h2>
     <label className="sc-session">Qualifying session<select aria-label="Qualifying session" value={selected.session.session_id}
-      onChange={e => setSessionId(e.target.value)}>{sessions.map(({session}) => <option key={session.session_id} value={session.session_id}>{session.year} · {session.event_name}</option>)}</select></label>
+      onChange={e => selectSession(e.target.value)}>{sessions.map(({session}) => <option key={session.session_id} value={session.session_id}>{session.year} · {session.event_name} · {session.session_type==='SQ'?'Sprint qualifying':'Qualifying'}</option>)}</select></label>
     <p className="sc-muted">{selected.driver_count} drivers · {selected.selectable_lap_count} eligible laps</p>
     <SessionLaps key={selected.session.session_id} sessionId={selected.session.session_id}/>
   </section>;

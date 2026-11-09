@@ -14,6 +14,7 @@ from threading import BoundedSemaphore, RLock
 from lapdna.analysis.engine import build_comparison, comparison_identity, canonical_hash
 from lapdna.store import ArtifactNotFound, ID_PATTERN, InvalidArtifact, MAX_ARTIFACT_BYTES
 from lapdna.models import DriverChannels, LapMetadata
+from lapdna.analysis.limits import MAX_NORMALIZED_LAPS, MAX_DISTANCE_POINTS
 
 
 class ComparisonBusy(Exception):
@@ -34,14 +35,22 @@ class PilotStore:
         self._lock = RLock()
         self._capacity = BoundedSemaphore(2)
         self._pending = {}
+        self._manifest_cache = None
+        self._manifest_revision = None
 
     def manifests(self):
         path = self.directory / "publication.json"
-        if path.resolve().parent != self.directory or path.stat().st_size > 256 * 1024:
+        info = path.stat()
+        if path.resolve().parent != self.directory or info.st_size > 256 * 1024:
             raise InvalidArtifact("invalid publication catalogue")
+        revision = (info.st_mtime_ns, info.st_size, info.st_ino)
+        if revision == self._manifest_revision and self._manifest_cache is not None:
+            return self._manifest_cache
         root = json.loads(path.read_text(encoding="utf-8"))
         if root.get("catalogue_version") != 2:
-            return {root["session_id"]: root}
+            self._manifest_cache = {root["session_id"]: root}
+            self._manifest_revision = revision
+            return self._manifest_cache
         if len(root["sessions"]) > 500:
             raise InvalidArtifact("publication catalogue exceeds session bound")
         manifests = {}
@@ -60,6 +69,7 @@ class PilotStore:
             if manifest["session_id"] != identifier:
                 raise InvalidArtifact("publication manifest session mismatch")
             manifests[identifier] = manifest
+        self._manifest_cache, self._manifest_revision = manifests, revision
         return manifests
 
     def load(self, session_id: str):
@@ -96,20 +106,26 @@ class PilotStore:
                 if (publication["session"]["session_id"] != session_id
                         or publication["publication_sha256"] != manifest["publication_sha256"]):
                     raise InvalidArtifact("normalized publication identity mismatch")
-                grid = publication["distance_m"]
-                if (not isinstance(grid, list) or not 2 <= len(grid) <= 5000 or grid[0] != 0
-                        or any(type(value) not in (int, float) or not isfinite(value) for value in grid)
-                        or any(right <= left for left, right in zip(grid, grid[1:]))):
-                    raise InvalidArtifact("normalized publication distance grid is invalid")
-                if not isinstance(publication["laps"], dict) or len(publication["laps"]) > 256:
+                if not isinstance(publication["laps"], dict) or len(publication["laps"]) > MAX_NORMALIZED_LAPS:
                     raise InvalidArtifact("normalized publication exceeds bounded lap count")
-                if len(publication["regions"]) > 128 or len(publication["corners"]) > 200:
-                    raise InvalidArtifact("normalized publication exceeds bounded region count")
-                if any(len(publication["geometry"][axis]) != len(grid) for axis in ("x", "y")):
-                    raise InvalidArtifact("normalized publication geometry length mismatch")
-                sectors = publication["sector_boundaries_m"]
-                if len(sectors) != 2 or not 0 < sectors[0] < sectors[1] < grid[-1]:
-                    raise InvalidArtifact("normalized publication sector boundaries are invalid")
+                timing_only = publication.get("capability") == "sector_only"
+                if timing_only:
+                    if any(key in publication for key in ("distance_m", "geometry", "regions", "corners", "sector_boundaries_m")) or any("channels" in record for record in publication["laps"].values()):
+                        raise InvalidArtifact("timing-only publication must not contain fabricated spatial inputs")
+                    grid = []
+                else:
+                    grid = publication["distance_m"]
+                    if (not isinstance(grid, list) or not 2 <= len(grid) <= MAX_DISTANCE_POINTS or grid[0] != 0
+                            or any(type(value) not in (int, float) or not isfinite(value) for value in grid)
+                            or any(right <= left for left, right in zip(grid, grid[1:]))):
+                        raise InvalidArtifact("normalized publication distance grid is invalid")
+                    if len(publication["regions"]) > 128 or len(publication["corners"]) > 200:
+                        raise InvalidArtifact("normalized publication exceeds bounded region count")
+                    if any(len(publication["geometry"][axis]) != len(grid) for axis in ("x", "y")):
+                        raise InvalidArtifact("normalized publication geometry length mismatch")
+                    sectors = publication["sector_boundaries_m"]
+                    if len(sectors) != 2 or not 0 < sectors[0] < sectors[1] < grid[-1]:
+                        raise InvalidArtifact("normalized publication sector boundaries are invalid")
                 for identifier, record in publication["laps"].items():
                     metadata = LapMetadata.model_validate_json(json.dumps(record["metadata"]))
                     if metadata.lap_id != identifier:
@@ -181,7 +197,7 @@ class PilotStore:
                 continue
             publication = self.load(session_id)
             candidates = sorted(publication["laps"])
-            if len(candidates) > 256:
+            if len(candidates) > MAX_NORMALIZED_LAPS:
                 raise InvalidArtifact("identity resolver exceeds bounded lap count")
             for a, b in combinations(candidates, 2):
                 if publication["laps"][a]["metadata"]["driver_number"] == publication["laps"][b]["metadata"]["driver_number"]:

@@ -14,9 +14,9 @@ Nonnegative = Annotated[Finite, Field(ge=0)]
 Duration = Annotated[Finite, Field(gt=0)]
 QualityStatus = Literal["pass", "warn", "block"]
 DriverSlot = Literal["A", "B"]
-Phase = Literal["Q1", "Q2", "Q3"]
+Phase = Literal["Q1", "Q2", "Q3", "SQ1", "SQ2", "SQ3"]
 SpeedClass = Literal["low", "medium", "high"]
-SchemaVersion = Literal["1.2.0", "1.3.0"]
+SchemaVersion = Literal["1.2.0", "1.3.0", "1.4.0"]
 Count = Annotated[int, Field(ge=0)]
 ShortText = Annotated[str, Field(min_length=1, max_length=600)]
 TeamColour = Annotated[str, Field(pattern=r"^#[0-9A-Fa-f]{6}$")]
@@ -45,9 +45,15 @@ class SessionIdentity(Contract):
     session_id: Identifier
     year: Annotated[int, Field(strict=True, ge=2018, le=2100)]
     round: Annotated[int, Field(strict=True, ge=1, le=30)]
-    session_type: Literal["Q"] = "Q"
+    session_type: Literal["Q", "SQ"] = "Q"
     circuit_id: Identifier
     event_name: Annotated[str, Field(min_length=1, max_length=150)]
+
+    @model_validator(mode="after")
+    def actual_format(self) -> Self:
+        if self.session_type == "SQ" and self.year < 2023:
+            raise ValueError("three-phase Sprint Qualifying did not exist before 2023")
+        return self
 
 
 class LapIdentity(Contract):
@@ -134,6 +140,11 @@ class ArtifactHeader(Contract):
 
     @model_validator(mode="after")
     def validate_pair(self) -> Self:
+        sprint = self.session.session_type == "SQ"
+        if sprint and self.schema_version != "1.4.0":
+            raise ValueError("Sprint Qualifying requires contract 1.4.0")
+        if any(lap.phase.startswith("SQ") != sprint for lap in (self.lap_a, self.lap_b)):
+            raise ValueError("lap phases must match the actual qualifying session format")
         if self.lap_a.driver_number == self.lap_b.driver_number or self.lap_a.lap_id == self.lap_b.lap_id:
             raise ValueError("comparison requires distinct drivers and laps")
         cross_phase = self.lap_a.phase != self.lap_b.phase

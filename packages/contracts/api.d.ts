@@ -275,7 +275,7 @@ export interface components {
              * @default 1.2.0
              * @enum {string}
              */
-            schema_version: "1.2.0" | "1.3.0";
+            schema_version: "1.2.0" | "1.3.0" | "1.4.0";
         };
         /**
          * ChannelProvenance
@@ -494,7 +494,7 @@ export interface components {
              * @default 1.2.0
              * @enum {string}
              */
-            schema_version: "1.2.0" | "1.3.0";
+            schema_version: "1.2.0" | "1.3.0" | "1.4.0";
             /** Sector Boundaries M */
             sector_boundaries_m: [
                 number,
@@ -704,7 +704,7 @@ export interface components {
              * Phase
              * @enum {string}
              */
-            phase: "Q1" | "Q2" | "Q3";
+            phase: "Q1" | "Q2" | "Q3" | "SQ1" | "SQ2" | "SQ3";
             /** Sector Times Ms */
             sector_times_ms: [
                 number,
@@ -747,7 +747,7 @@ export interface components {
              * Phase
              * @enum {string}
              */
-            phase: "Q1" | "Q2" | "Q3";
+            phase: "Q1" | "Q2" | "Q3" | "SQ1" | "SQ2" | "SQ3";
             /** Reasons */
             reasons: string[];
             /** Sector Times Ms */
@@ -980,7 +980,7 @@ export interface components {
              * @default 1.2.0
              * @enum {string}
              */
-            schema_version: "1.2.0" | "1.3.0";
+            schema_version: "1.2.0" | "1.3.0" | "1.4.0";
             /** Sector Delta Ms */
             sector_delta_ms: [
                 number,
@@ -1047,9 +1047,9 @@ export interface components {
             /**
              * Session Type
              * @default Q
-             * @constant
+             * @enum {string}
              */
-            session_type: "Q";
+            session_type: "Q" | "SQ";
             /** Year */
             year: number;
         };
@@ -1057,10 +1057,10 @@ export interface components {
         SessionInventory: {
             /**
              * Schema Version
-             * @default 1.2.0
+             * @default 1.4.0
              * @enum {string}
              */
-            schema_version: "1.2.0" | "1.3.0";
+            schema_version: "1.2.0" | "1.3.0" | "1.4.0";
             /** Sessions */
             sessions: components["schemas"]["SessionSummary"][];
         };
@@ -1077,10 +1077,10 @@ export interface components {
             laps: components["schemas"]["LapOption"][];
             /**
              * Schema Version
-             * @default 1.2.0
+             * @default 1.4.0
              * @enum {string}
              */
-            schema_version: "1.2.0" | "1.3.0";
+            schema_version: "1.2.0" | "1.3.0" | "1.4.0";
             session: components["schemas"]["SessionIdentity"];
             /** Source Name */
             source_name?: string | null;

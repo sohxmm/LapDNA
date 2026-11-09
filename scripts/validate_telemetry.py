@@ -23,7 +23,7 @@ def main():
     publication = store.load(session_id)
     index = SessionLapIndex.model_validate_json((args.publication / "sessions" / f"{session_id}.json").read_bytes())
     results, elapsed = [], []
-    for phase in ("Q1", "Q2", "Q3"):
+    for phase in (("SQ1", "SQ2", "SQ3") if index.session.session_type == "SQ" else ("Q1", "Q2", "Q3")):
         by_driver = {}
         for lap in index.laps:
             if lap.phase != phase or lap.capability == "unavailable":
@@ -70,7 +70,7 @@ def main():
               "pair_counts": dict(Counter(result["tier"] for result in results)),
               "phase_counts": dict(Counter(result["phase"] for result in results)),
               "observation_counts": dict(Counter(str(result["observations"]) for result in results if result["tier"] == "telemetry")),
-              "cold_calculation_ms": {"median": median(elapsed), "maximum": max(elapsed)},
+              "cold_calculation_ms": {"median": median(elapsed) if elapsed else None, "maximum": max(elapsed) if elapsed else None},
               "official_spot_checks": {"source": official_source,
                                       "url": official_url,
                                       "lap_number_note": "FIA report ordinals differ from provider ordinals; matching uses driver, phase, duration and sector triple.",
@@ -82,7 +82,7 @@ def main():
     args.output.write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(f"Validated {len(results)} pairs and their reversed selections: {report['pair_counts']}")
     print(f"Phases {report['phase_counts']}; observation counts {report['observation_counts']}")
-    print(f"Median cold {median(elapsed):.1f} ms; maximum {max(elapsed):.1f} ms")
+    print(f"Cold calculation milliseconds: {report['cold_calculation_ms']}")
     print(f"Report: {args.output}")
 
 

@@ -89,7 +89,7 @@ export default function ComparisonResult({ result }: { result: PairResponse }) {
       <p>{lap.phase} · Lap {lap.lap_number} · {lapTime(lap.lap_time_ms)}</p>
       <small>{lap.compound} · Tyre life {lap.tyre_life_laps ?? 'unknown'} laps</small>
     </div>)}</div>
-    <p><strong>Official gap {signed(b.lap_time_ms - a.lap_time_ms)} s</strong> · B − A, positive favors {a.driver_code}.</p>
+    <p><strong>Recorded gap {signed(b.lap_time_ms - a.lap_time_ms)} s</strong> · B − A, positive favors {a.driver_code}.</p>
     <p className="lap-context">{artifact.detail_level==='telemetry'?'Estimated local timing · ':''}Data checks: {artifact.quality.status} · {sourceName(artifact)}</p>
     {artifact.pairing.mode === 'cross_phase' && <p className="sc-warning">Different qualifying phases · {a.phase} and {b.phase}. Conditions may have changed between these laps.</p>}
     {warnings.filter(text=>!methodWarning(text)).map(text => <p className="sc-warning" key={text}>{text}</p>)}

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { initialDraft, changeMode, changePhase, changeDriver } from './selection.ts';
+import { initialDraft, changeMode, changePhase, changeDriver, sessionPhases } from './selection.ts';
 import { traceView } from './resultView.ts';
 import { availableSignals, supportedSample, signed, groupTurnMarkers } from '../telemetry/view.ts';
 
@@ -65,4 +65,13 @@ test('measured brake state stays binary, missing channels do not become inferred
   assert.deepEqual(availableSignals(view),['speed','brake']); // B still has actual brake samples.
   view.provenanceB={...provenance,brake:missing};
   assert.deepEqual(availableSignals(view),['speed']);
+});
+
+
+test('sprint inventory selects its actual SQ phases without inventing modern SQ for ordinary qualifying',()=>{
+  const sprint={...index,session:{session_type:'SQ'},laps:index.laps.map(row=>({...row,phase:'S'+row.phase}))};
+  assert.deepEqual(sessionPhases(sprint),['SQ1','SQ2','SQ3']);
+  const draft=initialDraft(sprint);
+  assert.deepEqual([draft.a.phase,draft.b.phase],['SQ2','SQ2']);
+  assert.deepEqual(sessionPhases(index),['Q1','Q2','Q3']);
 });

@@ -82,9 +82,27 @@ def native_rows(raw: bytes, kind: str):
     return output
 
 
-def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress=print, refresh: bool = False) -> Path:
+def lap_window_rows(stream, roster, start, end):
+    """Keep native samples around actual lap clocks, rejecting in-window aliens.
+
+    Some archives begin with a stale previous-series message. Five seconds
+    of padding preserve interpolation support outside the first/last lap.
+    Source bytes remain in the private cache; clipping never edits samples.
+    """
+    lower, upper = timestamp(start) - timedelta(seconds=5), timestamp(end) + timedelta(seconds=5)
+    retained = {number: [row for row in rows if lower <= timestamp(row["date"]) <= upper]
+                for number, rows in stream.items()}
+    retained = {number: rows for number, rows in retained.items() if rows}
+    if set(retained) - roster:
+        raise ImportFailure("foreign_driver", "Native stream contains an unknown driver inside the actual lap-clock window")
+    return retained, sum(map(len, stream.values())) - sum(map(len, retained.values()))
+
+
+def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress=print, refresh: bool = False, session_type: str = "Q") -> Path:
     if not 2018 <= year <= 2026 or not 1 <= round_number <= 30:
         raise ImportFailure("unsupported_session", "Detailed native imports are limited to 2018–2026 qualifying")
+    if session_type not in ("Q", "SQ") or session_type == "SQ" and year < 2023:
+        raise ImportFailure("unsupported_session", "Native Sprint Qualifying uses actual 2023-onward sessions; earlier sprint race formats are not SQ")
     pointer = cache / "snapshot-pointer.json"
     if pointer.exists() and not refresh:
         previous = Path(json.loads(pointer.read_text(encoding="utf-8"))["snapshot_path"])
@@ -92,6 +110,7 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
             snapshot = json.loads(previous.read_text(encoding="utf-8"))
             identity, source = snapshot.get("session", {}), snapshot.get("provenance", {})
             if (snapshot.get("source") == "fastf1" and identity.get("year") == year and identity.get("round") == round_number
+                    and identity.get("session_type", "Q") == session_type
                     and source.get("fastf1_version") == VERSION and source.get("native_mask_policy") == "raw-presence-v1"):
                 progress("Reusing the complete primary native snapshot; no sign-in or source request required")
                 return previous
@@ -106,6 +125,8 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
     if fastf1.__version__ != VERSION:
         raise ImportFailure("unreviewed_library", f"This native adapter requires FastF1 {VERSION}")
     fastf1.set_log_level("WARNING")
+    from .budget import install_fastf1_budget
+    budget = install_fastf1_budget()
     # Check status without printing token contents/claims or launching login.
     token = token_manager.get_stored()
     if token is None or not token.is_valid():
@@ -138,7 +159,10 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
         return raw
 
     try:
-        session = fastf1.get_session(year, round_number, "Q")
+        session = fastf1.get_session(year, round_number, session_type)
+        expected_names = ("Sprint Qualifying", "Sprint Shootout") if session_type == "SQ" else ("Qualifying",)
+        if session.name not in expected_names:
+            raise ImportFailure("session_mismatch", "The selected source format does not match the requested qualifying session")
         if int(session.event["RoundNumber"]) != round_number or session.event.year != year or not session.api_path.startswith(f"/static/{year}/"):
             raise ImportFailure("session_mismatch", "FastF1 resolved a different event identity")
         # Library clocks/phases/accuracy checks are retained with their exact
@@ -160,10 +184,12 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
             raw_resource(name)
         source_drivers = _api.driver_info(session.api_path)
     except ImportFailure:
+        if budget.status()[1] > 0:
+            raise ImportFailure("rate_limited", "The shared historical import window is full; cached progress is retained until the source window resets") from None
         raise
     except Exception as exc:
         from fastf1.exceptions import RateLimitExceededError
-        if isinstance(exc, RateLimitExceededError):
+        if isinstance(exc, RateLimitExceededError) or budget.status()[1] > 0:
             raise ImportFailure("rate_limited", "FastF1's source rate window is exhausted; keep cached progress and resume after the provider window resets") from None
         # Authentication/network exceptions may contain sensitive request
         # details. Keep operator-facing output deliberately sanitized.
@@ -198,8 +224,6 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
         drivers.append({"driver_number": int(number), "name_acronym": row["Tla"], "full_name": name,
                         "team_name": row.get("TeamName"), "team_colour": row.get("TeamColour")})
     roster = {str(row["driver_number"]) for row in drivers}
-    if (set(car) | set(positions)) - roster:
-        raise ImportFailure("foreign_driver", "Native stream and source roster identities disagree")
 
     def scalar(value):
         if value is None or pd.isna(value):
@@ -213,7 +237,8 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
         return None if value is None or pd.isna(value) else (t0 + value).isoformat()
 
     phases = {}
-    for phase, frame in zip(("Q1", "Q2", "Q3"), session.laps.split_qualifying_sessions()):
+    phase_names = ("SQ1", "SQ2", "SQ3") if session_type == "SQ" else ("Q1", "Q2", "Q3")
+    for phase, frame in zip(phase_names, session.laps.split_qualifying_sessions()):
         if frame is not None:
             for _, row in frame.iterrows():
                 phases[(str(row["DriverNumber"]), int(row["LapNumber"]))] = phase
@@ -244,13 +269,19 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
             reasons.append("dry_compound_unverified")
         rain = [sample for sample in weather if start and end and timestamp(start) - timedelta(seconds=90) <= timestamp(sample["date"]) <= timestamp(end) + timedelta(seconds=90)]
         if not rain or any(sample["rainfall"] != 0 for sample in rain): reasons.append("dry_weather_unverified")
-        laps.append({"lap_id": f"fastf1_{year}_{round_number}_Q_{number}_{lap_number}", "driver_number": number,
+        laps.append({"lap_id": f"fastf1_{year}_{round_number}_{session_type}_{number}_{lap_number}", "driver_number": number,
                      "lap_number": lap_number, "phase": phase, "lap_time_ms": duration, "sector_times_ms": sectors,
                      "lap_start_utc": start, "lap_end_utc": end,
                      "sector_crossing_utc": [clock(row.get(f"Sector{i}SessionTime")) for i in (1, 2, 3)],
                      "compound": compound, "tyre_life_laps": scalar(row.get("TyreLife")), "source_flags": flags,
                      "timing_candidate": not reasons, "exclusion_reasons": reasons})
-    spec = {"year": year, "round": round_number, "session_type": "Q", "circuit_id": race["circuit_id"],
+    starts = [row["lap_start_utc"] for row in laps if row["lap_start_utc"]]
+    ends = [row["lap_end_utc"] for row in laps if row["lap_end_utc"]]
+    if not starts or not ends:
+        raise ImportFailure("timing_unavailable", "Source has no actual lap-clock envelope")
+    car, excluded_car = lap_window_rows(car, roster, min(starts), max(ends))
+    positions, excluded_position = lap_window_rows(positions, roster, min(starts), max(ends))
+    spec = {"year": year, "round": round_number, "session_type": session_type, "circuit_id": race["circuit_id"],
             "event_name": race["name"], "session_key": info.get("Key"), "profile": "monza-v1" if race["circuit_id"] == "monza" else "marker-windows-v1"}
     components = [{"source": "multiviewer" if "multiviewer" in item["source_url"] else "fastf1",
                    "version": str(year) if "multiviewer" in item["source_url"] else VERSION,
@@ -259,6 +290,7 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
                    "license_url": "https://github.com/theOehrly/Fast-F1/blob/v3.9.2/LICENSE" if "multiviewer" not in item["source_url"] else None} for item in records]
     provenance = {"source": "fastf1", "fastf1_version": VERSION, "retrieved_at": utc_now(), "source_records": records, "components": components,
                   "clock_origin_utc": t0.isoformat(), "native_mask_policy": "raw-presence-v1",
+                  "native_window_policy": "actual-lap-envelope-v1", "outside_lap_window_samples": {"car": excluded_car, "position": excluded_position},
                   "limitations": ["Car and position rows decoded before library filling; absent channels remain absent", "Raw brake is binary 0/100 only", "Coordinate frame and circuit projection must pass year-specific publication checks"]}
     snapshot = {"source": "fastf1", "schema_version": "1.0.0", "import_spec": spec,
                 "session": {**spec, "session_key": info.get("Key")}, "drivers": drivers, "laps": laps,
