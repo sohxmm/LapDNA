@@ -40,7 +40,12 @@ export function synchronize(index: Index, draft: Draft, preferred: Phase | '' = 
 }
 
 export function initialDraft(index: Index): Draft {
-  const selectable = index.drivers.filter(d => available(index, d.driver_number).length);
+  const highestShared = [...sessionPhases(index)].reverse().find(phase =>
+    index.drivers.filter(driver => available(index,driver.driver_number,phase).length).length >= 2);
+  const selectable = index.drivers.filter(d => available(index, d.driver_number,highestShared).length)
+    .sort((a,b) => (available(index,a.driver_number,highestShared)[0]?.lap_time_ms ?? Infinity)
+      - (available(index,b.driver_number,highestShared)[0]?.lap_time_ms ?? Infinity)
+      || Number(a.driver_number)-Number(b.driver_number));
   const make = (i: number) => choose(index, selectable[i]?.driver_number ?? '', '');
   return synchronize(index, { a: make(0), b: make(1), independent: false });
 }

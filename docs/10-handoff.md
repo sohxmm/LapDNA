@@ -88,3 +88,6 @@ Checks at this increment: 201 Python tests passed, one Windows symlink test skip
 
 
 Australia 2024: the native feed includes unassigned car #2, absent from the 19-driver source roster and lap timing. Quarantining that extra stream preserves all original bytes in the private source cache and publishes only the matched actual roster. Added a regression for rejecting any unrostered timed driver.
+
+
+Browser acceptance found and fixed the client version guard rejecting valid 1.4.0 inventories. Added HTTP-boundary regression tests. New selections choose the fastest eligible timing pair in the highest phase with two eligible drivers, independent of numeric roster order; they never switch to slower telemetry laps implicitly. Local Miami Q-to-SQ and browser Back checks passed; SQ3 VER/LEC returned a real +0.108 s comparison, synchronized channels/map and three evidence-backed observations. 29 client tests, typecheck and build pass.

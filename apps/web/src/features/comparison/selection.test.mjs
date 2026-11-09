@@ -29,6 +29,15 @@ test('default selects fastest eligible laps in highest common phase with lower l
   const draft = initialDraft(index);
   assert.deepEqual([draft.a.lapId, draft.b.lapId], ['1_Q2_2','2_Q2_2']);
 });
+
+test('default pair uses the highest shared phase and recorded eligible times, independent of roster order', () => {
+  const reversed={...index,drivers:[...drivers].reverse()};
+  assert.deepEqual(initialDraft(reversed),initialDraft(index));
+  const third={...index,laps:[...index.laps,lap('3','Q3',8,76000,'sector_only')]};
+  const chosen=initialDraft(third);
+  assert.deepEqual([chosen.a.driver,chosen.b.driver,chosen.a.phase],['3','1','Q3']);
+  assert.equal(chosen.a.lapId,'3_Q3_8'); // Never replace a timing best to obtain telemetry.
+});
 test('changing an independent phase preserves the other slot, relinking finds the highest common phase', () => {
   const draft = changeMode(index, initialDraft(index), true);
   draft.a.lapId = '1_Q2_3';

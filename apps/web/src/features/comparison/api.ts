@@ -5,7 +5,7 @@ type JsonObject = Record<string, unknown>;
 function object(value: unknown): value is JsonObject {
   return typeof value === 'object' && value !== null;
 }
-const supportedVersion = (value:unknown) => value === '1.2.0' || value === '1.3.0';
+const supportedVersion = (value:unknown) => value === '1.2.0' || value === '1.3.0' || value === '1.4.0';
 
 async function request(path: string, init: RequestInit): Promise<JsonObject> {
   const response = await fetch('/api/v1/' + path, init);
