@@ -9,7 +9,23 @@ from datetime import date
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "services/api/src"))
 from lapdna.ingestion.fastf1_native import import_fastf1_session
 from lapdna.ingestion.openf1 import ImportFailure, atomic_json, utc_now
-from lapdna.analysis.publication import write_publication
+from lapdna.analysis.publication import write_publication, activation_lock
+
+
+def record_attempt(path, result):
+    """A targeted retry must not erase the rest of a season's import report."""
+    with activation_lock(path.parent):
+        prior = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"results":[]}
+        identity = lambda row:(row["year"],row["round"],row.get("session_type","Q"))
+        rows = {identity(row):row for row in prior["results"]}
+        previous = rows.get(identity(result))
+        if previous and result["status"] == "unavailable":
+            successful = previous if previous["status"] == "published" else previous.get("last_success")
+            if successful:
+                result = {**result,"last_success":{key:value for key,value in successful.items() if key != "last_success"}}
+        rows[identity(result)] = result
+        atomic_json(path, {"scope":"Actual latest primary-native import attempts; last_success is historical and active coverage comes from the publication catalogue",
+                           "results":[rows[key] for key in sorted(rows)]})
 
 
 def main(argv=None):
@@ -56,7 +72,7 @@ def main(argv=None):
             result.update(status="unavailable", code="filesystem_failed", reason="Local source/publication storage failed; previous publication retained")
             print(result["reason"], file=sys.stderr, flush=True)
         results.append(result)
-        atomic_json(base / f"import-report-{args.year}{'-SQ' if args.session=='SQ' else ''}.json", {"scope": "Actual attempted primary-native imports; no calendar-only coverage claims", "results": results})
+        record_attempt(base / f"import-report-{args.year}{'-SQ' if args.session=='SQ' else ''}.json", result)
         if result.get("code") in ("rate_limited", "access_required"):
             break
     return 1 if any(result["status"] == "unavailable" for result in results) else 0
