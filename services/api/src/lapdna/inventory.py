@@ -7,7 +7,7 @@ from pydantic import Field, ValidationError, model_validator
 
 from lapdna.models import (
     Artifact, Contract, Count, Identifier, LapIdentity, Nonnegative,
-    SchemaVersion, SessionIdentity, Sha256, ShortText,
+    SchemaVersion, SessionIdentity, Sha256, ShortText, TeamColour,
 )
 from lapdna.store import ArtifactNotFound, ArtifactStore, InvalidArtifact, read_local_json
 
@@ -17,9 +17,12 @@ class DriverEntry(Contract):
     driver_code: Annotated[str, Field(pattern=r"^[A-Z0-9]{2,4}$")]
     driver_name: ShortText
     team_name: ShortText | None = None
+    team_colour: TeamColour | None = None
 
 
 class LapOption(LapIdentity):
+    team_name: ShortText | None = None
+    team_colour: TeamColour | None = None
     lap_time_ms: Nonnegative | None
     sector_times_ms: tuple[Nonnegative | None, Nonnegative | None, Nonnegative | None]
     capability: Literal["telemetry", "sector_only", "unavailable"]

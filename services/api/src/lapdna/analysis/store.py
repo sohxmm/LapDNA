@@ -11,7 +11,7 @@ from pathlib import Path
 from math import isfinite
 from threading import BoundedSemaphore, RLock
 
-from lapdna.analysis.engine import build_comparison, comparison_identity
+from lapdna.analysis.engine import build_comparison, comparison_identity, canonical_hash
 from lapdna.store import ArtifactNotFound, ID_PATTERN, InvalidArtifact, MAX_ARTIFACT_BYTES
 from lapdna.models import DriverChannels, LapMetadata
 
@@ -29,11 +29,38 @@ class PilotStore:
 
     def __init__(self, directory: Path):
         self.directory = directory.resolve()
-        self._publications = {}
+        self._publications = OrderedDict()
         self._results = OrderedDict()
         self._lock = RLock()
         self._capacity = BoundedSemaphore(2)
         self._pending = {}
+
+    def manifests(self):
+        path = self.directory / "publication.json"
+        if path.resolve().parent != self.directory or path.stat().st_size > 256 * 1024:
+            raise InvalidArtifact("invalid publication catalogue")
+        root = json.loads(path.read_text(encoding="utf-8"))
+        if root.get("catalogue_version") != 2:
+            return {root["session_id"]: root}
+        if len(root["sessions"]) > 500:
+            raise InvalidArtifact("publication catalogue exceeds session bound")
+        manifests = {}
+        for identifier, entry in root["sessions"].items():
+            if not ID_PATTERN.fullmatch(identifier):
+                raise InvalidArtifact("invalid publication session ID")
+            manifest_path = self.directory / entry["manifest"]
+            if manifest_path.resolve().parent != (self.directory / "manifests").resolve() or not manifest_path.resolve().is_relative_to(self.directory):
+                raise InvalidArtifact("publication manifest escaped root")
+            if manifest_path.stat().st_size > 256 * 1024:
+                raise InvalidArtifact("publication manifest exceeds size limit")
+            raw = manifest_path.read_bytes()
+            if sha256(raw).hexdigest() != entry["sha256"]:
+                raise InvalidArtifact("publication manifest digest mismatch")
+            manifest = json.loads(raw)
+            if manifest["session_id"] != identifier:
+                raise InvalidArtifact("publication manifest session mismatch")
+            manifests[identifier] = manifest
+        return manifests
 
     def load(self, session_id: str):
         if not ID_PATTERN.fullmatch(session_id):
@@ -47,10 +74,10 @@ class PilotStore:
                     raise InvalidArtifact("publication manifest escaped root")
                 if manifest_path.stat().st_size > 256 * 1024:
                     raise InvalidArtifact("publication manifest exceeds size limit")
-                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-                if manifest["session_id"] != session_id:
+                manifest = self.manifests().get(session_id)
+                if manifest is None:
                     raise ArtifactNotFound
-                relative = f"normalized/{session_id}.json.gz"
+                relative = manifest.get("normalized", f"normalized/{session_id}.json.gz")
                 path = self.directory / relative
                 if not path.resolve().is_relative_to(self.directory) or path.resolve().parent != (self.directory / "normalized").resolve():
                     raise InvalidArtifact("normalized publication path escaped root")
@@ -94,6 +121,8 @@ class PilotStore:
             except (OSError, KeyError, ValueError, TypeError) as exc:
                 raise InvalidArtifact("invalid normalized publication") from exc
             self._publications[session_id] = publication
+            while len(self._publications) > 3:
+                self._publications.popitem(last=False)
             return publication
 
     def compare(self, session_id, lap_a, lap_b, detail_level):
@@ -141,19 +170,23 @@ class PilotStore:
                 if result.comparison_id == comparison_id:
                     return result
         try:
-            manifest = json.loads((self.directory / "publication.json").read_text(encoding="utf-8"))
-            publication = self.load(manifest["session_id"])
+            manifests = self.manifests()
         except (FileNotFoundError, KeyError, ValueError):
             raise ArtifactNotFound
-        candidates = sorted(publication["laps"])
-        if len(candidates) > 200:
-            raise InvalidArtifact("pilot identity resolver exceeds bounded lap count")
-        for a, b in combinations(candidates, 2):
-            if publication["laps"][a]["metadata"]["driver_number"] == publication["laps"][b]["metadata"]["driver_number"]:
+        # Session tag prevents an archive-wide Cartesian search or bulk load.
+        for session_id in manifests:
+            if not comparison_id.startswith("cmp_" + canonical_hash(session_id)[:8] + "_"):
                 continue
-            for tier in ("telemetry", "sector_only"):
-                if comparison_identity(publication, a, b, tier) == comparison_id:
-                    result = self.compare(manifest["session_id"], a, b, tier)
-                    if result.comparison_id == comparison_id:
-                        return result
+            publication = self.load(session_id)
+            candidates = sorted(publication["laps"])
+            if len(candidates) > 200:
+                raise InvalidArtifact("identity resolver exceeds bounded lap count")
+            for a, b in combinations(candidates, 2):
+                if publication["laps"][a]["metadata"]["driver_number"] == publication["laps"][b]["metadata"]["driver_number"]:
+                    continue
+                for tier in ("telemetry", "sector_only"):
+                    if comparison_identity(publication, a, b, tier) == comparison_id:
+                        result = self.compare(session_id, a, b, tier)
+                        if result.comparison_id == comparison_id:
+                            return result
         raise ArtifactNotFound

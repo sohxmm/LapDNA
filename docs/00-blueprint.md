@@ -1,5 +1,6 @@
 # LapDNA implementation blueprint
 
+Prefinal update, 9 November 2026: [verified telemetry release](20-verified-telemetry-release.md) supersedes the former single-Monza/synthetic-preview scope and fixed A/B colours. The publication catalogue now supports independently checked sessions; exact live counts are recorded at release.
 Revision 6 · 8 November 2026. Status: **recorded qualifying results and the real Monza 2024 lap/telemetry pilot are implemented locally; final hosted pilot verification is pending**. R01 covers classifications across 1950–2026. The [pilot guide](19-monza-2024-pilot.md) records the implemented source/comparison pipeline. The [approved design and rollout](17-approved-ui-and-telemetry-rollout.md) selects the sports-editorial landing and G1 overlays, now extended with persistent blue dark/off-white light modes. Broader telemetry remains limited to verified sessions/channels in **2018–2026**; earlier years retain timing comparisons.
 
 ## The product
@@ -25,7 +26,7 @@ Corner classes use the frozen reference lap's reviewed apex windows, with initia
 
 The Monza pilot uses an explicit OpenF1 + pinned TracingInsights/FastF1 composite because the tested primary archive required authentication and its mirror lacked the metadata resource. Native car/position records remain OpenF1; all 276 lap identities and available lap/sector durations were matched to the archive before adopting its clocks/phases/validity flags. The original archive FastF1 version remains unknown. This is a reviewed pilot exception, not a completed direct FastF1 account adapter or a silent mixed-source series. Source definitions, clock offsets, exact hashes and FIA timing checks are in [the pilot guide](19-monza-2024-pilot.md).
 
-The [20-source survey](13-data-source-audit.md) confirms native speed, throttle, gear and binary brake, so preserve all four features and the labelled synthetic preview. The selected public feeds do not establish a measured steering-angle or brake-pressure channel. Missing channels stay unavailable; never derive pedal or gear states from speed. FastF1's inserted zero/False defaults must retain missing-data masks. OpenF1's mini-sector arrays contain status/color codes rather than measured durations. LapDNA therefore labels its 100 m splits **estimated mini-sectors**. If only recorded sectors are available, show a sector table and separate cumulative-gap points at crossings; do not invent a continuous curve, turn attribution or corner-class analysis.
+The [20-source survey](13-data-source-audit.md) confirms native speed, throttle, gear and binary brake, so preserve all four features . The selected public feeds do not establish a measured steering-angle or brake-pressure channel. Missing channels stay unavailable; never derive pedal or gear states from speed. FastF1's inserted zero/False defaults must retain missing-data masks. OpenF1's mini-sector arrays contain status/color codes rather than measured durations. LapDNA therefore labels its 100 m splits **estimated mini-sectors**. If only recorded sectors are available, show a sector table and separate cumulative-gap points at crossings; do not invent a continuous curve, turn attribution or corner-class analysis.
 
 ## Frozen decisions
 
@@ -85,7 +86,7 @@ flowchart LR
 
 ## What exists now
 
-R01 provides real final classifications, event-specific teams/rosters, exact phases, timing gaps and historical formats across 1,168 qualifying and 24 SQ sessions. Monza 2024 now adds native-channel import, per-lap eligibility, a fixed independent reference, raw distance delta/reconciliation, estimated mini-sectors, performance map, class/observation evidence and themed PNG/JSON exports. Shared cursor, turn zoom and map/region selection connect the graphs. Fastest eligible timings are preserved; an explicit action chooses alternative telemetry-supported laps instead of silently substituting them. The synthetic preview remains separate. The pilot does not imply telemetry coverage for other events, run-number labels, optional RPM/DRS plots or runtime LLM calls.
+R01 provides real final classifications, event-specific teams/rosters, exact phases, timing gaps and historical formats across 1,168 qualifying and 24 SQ sessions. Monza 2024 now adds native-channel import, per-lap eligibility, a fixed independent reference, raw distance delta/reconciliation, estimated mini-sectors, performance map, class/observation evidence and themed PNG/JSON exports. Shared cursor, turn zoom and map/region selection connect the graphs. Fastest eligible timings are preserved; an explicit action chooses alternative telemetry-supported laps instead of silently substituting them. The synthetic preview was removed for the prefinal release; only verified source data is shown. The pilot does not imply telemetry coverage for other events, run-number labels, optional RPM/DRS plots or runtime LLM calls.
 
 ## Delivery sequence
 

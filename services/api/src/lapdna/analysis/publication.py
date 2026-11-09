@@ -4,12 +4,13 @@ from datetime import datetime, timezone
 import gzip
 from hashlib import sha256
 import json
+import re
 from pathlib import Path
 
 from lapdna.alignment.native import (
     AlignmentError, aligned_channels, distance_at, linear, prepare_lap, support, utc_seconds,
 )
-from lapdna.alignment.reference import canonical_grid, geometry_at, monza_regions, project_markers
+from lapdna.alignment.reference import canonical_grid, geometry_at, monza_regions, marker_regions, project_markers
 from lapdna.analysis.engine import METHOD, PIPELINE, canonical_hash, grade, quality
 from lapdna.inventory import SessionLapIndex
 
@@ -20,9 +21,12 @@ SESSION = {"session_id": "2024-16-monza-Q", "year": 2024, "round": 16,
 
 def roster_and_laps(snapshot):
     drivers = {str(row["driver_number"]): row for row in snapshot["drivers"]}
+    def colour(row):
+        value = row.get("team_colour")
+        return "#" + value.upper() if isinstance(value, str) and re.fullmatch(r"[0-9a-fA-F]{6}", value) else None
     roster = [{"driver_number": number, "driver_code": row["name_acronym"],
                "driver_name": row.get("full_name") or f"{row['first_name']} {row['last_name']}",
-               "team_name": row.get("team_name")} for number, row in drivers.items()]
+               "team_name": row.get("team_name"), "team_colour": colour(row)} for number, row in drivers.items()]
     positions = {str(row["driver_number"]): row.get("position") for row in snapshot.get("session_results", [])}
     roster.sort(key=lambda row: (positions.get(row["driver_number"]) or 999, int(row["driver_number"])))
     metadata = {}
@@ -34,6 +38,7 @@ def roster_and_laps(snapshot):
         number = str(row["driver_number"])
         driver = drivers[number]
         value = {"lap_id": row["lap_id"], "phase": phase, "driver_number": number,
+                 "team_name": driver.get("team_name"), "team_colour": colour(driver),
                  "driver_code": driver["name_acronym"], "driver_name": driver["full_name"],
                  "lap_number": row["lap_number"], "lap_time_ms": row.get("lap_time_ms"),
                  "sector_times_ms": row["sector_times_ms"], "compound": row.get("compound"),
@@ -109,11 +114,13 @@ def _components(snapshot):
             source = "openf1" if "api.openf1.org/" in url else "tracinginsights" if "TracingInsights/" in url else "multiviewer" if "api.multiviewer.app/" in url else None
             if source is None:
                 continue
-            components.append({"source": source, "version": record.get("archive_commit") or ("v1" if source == "openf1" else "2024"),
+            match = re.search(r"TracingInsights/(\d{4})/([a-f0-9]{40})/", url)
+            archive_license = f"https://github.com/TracingInsights/{match[1]}/blob/{match[2]}/LICENSE" if match else None
+            components.append({"source": source, "version": record.get("archive_commit") or ("v1" if source == "openf1" else str(snapshot["session"]["year"])),
                                "url": url, "sha256": record["sha256"], "retrieved_at": record["retrieved_at"],
-                               "license_name": "CC BY-NC-SA 4.0" if source == "openf1" else "MIT; archive software/data scope and upstream rights remain distinct" if source == "tracinginsights" else "Public endpoint; redistribution terms not verified",
+                               "license_name": "CC BY-NC-SA 4.0" if source == "openf1" else "Archive licence and underlying data rights remain distinct; review the pinned licence" if source == "tracinginsights" else "Public endpoint; redistribution terms not verified",
                                "license_url": "https://github.com/br-g/openf1/blob/main/LICENSE" if source == "openf1" else
-                               "https://github.com/TracingInsights/2024/blob/d1543a71370d9b617b627319f8ad80b2f85dfd5e/LICENSE" if source == "tracinginsights" else None})
+                               archive_license if source == "tracinginsights" else None})
     if not {"openf1", "tracinginsights"}.issubset({item["source"] for item in components}):
         raise ValueError("composite snapshot requires explicit provider component hashes")
     return components
@@ -121,8 +128,12 @@ def _components(snapshot):
 
 def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
     if snapshot.get("source") != "openf1_tracinginsights":
-        raise ValueError("Monza publication requires identity-checked composite timing and native telemetry")
+        raise ValueError("Publication requires identity-checked composite timing and native telemetry")
     components = _components(snapshot)
+    spec = snapshot.get("import_spec")
+    session = ({"session_id": f"{spec['year']}-{spec['round']}-{spec['circuit_id']}-Q",
+                **{key: spec[key] for key in ("year", "round", "session_type", "circuit_id", "event_name")}} if spec else SESSION)
+    profile = spec.get("profile", "marker-windows-v1") if spec else "monza-v1"
     source_hash = canonical_hash(snapshot)
     roster, options, metadata = roster_and_laps(snapshot)
     source_laps = {row["lap_id"]: row for row in snapshot["laps"]}
@@ -147,7 +158,7 @@ def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
         try:
             trial_geometry = geometry_at(native, snapshot["position_data"].get(candidate["driver_number"], []), trial_grid)
             markers = project_markers(snapshot["markers"], trial_grid, trial_geometry, native)
-            regions = monza_regions(markers, native["length"])
+            regions = monza_regions(markers, native["length"]) if profile == "monza-v1" else marker_regions(markers, native["length"])
             crossings = source_laps[identifier].get("sector_crossing_utc")
             if not crossings or len(crossings) < 2:
                 raise AlignmentError("reference lacks actual source sector crossing timestamps")
@@ -167,17 +178,19 @@ def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
     retrieved = source_provenance.get("retrieved_at") or source_provenance.get("source_retrieved_at")
     if not retrieved:
         raise ValueError("snapshot must retain actual retrieval timestamp")
-    publication = {"schema_version": "1.3.0", "session": SESSION, "reference_lap_id": reference_id,
+    publication = {"schema_version": "1.3.0", "session": session, "reference_lap_id": reference_id,
+                   "circuit_revision": f"{session['circuit_id']}-{session['year']}-{profile}",
+                   "profile": profile,
                    "distance_m": grid, "geometry": geometry, "regions": regions,
                    "corners": [{key: value for key, value in marker.items() if key != "projection_error_source_units"} for marker in markers],
                    "sector_boundaries_m": sectors, "laps": {},
                    "provenance": {"source": "openf1_tracinginsights", "fastf1_version": None,
-                                  "provider_version": "OpenF1 v1 + TracingInsights 2024 pinned archive",
+                                  "provider_version": f"OpenF1 v1 + TracingInsights {session['year']} pinned archive",
                                   "source_retrieved_at": retrieved, "generated_at": retrieved,
                                   "source_urls": source_provenance.get("source_urls", [item["url"] for item in components]),
                                   "components": components, "source_snapshot_sha256": source_hash,
-                                  "verification_scope": "Identity-matched source timings, native-channel support and numerical reconciliation. FIA spot checks cover NOR/PIA phase-best timing only; other records are feed-checked. Local estimates are approximate. Source licences do not independently grant all underlying F1 redistribution rights.",
-                                  "source_session": "2024 Italian Grand Prix Qualifying / OpenF1 session 9586 / TracingInsights 2024"}}
+                                  "verification_scope": "Complete source driver/lap identities and available timings matched, native support and raw sector reconciliation checked. Local estimates are approximate; source agreement is not independent physical validation. Source licences do not independently grant all underlying F1 redistribution rights.",
+                                  "source_session": f"{session['year']} {session['event_name']} Qualifying / OpenF1 session {snapshot['session']['session_key']} / TracingInsights {session['year']}"}}
     publication["reference_sha256"] = canonical_hash({"reference_lap_id": reference_id, "geometry": geometry,
                                                       "regions": regions, "corners": publication["corners"], "grid": grid,
                                                       "method": METHOD})
@@ -219,15 +232,21 @@ def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
             option_map[identifier]["reasons"] = [str(exc)]
     publication["publication_sha256"] = canonical_hash(publication)
     data_points = ["Recorded lap and sector timing", "Q1/Q2/Q3 and source validity", "Native speed (km/h)",
-                   "Native throttle (%)", "Native gear", "Native binary brake", "Approximate location and 11 source turn markers",
+                   "Native throttle (%)", "Native gear", "Native binary brake", f"Approximate location and {len(markers)} source turn markers",
                    "Event-specific drivers/teams", "Compound and tyre age", "Source lap clocks and weather/race control context",
                    "Derived distance, delta, local gains and evidence-backed observations"]
-    index = {"schema_version": "1.3.0", "session": SESSION, "source_snapshot_sha256": source_hash,
+    index = {"schema_version": "1.3.0", "session": session, "source_snapshot_sha256": source_hash,
              "drivers": roster, "laps": options, "source_name": "OpenF1 + TracingInsights",
              "source_url": "https://openf1.org/docs/", "data_points": data_points,
              "warnings": ["Public telemetry supports approximate local analysis; brake is binary, not pressure.",
                           "Map coordinates remain in their source frame. Timing distance is integrated speed.",
                           "Eligible laps can still fall back to sectors when pair reconciliation fails."]}
+    if profile == "marker-windows-v1":
+        note = "Turn vicinities use fixed ±120 m source-marker windows; overlapping windows form a complex. They are approximate analysis zones, not measured corner boundaries."
+        index["warnings"].append(note)
+        publication["provenance"]["verification_scope"] += " " + note
+        # Final identity includes the profile disclosure as well as its arrays.
+        publication["publication_sha256"] = canonical_hash({key: value for key, value in publication.items() if key != "publication_sha256"})
     report["reference_lap_id"] = reference_id
     report["reference_length_m"] = length
     report["markers"] = markers
@@ -241,15 +260,19 @@ def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
 def write_publication(snapshot_path: Path, output: Path):
     snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
     publication, index, report = prepare_publication(snapshot)
+    session_id = index.session.session_id
     normalized = json.dumps(publication, separators=(",", ":"), allow_nan=False).encode()
+    revision = publication["publication_sha256"]
+    normalized_name = f"{session_id}-{revision}.json.gz"
     if len(normalized) > 20 * 1024 * 1024:
         raise ValueError("normalized pilot publication exceeds bounded reader size")
     outputs = {
-        output / "sessions" / f"{SESSION['session_id']}.json": index.model_dump_json().encode(),
-        output / "normalized" / f"{SESSION['session_id']}.json.gz": gzip.compress(normalized, mtime=0),
-        output / "reports" / "monza-2024.json": json.dumps(report, indent=2, allow_nan=False).encode(),
+        output / "sessions" / f"{session_id}.json": index.model_dump_json().encode(),
+        output / "normalized" / normalized_name: gzip.compress(normalized, mtime=0),
+        output / "reports" / f"{session_id}.json": json.dumps(report, indent=2, allow_nan=False).encode(),
     }
-    manifest = {"session_id": SESSION["session_id"], "schema_version": "1.3.0", "method": METHOD,
+    manifest = {"session_id": session_id, "schema_version": "1.3.0", "method": METHOD,
+                "normalized": f"normalized/{normalized_name}",
                 "source_snapshot_sha256": index.source_snapshot_sha256,
                 "publication_sha256": publication["publication_sha256"],
                 "files": {str(path.relative_to(output)).replace("\\", "/"): sha256(data).hexdigest() for path, data in outputs.items()}}
@@ -258,8 +281,18 @@ def write_publication(snapshot_path: Path, output: Path):
         temporary = path.with_suffix(path.suffix + ".tmp")
         temporary.write_bytes(data)
         temporary.replace(path)
-    manifest_path = output / "publication.json"
+    # Each session has its own activation manifest; adding a session cannot
+    # overwrite the identity of another. The root is a small lookup catalogue.
+    manifest_path = output / "manifests" / f"{session_id}-{revision}.json"
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
     temporary = manifest_path.with_suffix(".tmp")
     temporary.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     temporary.replace(manifest_path)
-    return report, len(normalized), len(outputs[output / "normalized" / f"{SESSION['session_id']}.json.gz"])
+    root = output / "publication.json"
+    prior = json.loads(root.read_text(encoding="utf-8")) if root.exists() else {}
+    catalogue = prior if prior.get("catalogue_version") == 2 else {"catalogue_version": 2, "sessions": {}}
+    catalogue["sessions"][session_id] = {"manifest": str(manifest_path.relative_to(output)).replace("\\", "/"), "sha256": sha256(manifest_path.read_bytes()).hexdigest()}
+    temporary = root.with_suffix(".tmp")
+    temporary.write_text(json.dumps(catalogue, indent=2), encoding="utf-8")
+    temporary.replace(root)
+    return report, len(normalized), len(outputs[output / "normalized" / normalized_name])

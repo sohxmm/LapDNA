@@ -42,13 +42,14 @@ test('a reversed result exchanges channel roles and negates delta and minisector
   const provenance = {speed_kph:{status:'measured',source_channel:'Speed',reason:null},
     ...Object.fromEntries(['throttle_pct','gear','brake'].map(name=>[name,{status:'missing',source_channel:null,reason:'No native field'}]))};
   const fixture = { segments: [{ segment_id:'t1', start_m:0,end_m:100 }], corners:[
-    {segment_id:'t1',label:'T1',distance_m:40,speed_class:'low'}], lap_a:{driver_code:'XA'},lap_b:{driver_code:'XB'},
+    {segment_id:'t1',label:'T1',distance_m:40,speed_class:'low'}], lap_a:{driver_code:'XA',team_colour:'#FF8000'},lap_b:{driver_code:'XB',team_colour:'#27F4D2'},
     channels_a:channels([50]),channels_b:channels([45]),delta_ms:[null,123],distance_m:[0,100],
     channel_provenance_a:provenance,channel_provenance_b:provenance,
     sector_boundaries_m:[30,65],estimated_minisectors:[{start_m:0,end_m:100,gain_ms:123}] };
   const view = traceView(fixture,true);
   assert.deepEqual([view.nameA,view.nameB,view.a.speed,view.delta,view.bins[0].gain], ['XB','XA',[45],[null,-123],-123]);
   assert.equal(view.turns[0].at,40);
+  assert.deepEqual([view.colorA,view.colorB],['#27F4D2','#FF8000']);
 });
 
 test('measured brake state stays binary, missing channels do not become inferred traces', () => {

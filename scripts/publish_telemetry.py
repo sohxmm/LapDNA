@@ -1,4 +1,4 @@
-"""Prepare the compact Monza publication offline; no source request occurs here."""
+"""Prepare a compact verified session publication offline; no upstream requests."""
 
 import argparse
 from pathlib import Path
@@ -15,7 +15,7 @@ def main():
     print(f"Published {report['roster_count']} drivers; {report['telemetry_laps']} telemetry, {report['sector_only_laps']} sector-only, {report['unavailable_laps']} unavailable laps")
     print(f"Reference {report['reference_lap_id']}; integrated length {report['reference_length_m']:.1f} m")
     print(f"Normalized bytes {raw_bytes}; compressed {compressed_bytes}")
-    print(f"Report: {args.output / 'reports' / 'monza-2024.json'}")
+    print(f"Reports: {args.output / 'reports'}")
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ export type Samples = {
 };
 export type SignalName = keyof Samples;
 export type SignalProvenance = {
-  status: 'measured' | 'missing' | 'synthetic';
+  status: 'measured' | 'missing';
   sourceChannel: string | null;
   reason: string | null;
 };
@@ -25,10 +25,11 @@ export type TraceView = {
   distance: number[]; a: Samples; b: Samples; delta: (number | null)[];
   turns: TraceTurn[]; bins: {start:number; end:number; gain:number | null}[];
   boundaries: number[]; nameA: string; nameB: string;
+  colorA?: string | null; colorB?: string | null;
   provenanceA: SignalProvenanceSet; provenanceB: SignalProvenanceSet;
 };
 export function hasSupportedSignal(samples:Samples, provenance:SignalProvenanceSet, name:SignalName) {
-  return (provenance[name].status==='measured' || provenance[name].status==='synthetic')
+  return provenance[name].status==='measured'
     && samples[name].some(value=>value!==null);
 }
 export function availableSignals(view:TraceView):SignalName[] {

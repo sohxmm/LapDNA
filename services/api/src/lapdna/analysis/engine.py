@@ -8,8 +8,8 @@ from math import ceil, floor
 from lapdna.alignment.native import linear
 from lapdna.models import ComparisonArtifact, SectorComparisonArtifact
 
-METHOD = "distance-v3-openf1-native-composite"
-PIPELINE = "monza-pilot-1"
+METHOD = "distance-v4-openf1-native-composite"
+PIPELINE = "native-composite-2"
 SEVERITY = {"pass": 0, "warn": 1, "block": 2}
 
 
@@ -37,7 +37,8 @@ def check(driver, metric, basis, official, observed, passing=50., warning=150.):
 
 
 def comparison_identity(publication: dict, a: str, b: str, tier: str) -> str:
-    return "cmp_" + canonical_hash({"laps": sorted((a, b)), "publication": publication["publication_sha256"],
+    tag = canonical_hash(publication["session"]["session_id"])[:8]
+    return "cmp_" + tag + "_" + canonical_hash({"laps": sorted((a, b)), "publication": publication["publication_sha256"],
                                     "method": METHOD, "pipeline": PIPELINE, "schema": "1.3.0", "tier": tier})[:24]
 
 
@@ -66,7 +67,7 @@ def provenance(publication: dict, telemetry: bool):
     value.update(pipeline_version=PIPELINE, methodology_version=METHOD)
     if telemetry:
         value.update(reference_sha256=publication["reference_sha256"],
-                     circuit_revision="monza-2024-projected-v1", reference_lap_id=publication["reference_lap_id"])
+                     circuit_revision=publication.get("circuit_revision", "monza-2024-projected-v1"), reference_lap_id=publication["reference_lap_id"])
     return value
 
 
@@ -267,6 +268,8 @@ def summaries(publication, a, b, delta):
                 "limitations": ["Class totals describe only these selected laps and the supported reference windows.",
                                 "Public brake is an on/off signal; steering angle and brake pressure are unavailable.",
                                 "One high-speed region cannot establish a consistent class-wide advantage."]}
+    if publication.get("profile") == "marker-windows-v1":
+        analysis["limitations"].insert(0, "Turn vicinities are fixed ±120 m marker windows, merged where overlapping; they are approximate analysis zones, not measured corner entry/exit boundaries.")
     return segments, evidence, observations, analysis
 
 

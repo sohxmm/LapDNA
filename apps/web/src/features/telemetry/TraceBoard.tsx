@@ -28,7 +28,8 @@ export function chartRows(view:TraceView) {
 }
 
 function options(v:TraceView, start:number, end:number, colors:ReturnType<typeof chartPalette>):EChartsCoreOption {
-  const {a:A,b:B,ink:INK}=colors;
+  const {ink:INK}=colors;
+  const A=v.colorA??colors.ink, B=v.colorB??colors.ink;
   const series:Record<string,unknown>[]=[];
   const deltaExtent=Math.max(.02,...v.delta.flatMap((value,i)=>value!==null&&v.distance[i]>=start&&v.distance[i]<=end?[Math.abs(value/1000)]:[]))*1.12;
   const rows=chartRows(v), marked=new Set<number>();
@@ -129,14 +130,14 @@ export function TraceBoard({view,cursor:externalCursor,onCursorChange,selection:
   function source(slot:'a'|'b',name:SignalName) {
     const provenance=(slot==='a'?view.provenanceA:view.provenanceB)[name];
     return provenance.status==='measured'?'Source '+provenance.sourceChannel+' · aligned display samples'
-      : provenance.status==='synthetic'?'Synthetic preview fixture':provenance.reason??'No source measurement';
+      : provenance.reason??'No source measurement';
   }
   return <section className="trace-board" aria-label="Distance-aligned telemetry">
     <div className="trace-tools"><div><p className="eyebrow">TELEMETRY / DISTANCE</p><h2>The lap, side by side.</h2></div>
       <label>Inspect turn <select value={selection?.label??''} onChange={e=>select(e.target.value)}><option value="">Full lap</option>{selection&&!turn&&<option value={selection.label}>{selection.label}</option>}{view.turns.map(t=><option key={t.label} value={t.label}>{t.label} · {t.speedClass} speed</option>)}</select></label></div>
     <div className="trace-legend"><span className="key-a">{view.nameA} · solid</span><span className="key-b">{view.nameB} · dashed</span><span>Positive Δ: {view.nameA} ahead</span></div>
-    <div className="strip-label">Estimated minisector gain <span>100 m · grey: within 0.01 s · striped: unavailable</span></div>
-    <div className="trace-rail bins">{view.bins.map(b=>{
+    <div className="strip-label">Estimated minisector gain <span>100 m · grey: within 0.01 s · grey stripes: unavailable{view.colorA&&view.colorA===view.colorB?' · team-colour hatching: '+view.nameB+' gains':''}</span></div>
+    <div className={'trace-rail bins'+(view.colorA&&view.colorA===view.colorB?' same-team':'')}>{view.bins.map(b=>{
       const a=Math.max(start,b.start), z=Math.min(end,b.end);if(a>=z)return null;
       const tone=b.gain===null?'unknown':Math.abs(b.gain)<10?'tie':b.gain>0?'a':'b';
       return <span key={b.start} className={'bin '+tone} style={{left:pos(a)+'%',width:(pos(z)-pos(a))+'%'}}

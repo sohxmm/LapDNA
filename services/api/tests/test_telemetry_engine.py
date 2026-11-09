@@ -192,3 +192,49 @@ def test_negligible_class_net_does_not_name_a_driver_advantage(publication):
     assert "negligible estimated net" in analysis["text"]
     assert "TSA net" not in analysis["text"]
     assert "advantage" not in analysis["text"]
+
+
+def test_event_team_colours_survive_comparison_and_reversal(publication):
+    publication["laps"]["test-A"]["metadata"].update(team_name="McLaren", team_colour="#FF8000")
+    publication["laps"]["test-B"]["metadata"].update(team_name="Mercedes", team_colour="#27F4D2")
+    result = build_comparison(publication, "test-A", "test-B")
+    assert result.lap_a.team_colour == "#FF8000"
+    assert result.lap_b.team_colour == "#27F4D2"
+    assert build_comparison(publication, "test-B", "test-A").model_dump() == result.model_dump()
+
+
+def test_catalogue_loads_two_sessions_and_resolves_only_matching_session(tmp_path, publication):
+    from lapdna.analysis.engine import comparison_identity
+    write_bundle(tmp_path, publication)
+    first = json.loads((tmp_path / "publication.json").read_text())
+    other = deepcopy(publication)
+    other["session"]["session_id"] = "2024-4-suzuka-Q"
+    other["session"]["circuit_id"] = "suzuka"
+    other["publication_sha256"] = "3" * 64
+    folder = tmp_path / "second"
+    folder.mkdir()
+    second_path = write_bundle(folder, other)
+    target = tmp_path / "normalized" / second_path.name
+    target.write_bytes(second_path.read_bytes())
+    second = json.loads((folder / "publication.json").read_text())
+    manifests = tmp_path / "manifests"
+    manifests.mkdir()
+    catalogue = {"catalogue_version": 2, "sessions": {}}
+    for manifest in (first, second):
+        filename = manifest["session_id"] + ".json"
+        raw = json.dumps(manifest).encode()
+        (manifests / filename).write_bytes(raw)
+        catalogue["sessions"][manifest["session_id"]] = {"manifest": "manifests/" + filename, "sha256": sha256(raw).hexdigest()}
+    (tmp_path / "publication.json").write_text(json.dumps(catalogue))
+    store = PilotStore(tmp_path)
+    assert store.load(publication["session"]["session_id"])["publication_sha256"] == "2" * 64
+    assert store.load(other["session"]["session_id"])["publication_sha256"] == "3" * 64
+    identifier = comparison_identity(other, "test-A", "test-B", "telemetry")
+    restarted = PilotStore(tmp_path)
+    assert restarted.resolve(identifier).session.circuit_id == "suzuka"
+    assert list(restarted._publications) == [other["session"]["session_id"]]
+    entry = next(iter(catalogue["sessions"].values()))
+    entry["sha256"] = "0" * 64
+    (tmp_path / "publication.json").write_text(json.dumps(catalogue))
+    with pytest.raises(InvalidArtifact, match="digest"):
+        PilotStore(tmp_path).load(publication["session"]["session_id"])

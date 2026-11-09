@@ -7,6 +7,7 @@ import { lapTime } from './selection';
 import {PerformanceMap} from './PerformanceMap';
 import {ComparisonExport, sourceName} from './ComparisonExport';
 import type {TraceWindow} from '../telemetry/TraceBoard';
+import type {CSSProperties} from 'react';
 
 const TraceBoard = lazy(async () => ({ default: (await import('../telemetry/TraceBoard')).TraceBoard }));
 const estimated = (value: number | null, showSign = false) =>
@@ -80,7 +81,7 @@ export default function ComparisonResult({ result }: { result: PairResponse }) {
   const b = swapped ? artifact.lap_a : artifact.lap_b;
   const warnings=[...new Set([...artifact.pairing.warnings,...artifact.quality.warnings])];
   const methodWarning=(text:string)=>['Approximate local timing','Timing clocks/eligibility','Start/finish values'].some(prefix=>text.startsWith(prefix));
-  return <section className="sc-result" aria-label="Loaded comparison">
+  return <section className="sc-result" aria-label="Loaded comparison" style={{'--a':a.team_colour??'var(--muted)','--b':b.team_colour??'var(--muted)'} as CSSProperties}>
     <p className="eyebrow">{artifact.session.year} · {artifact.session.event_name} · {artifact.detail_level === 'telemetry' ? 'Telemetry comparison' : 'Sector timing only'}</p>
     <h2>{a.driver_code} {a.phase} vs {b.driver_code} {b.phase}</h2>
     <div className="sc-lap-cards">{[a, b].map((lap, i) => <div key={lap.lap_id}>

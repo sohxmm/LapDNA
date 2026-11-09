@@ -628,6 +628,8 @@ export interface components {
             driver_name: string;
             /** Driver Number */
             driver_number: string;
+            /** Team Colour */
+            team_colour?: string | null;
             /** Team Name */
             team_name?: string | null;
         };
@@ -709,6 +711,10 @@ export interface components {
                 number,
                 number
             ];
+            /** Team Colour */
+            team_colour?: string | null;
+            /** Team Name */
+            team_name?: string | null;
             /** Track Status */
             track_status: string;
             /** Tyre Life Laps */
@@ -750,6 +756,10 @@ export interface components {
                 number | null,
                 number | null
             ];
+            /** Team Colour */
+            team_colour?: string | null;
+            /** Team Name */
+            team_name?: string | null;
             /** Tyre Life Laps */
             tyre_life_laps?: number | null;
         };
@@ -1026,11 +1036,8 @@ export interface components {
         };
         /** SessionIdentity */
         SessionIdentity: {
-            /**
-             * Circuit Id
-             * @enum {string}
-             */
-            circuit_id: "monza" | "silverstone" | "suzuka";
+            /** Circuit Id */
+            circuit_id: string;
             /** Event Name */
             event_name: string;
             /** Round */

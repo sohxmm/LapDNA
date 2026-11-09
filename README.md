@@ -2,12 +2,13 @@
 
 Where did the lap time go? Compare two qualifying laps on a common track-distance axis and connect approximate local gains to observed telemetry.
 
-**Hosted app:** [LapDNA](https://lapdna.vercel.app) · [Real Monza 2024 studio](https://lapdna.vercel.app/?year=2024&race=2024-16&view=studio) · [2026 Mexican GP qualifying](https://lapdna.vercel.app/?year=2026&race=2026-19&view=studio) · [Synthetic demo](https://lapdna.vercel.app/?preview=1). The real Monza telemetry pilot and persistent dark/light themes are live and verified. See [deployment status](docs/12-hosting.md), [the pilot guide](docs/19-monza-2024-pilot.md) and [data availability by year](docs/18-data-availability-by-year.md).
+**Hosted app:** [LapDNA](https://lapdna.vercel.app) · [Real Monza 2024 studio](https://lapdna.vercel.app/?year=2024&race=2024-16&view=studio) · [2026 Mexican GP qualifying](https://lapdna.vercel.app/?year=2026&race=2026-19&view=studio). The real Monza telemetry pilot and persistent dark/light themes are live and verified. See [deployment status](docs/12-hosting.md), [the pilot guide](docs/19-monza-2024-pilot.md) and [data availability by year](docs/18-data-availability-by-year.md).
 
-**Status, 8 November 2026:** recorded-results comparison covers 1,168 qualifying events from 1950–2026 and 24 Sprint Qualifying sessions from 2023–2026. The Monza 2024 pilot adds all 20 event-specific drivers, 276 actual laps, same/independent Q phases, real speed/throttle/gear/binary-brake traces, raw distance delta, linked performance map, supported corner analysis and PNG/JSON export. It has 79 timing-eligible laps: 40 support telemetry and 39 remain sector-only; 197 ineligible records retain reasons. Shared dark/light themes persist across navigation/reload. Native car/position records come from OpenF1 and are identity-matched to pinned TracingInsights timing clocks/flags; source composition and uncertainty remain visible. Other circuits/years are not implied by this pilot. The four-channel synthetic preview stays separate.
+**Status, 8 November 2026:** recorded-results comparison covers 1,168 qualifying events from 1950–2026 and 24 Sprint Qualifying sessions from 2023–2026. The Monza 2024 pilot adds all 20 event-specific drivers, 276 actual laps, same/independent Q phases, real speed/throttle/gear/binary-brake traces, raw distance delta, linked performance map, supported corner analysis and PNG/JSON export. It has 79 timing-eligible laps: 40 support telemetry and 39 remain sector-only; 197 ineligible records retain reasons. Shared dark/light themes persist across navigation/reload. Native car/position records come from OpenF1 and are identity-matched to pinned TracingInsights timing clocks/flags; source composition and uncertainty remain visible. Other circuits/years are not implied by this pilot. No synthetic preview or fabricated fallback data is shipped.
 
 ## Start here
 
+- [Verified telemetry expansion and prefinal release](docs/20-verified-telemetry-release.md)
 - [Blueprint and reading order](docs/00-blueprint.md)
 - [Implementation tickets](docs/06-implementation-plan.md)
 - [Current handoff](docs/10-handoff.md)
@@ -44,7 +45,7 @@ npm run dev
 
 Open the local URL printed by Vite (normally http://localhost:5173). Vite proxies `/api` to port 8000. On macOS/Linux replace `.venv\Scripts\python` with `.venv/bin/python`.
 
-Use the **Synthetic demo** link, or append `?preview=1`, to inspect the explicitly synthetic trace layout. For the real pilot choose 2024 → Italian Grand Prix → Lap telemetry. The generated pilot publication is deliberately ignored by Git; a fresh checkout must run the [reviewed import/publication commands](docs/19-monza-2024-pilot.md) before it has native lap data. An absent local publication keeps the recorded timing views usable. If port 5173 is unavailable, run `npm run dev --workspace @lapdna/web -- --port 5273`.
+For real telemetry choose 2024 → Italian Grand Prix → Lap telemetry. The generated pilot publication is deliberately ignored by Git; a fresh checkout must run the [reviewed import/publication commands](docs/19-monza-2024-pilot.md) before it has native lap data. An absent local publication keeps the recorded timing views usable. If port 5173 is unavailable, run `npm run dev --workspace @lapdna/web -- --port 5273`.
 
 ## Verify
 

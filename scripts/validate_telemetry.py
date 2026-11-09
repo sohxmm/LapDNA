@@ -16,9 +16,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--publication", type=Path, default=Path("services/api/src/lapdna/pilot_data"))
     parser.add_argument("--output", type=Path, default=Path("work/monza2024/validation-report.json"))
+    parser.add_argument("--session", default="2024-16-monza-Q")
     args = parser.parse_args()
     store = PilotStore(args.publication)
-    session_id = "2024-16-monza-Q"
+    session_id = args.session
     publication = store.load(session_id)
     index = SessionLapIndex.model_validate_json((args.publication / "sessions" / f"{session_id}.json").read_bytes())
     results, elapsed = [], []
@@ -50,6 +51,8 @@ def main():
         "openf1_9586_81_15": (79436., [26407., 26643., 26386.]),
     }
     for identifier, (lap_ms, sectors) in official.items():
+        if session_id != "2024-16-monza-Q":
+            break
         metadata = publication["laps"][identifier]["metadata"]
         assert metadata["lap_time_ms"] == lap_ms and metadata["sector_times_ms"] == sectors
     report = {"session_id": session_id, "source_snapshot_sha256": index.source_snapshot_sha256,
@@ -66,6 +69,8 @@ def main():
                                       "lap_number_note": "FIA report ordinals differ from provider ordinals; matching uses driver, phase, duration and sector triple.",
                                       "records": {identifier: {"lap_time_ms": duration, "sector_times_ms": sectors} for identifier, (duration, sectors) in official.items()}},
               "results": results}
+    if session_id != "2024-16-monza-Q":
+        report["official_spot_checks"] = None
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(f"Validated {len(results)} pairs and their reversed selections: {report['pair_counts']}")

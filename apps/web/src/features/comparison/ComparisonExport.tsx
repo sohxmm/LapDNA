@@ -32,6 +32,7 @@ async function renderCard(result:PairResponse,theme:Theme) {
   const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Image export is unavailable in this browser.');
   const colors=chartPalette(theme),dark=theme==='dark',bg=dark?'#0b131c':'#f0efe7',text=dark?'#eef3f8':'#182734',muted=dark?'#a4b5c3':'#506270',surface=dark?'#142332':'#e5e7df';
   const {artifact,swapped}=result,a=swapped?artifact.lap_b:artifact.lap_a,b=swapped?artifact.lap_a:artifact.lap_b;
+  colors.a=a.team_colour??muted;colors.b=b.team_colour??muted;
   ctx.fillStyle=bg;ctx.fillRect(0,0,1080,1350);
   function write(value:string,x:number,y:number,size=20,color=text,weight=400) {ctx!.font=weight+' '+size+'px system-ui, sans-serif';ctx!.fillStyle=color;ctx!.fillText(value,x,y);}
   function wrap(value:string,x:number,y:number,width:number,size=20,lineHeight=29,maxLines=3,color=text) {
@@ -70,13 +71,15 @@ async function renderCard(result:PairResponse,theme:Theme) {
       const scale=Math.min(420/Math.max(1,maxX-minX),255/Math.max(1,maxY-minY));
       const ox=62+(420-(maxX-minX)*scale)/2,oy=462+(255-(maxY-minY)*scale)/2;
       artifact.segments.forEach(segment=>{
-        const gain=orient(segment.gain_ms,swapped);ctx!.strokeStyle=gain===null?muted:Math.abs(gain)<10?colors.axis:gain>0?colors.a:colors.b;ctx!.lineWidth=5;ctx!.lineCap='round';ctx!.beginPath();let previous=-2;
+        const gain=orient(segment.gain_ms,swapped);ctx!.setLineDash(gain===null?[2,8]:a.team_colour&&a.team_colour===b.team_colour&&gain<-10?[10,5]:[]);ctx!.strokeStyle=gain===null?muted:Math.abs(gain)<10?colors.axis:gain>0?colors.a:colors.b;ctx!.lineWidth=5;ctx!.lineCap='round';ctx!.beginPath();let previous=-2;
         points.filter(p=>artifact.distance_m[p.i]>=segment.start_m&&artifact.distance_m[p.i]<=segment.end_m).forEach(p=>{
           const x=ox+(p.x-minX)*scale,y=oy+(p.y-minY)*scale;
           if(p.i!==previous+1)ctx!.moveTo(x,y);else ctx!.lineTo(x,y);previous=p.i;
         });ctx!.stroke();
       });
     }
+    ctx.setLineDash([]);
+    if(a.team_colour&&a.team_colour===b.team_colour)write(a.driver_code+' solid / '+b.driver_code+' dashed',62,753,14,muted);
     const left=558,top=488,width=455,height=204,last=artifact.distance_m.at(-1)!;
     const delta=artifact.delta_ms.map(value=>orient(value,swapped));
     const extent=Math.max(20,...delta.filter((v):v is number=>v!==null).map(Math.abs))*1.12;

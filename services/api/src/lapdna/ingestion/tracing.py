@@ -24,10 +24,11 @@ ARCHIVE_ROOT = f"https://raw.githubusercontent.com/TracingInsights/2024/{ARCHIVE
 POLICY_VERSION = "openf1-tracing-lap-v1"
 
 
-def archive_json(cache_dir: Path, name: str, *, opener: Callable = urlopen, sleep: Callable = time.sleep) -> tuple[Any, dict[str, Any]]:
+def archive_json(cache_dir: Path, name: str, *, opener: Callable = urlopen, sleep: Callable = time.sleep, spec: dict | None = None) -> tuple[Any, dict[str, Any]]:
     if name not in ("session_info.json", "drivers.json", "session_laptimes.json", "rcm.json", "corners.json", "weather.json") and not re.fullmatch(r"[A-Z]{3}/laptimes\.json", name):
         raise ImportFailure("archive_path_invalid", "Only reviewed archive metadata and lap timing files may be imported")
-    url = ARCHIVE_ROOT + quote(name, safe="/")
+    from .specs import archive_root
+    url = (archive_root(spec) if spec else ARCHIVE_ROOT) + quote(name, safe="/")
     stem = "tracing-" + name.replace("/", "-")
     raw_path, meta_path = cache_dir / stem, cache_dir / (stem + ".meta.json")
     if raw_path.exists() and meta_path.exists():
@@ -44,7 +45,7 @@ def archive_json(cache_dir: Path, name: str, *, opener: Callable = urlopen, slee
             value = json.loads(raw)
             if not isinstance(value, dict):
                 raise ImportFailure("archive_shape_invalid", "Expected a columnar archive metadata object")
-            meta = {"source_url": url, "retrieved_at": utc_now(), "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw), "archive_commit": ARCHIVE_COMMIT}
+            meta = {"source_url": url, "retrieved_at": utc_now(), "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw), "archive_commit": spec["archive_commit"] if spec else ARCHIVE_COMMIT}
             raw_path.parent.mkdir(parents=True, exist_ok=True)
             temporary = raw_path.with_suffix(raw_path.suffix + ".tmp")
             try:
@@ -82,9 +83,10 @@ def column_rows(columns: dict[str, Any]) -> list[dict[str, Any]]:
     return [{name: nullable(values[index]) for name, values in columns.items()} for index in range(count)]
 
 
-def combine_laps(open_laps: list[dict[str, Any]], drivers: list[dict[str, Any]], archive_laps: dict[str, dict[str, Any]], session_info: dict[str, Any]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+def combine_laps(open_laps: list[dict[str, Any]], drivers: list[dict[str, Any]], archive_laps: dict[str, dict[str, Any]], session_info: dict[str, Any], *, spec: dict | None = None) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     info = session_info.get("session_info", {})
-    if info.get("Key") != 9586 or info.get("Meeting", {}).get("Key") != 1244 or info.get("Path") != "2024/2024-09-01_Italian_Grand_Prix/2024-08-31_Qualifying/":
+    expected = (spec["session_key"], spec["meeting_key"], spec["archive_session_path"]) if spec else (9586, 1244, "2024/2024-09-01_Italian_Grand_Prix/2024-08-31_Qualifying/")
+    if (info.get("Key"), info.get("Meeting", {}).get("Key"), info.get("Path")) != expected:
         raise ImportFailure("archive_session_mismatch", "Pinned metadata does not match Monza 2024 qualifying")
     t0 = timestamp(session_info.get("t0_date"))
     if t0 is None:
@@ -156,24 +158,26 @@ def combine_laps(open_laps: list[dict[str, Any]], drivers: list[dict[str, Any]],
 def enrich_snapshot(snapshot_path: Path, cache_dir: Path, *, progress: Callable[[str], None] = print) -> Path:
     snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
     records = []
-    info, meta = archive_json(cache_dir / "source", "session_info.json")
+    spec = snapshot.get("import_spec")
+    kwargs = {"spec": spec} if spec else {}
+    info, meta = archive_json(cache_dir / "source", "session_info.json", **kwargs)
     records.append(meta)
     archive_laps = {}
     for driver in snapshot["drivers"]:
         code = driver["name_acronym"]
-        archive_laps[code], meta = archive_json(cache_dir / "source", f"{code}/laptimes.json")
+        archive_laps[code], meta = archive_json(cache_dir / "source", f"{code}/laptimes.json", **kwargs)
         records.append(meta)
         progress(f"Matched pinned timing metadata for {code}")
-    laps, reconciliation = combine_laps(snapshot["laps"], snapshot["drivers"], archive_laps, info)
+    laps, reconciliation = combine_laps(snapshot["laps"], snapshot["drivers"], archive_laps, info, spec=spec)
     snapshot["source"] = "openf1_tracinginsights"
     snapshot["laps"] = laps
     provenance = snapshot["provenance"]
-    provenance.update({"source": "openf1_tracinginsights", "eligibility_policy": POLICY_VERSION, "archive_commit": ARCHIVE_COMMIT,
+    provenance.update({"source": "openf1_tracinginsights", "eligibility_policy": POLICY_VERSION, "archive_commit": spec["archive_commit"] if spec else ARCHIVE_COMMIT,
         "source_components": {"car_and_position": "OpenF1 unmodified API records with field presence and invalid-value masking", "timing_phase_and_eligibility": "TracingInsights archived FastF1 lap fields", "markers": "MultiViewer 2024 circuit annotations"},
         "source_records": sorted(provenance["source_records"] + records, key=lambda record: record["source_url"]),
         "timing_candidates": sum(lap["timing_candidate"] for lap in laps), "source_reconciliation": reconciliation,
         "limitations": ["Composite source: matching archived FastF1 lap clocks/flags and native OpenF1 car/location; both share an upstream timing family", "Archive FastF1 software version is not published with these records", "OpenF1 native source records contain invalid/sentinel fields; downstream masks remain mandatory", "Position coordinates support an approximate drawing; no surveyed physical car-line claim", "Publication still requires native support, geometry and timing quality gates"]})
-    fingerprint = hashlib.sha256(json.dumps({"policy": POLICY_VERSION, "snapshot_schema": "1.0.0", "inputs": [(record["source_url"], record["sha256"]) for record in provenance["source_records"]]}, separators=(",", ":")).encode()).hexdigest()
+    fingerprint = hashlib.sha256(json.dumps({"policy": POLICY_VERSION, "snapshot_schema": "1.0.0", "import_spec": spec, "inputs": [(record["source_url"], record["sha256"]) for record in provenance["source_records"]]}, separators=(",", ":")).encode()).hexdigest()
     provenance["source_digest"] = fingerprint
     target = cache_dir / "snapshots" / fingerprint[:24] / "snapshot.json"
     if not target.exists():

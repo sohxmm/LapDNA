@@ -1,8 +1,9 @@
 # Current handoff
 
+Prefinal update, 9 November 2026: [verified telemetry release](20-verified-telemetry-release.md) supersedes the former single-Monza/synthetic-preview scope and fixed A/B colours. The publication catalogue now supports independently checked sessions; exact live counts are recorded at release.
 Updated 8 November 2026 · Revision 6. **R01 historical recorded results and the real Monza 2024 telemetry pilot are implemented and verified live.** Shared editorial styling supports persistent blue dark and off-white light modes. The broader telemetry range remains verified sessions/channels in 2018–2026; older years keep timing comparisons. [Pilot and source decision](19-monza-2024-pilot.md); [year/field coverage](18-data-availability-by-year.md); [rollout](17-approved-ui-and-telemetry-rollout.md).
 
-The existing hosted app is [lapdna.vercel.app](https://lapdna.vercel.app). See [hosting](12-hosting.md) for the actually deployed commit and QA, rather than assuming local changes are live. R01 remains 1,168 qualifying and 24 Sprint Qualifying classifications across 1950–2026, with 27,581 driver-result rows. Its historical formats, event-specific teams and source restrictions are unchanged. The synthetic demo stays separate.
+The existing hosted app is [lapdna.vercel.app](https://lapdna.vercel.app). See [hosting](12-hosting.md) for the actually deployed commit and QA, rather than assuming local changes are live. R01 remains 1,168 qualifying and 24 Sprint Qualifying classifications across 1950–2026, with 27,581 driver-result rows. Its historical formats, event-specific teams and source restrictions are unchanged. The prefinal release removes the synthetic demo.
 
 ## Working folder
 
@@ -59,7 +60,7 @@ U01's earlier landing/calendar/results interface was also inspected at 768×1024
 3. Corner/straight and 100 m partitions are separate accounting views; status colours are not mini-sector durations.
 4. Native support, raw timing residuals, sensitivity, gross opposing gains and mixed/unknown classes govern every local claim. Show fewer observations when evidence is insufficient.
 5. No speed-derived throttle/brake/gear, brake-pressure/steering placeholders, forced timing repair or causal driver/car conclusions.
-6. Keep existing R01 and explicitly labelled synthetic preview useful when a real session or channel is absent.
+6. Keep real recorded timings useful when a session/channel is absent; no synthetic fallback.
 7. Pilot method `distance-v3-openf1-native-composite`, pipeline `monza-pilot-1`. A numerical/source/profile change creates a new reviewed method/input revision and immutable identity.
 
 ## Next gates and limitations

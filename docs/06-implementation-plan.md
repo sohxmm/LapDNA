@@ -92,7 +92,7 @@ Read methodology §§6–8, [contracts](05-contracts.md) and [architecture](02-a
 
 ## T06 — Wire production session and lap selection
 
-Read [UX](04-experience.md) and contracts. Extend the existing `apps/web/src/features/comparison/` inventory browser, selector and result adapter. Its session/laps GETs and selection POST already use exact IDs and the generated contracts. Connect them to T05's cold-build and bounded-load responses. Validate existing fastest-common-phase defaults, independent phase controls, overrides, reduced capabilities and contextual warnings against the full real inventory. Reserve the preview for its explicitly labeled entry point.
+Read [UX](04-experience.md) and contracts. Extend the existing `apps/web/src/features/comparison/` inventory browser, selector and result adapter. Its session/laps GETs and selection POST already use exact IDs and the generated contracts. Connect them to T05's cold-build and bounded-load responses. Validate existing fastest-common-phase defaults, independent phase controls, overrides, reduced capabilities and contextual warnings against the full real inventory. Do not restore the removed synthetic preview.
 
 Use a reducer for selection, loading, ready telemetry, sector-only, insufficient/unavailable data and transport error. Abort stale fetches and reject late responses. Route returned immutable comparison IDs with orientation and optional segment. Respect the returned `swapped` flag before rendering signed values. Preserve the reader's selection on retry and URL reload.
 

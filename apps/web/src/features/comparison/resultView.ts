@@ -24,6 +24,7 @@ export function traceView(artifact: Telemetry, swapped: boolean): TraceView {
   const second = swapped ? artifact.lap_a : artifact.lap_b;
   return {
     nameA: first.driver_code, nameB: second.driver_code, distance: artifact.distance_m,
+    colorA: first.team_colour, colorB: second.team_colour,
     a: samples(swapped ? artifact.channels_b : artifact.channels_a),
     b: samples(swapped ? artifact.channels_a : artifact.channels_b),
     provenanceA: provenance(swapped ? artifact.channel_provenance_b : artifact.channel_provenance_a),

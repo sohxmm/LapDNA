@@ -192,3 +192,33 @@ def test_failed_composite_reconciliation_preserves_active_snapshot(tmp_path, mon
     assert error.value.code == "source_timing_mismatch"
     assert json.loads((tmp_path / "snapshot-pointer.json").read_text()) == original_pointer
     assert not (tmp_path / "snapshots").exists()
+
+
+def test_time_window_cache_keeps_native_utc_rows_and_rejects_ignored_filters(tmp_path):
+    from datetime import datetime, timezone, timedelta
+    start = datetime(2024, 1, 1, tzinfo=timezone.utc)
+    end = start + timedelta(minutes=10)
+    payload = [{"session_key": 9586, "driver_number": 4, "date": start.isoformat(), "brake": 0}]
+    requests = []
+    def opener(request, timeout):
+        requests.append(request.full_url)
+        return io.BytesIO(json.dumps(payload).encode())
+    client = OpenF1Client(tmp_path, opener=opener, sleep=lambda _: None)
+    assert client.fetch("car_data", 9586, start=start, end=end) == payload
+    assert client.fetch("car_data", 9586, start=start, end=end) == payload
+    assert len(requests) == 1 and "date%3E=" in requests[0]
+    payload[0]["date"] = (end + timedelta(seconds=1)).isoformat()
+    with pytest.raises(ImportFailure) as error:
+        client.fetch("car_data", 9586, start=start + timedelta(seconds=1), end=end)
+    assert error.value.code == "source_filter_mismatch"
+
+
+def test_generalized_archive_identity_still_rejects_another_event():
+    row, drivers, archives, info = archive_inputs()
+    spec = {"session_key": 9492, "meeting_key": 1232,
+            "archive_session_path": "2024/2024-04-07_Japanese_Grand_Prix/2024-04-06_Qualifying/"}
+    with pytest.raises(ImportFailure) as error:
+        combine_laps([row], drivers, archives, info, spec=spec)
+    assert error.value.code == "archive_session_mismatch"
+    info["session_info"].update(Key=9492, Meeting={"Key":1232}, Path=spec["archive_session_path"])
+    assert combine_laps([row], drivers, archives, info, spec=spec)[1]["session_identity_verified"]

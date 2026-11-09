@@ -167,9 +167,6 @@ function Studio({
           <button type="button" className="calendar-button" onClick={onBack}>
             ← Race calendar
           </button>
-          <a className="calendar-button" href="?preview=1">
-            Synthetic demo ↗
-          </a>
         </div>
       </div>
       {race.year < 2018 && (
@@ -286,9 +283,6 @@ export default function CalendarWorkspace() {
         >
           Retry seasons
         </button>
-        <p>
-          <a href="?preview=1">Open the explicitly synthetic design preview</a>
-        </p>
       </section>
     );
   if (!route) return <p role="status">Selecting the current season…</p>;

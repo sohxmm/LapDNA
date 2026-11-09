@@ -59,8 +59,8 @@ def project_markers(raw_markers: dict, grid: list[float], geometry: dict, refere
                         "distance_m": distance, "segment_id": "pending",
                         "reference_speed_kph": windows[1]["minimum"],
                         "speed_class": classification, "projection_error_source_units": error})
-    if len(markers) != 11:
-        raise AlignmentError("2024 Monza profile requires all eleven source turn markers")
+    if not 1 <= len(markers) <= 60:
+        raise AlignmentError("source turn annotation inventory is empty or exceeds the reviewed bound")
     return markers
 
 
@@ -105,6 +105,43 @@ def monza_regions(markers: list[dict], length: float) -> list[dict]:
                             "speed_class": None, "start_m": previous, "end_m": corner["start_m"]})
         regions.append(corner)
         previous = corner["end_m"]
+    if previous < length:
+        regions.append({"segment_id": "finish_straight", "kind": "straight", "label": "Finish straight",
+                        "speed_class": None, "start_m": previous, "end_m": length})
+    return regions
+
+
+def marker_regions(markers: list[dict], length: float) -> list[dict]:
+    """Approximate annotation-centred zones, not measured corner boundaries.
+
+    Freeze ±120 m windows on the reference. Merge overlapping windows into
+    complexes so neither time nor class support is counted twice. Their
+    complement forms straights. A mixed/unsupported complex stays explicit.
+    No speed threshold is used to invent braking or pedal data.
+    """
+    groups = []
+    for marker in markers:
+        start, end = max(0., marker["distance_m"] - 120), min(length, marker["distance_m"] + 120)
+        if groups and start <= groups[-1][1]:
+            groups[-1][1] = end
+            groups[-1][2].append(marker)
+        else:
+            groups.append([start, end, [marker]])
+    regions, previous = [], 0.
+    for start, end, members in groups:
+        identifier = "zone_" + "_".join(marker["marker_id"] for marker in members)
+        classes = {marker["speed_class"] for marker in members}
+        classification = "unknown" if "unknown" in classes else "mixed" if len(classes) > 1 else next(iter(classes))
+        if start > previous:
+            regions.append({"segment_id": f"straight_{len(regions)}", "kind": "straight",
+                            "label": "Straight to " + members[0]["label"], "speed_class": None,
+                            "start_m": previous, "end_m": start})
+        for marker in members:
+            marker["segment_id"] = identifier
+        label = members[0]["label"] if len(members) == 1 else members[0]["label"] + "–" + members[-1]["label"]
+        regions.append({"segment_id": identifier, "kind": "corner" if len(members) == 1 else "complex",
+                        "label": label + " vicinity", "speed_class": classification, "start_m": start, "end_m": end})
+        previous = end
     if previous < length:
         regions.append({"segment_id": "finish_straight", "kind": "straight", "label": "Finish straight",
                         "speed_class": None, "start_m": previous, "end_m": length})

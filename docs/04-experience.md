@@ -1,6 +1,6 @@
 # Comparison workspace experience
 
-The workspace makes it possible to read a time change, locate its turn, and check the associated telemetry without translating between separate axes. This guide specifies the full application. The user has approved a sports-editorial landing and G1 stacked overlays; [the approved decision](17-approved-ui-and-telemetry-rollout.md) governs entry flow, minimal copy and verified 2018–2026 telemetry scope. The opt-in synthetic preview remains separate. Real session ingestion and numerical validation follow the implementation tickets. See [current handoff](10-handoff.md).
+The workspace makes it possible to read a time change, locate its turn, and check the associated telemetry without translating between separate axes. This guide specifies the full application. The user has approved a sports-editorial landing and G1 stacked overlays; [the approved decision](17-approved-ui-and-telemetry-rollout.md) governs entry flow, minimal copy and verified 2018–2026 telemetry scope. The prefinal product has no synthetic preview. Real session ingestion and numerical validation follow the implementation tickets. See [current handoff](10-handoff.md).
 
 ## 1. Layout and visual language
 
@@ -34,7 +34,7 @@ Keep speed the tallest channel panel and delta visibly separate with its own zer
 
 ## 2. Data entry and states
 
-The ordinary home view is the approved landing, with Open Studio entering the current-year calendar. The flow is year → race → actual session/phase → two drivers. The existing classification comparison provides useful real timings even when no detailed laps are imported; do not replace it with a global empty-data message. Detailed lap inventory has its own honest empty state. A secondary demonstration link opens `?preview=1`. Display “Synthetic design preview” prominently and continuously with fictional track geometry and anonymous driver slots. Isolate this fixture from real source loading, quality claims, the session catalogue, official attribution and editorial export. No image from the reference is required at runtime.
+The ordinary home view is the approved landing, with Open Studio entering the current-year calendar. The flow is year → race → actual session/phase → two drivers. The existing classification comparison provides useful real timings even when no detailed laps are imported; do not replace it with a global empty-data message. Detailed lap inventory has its own honest empty state. No demo route or fabricated graph/map fallback is shipped. The landing circuit outline is a small excerpt of the verified Monza reference geometry. No image from the reference is required at runtime.
 
 In a populated release, event selection loads the session's driver/lap inventory. Each slot shows driver, phase, lap, official time, compound, tyre age and start time as available. Put the actual phase next to every loaded lap in the comparison header even in same-phase mode. A phase option with no eligible lap is disabled with a reason. The form offers all eligible individual laps from the imported event, including non-fastest laps.
 

@@ -20,7 +20,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 BASE_URL = "https://api.openf1.org/v1"
-MAX_SOURCE_BYTES = 64 * 1024 * 1024
+MAX_SOURCE_BYTES = 128 * 1024 * 1024
 POLICY_VERSION = "openf1-lap-v1"
 METADATA_ENDPOINTS = ("sessions", "drivers", "laps", "stints", "race_control", "weather", "pit", "session_result")
 CAR_FIELDS = ("speed", "throttle", "n_gear", "brake", "rpm", "drs")
@@ -77,34 +77,48 @@ class OpenF1Client:
         self.cache_hits = 0
         cache_dir.mkdir(parents=True, exist_ok=True)
 
-    def fetch(self, endpoint: str, session_key: int, driver_number: int | None = None) -> list[dict[str, Any]]:
+    def fetch(self, endpoint: str, session_key: int, driver_number: int | None = None, *, start: datetime | None = None, end: datetime | None = None) -> list[dict[str, Any]]:
         if endpoint not in (*METADATA_ENDPOINTS, "car_data", "location"):
             raise ImportFailure("invalid_endpoint", "Only the reviewed OpenF1 source endpoints are supported")
         params = {"session_key": session_key}
         if driver_number is not None:
             params["driver_number"] = driver_number
+        if start is not None:
+            params["date>"] = start.isoformat()
+        if end is not None:
+            params["date<"] = end.isoformat()
         url = BASE_URL + "/" + endpoint + "?" + urlencode(params)
         stem = endpoint + ("-" + str(driver_number) if driver_number is not None else "")
+        if start is not None or end is not None:
+            stem += "-" + hashlib.sha256(url.encode()).hexdigest()[:16]
+        def validate(payload):
+            self._validate(payload, session_key, driver_number)
+            if start is not None or end is not None:
+                for row in payload:
+                    when = timestamp(row.get("date"))
+                    if when is None or (start is not None and when < start) or (end is not None and when > end):
+                        raise ImportFailure("source_filter_mismatch", "Source returned native rows outside the requested UTC interval")
         raw_path, metadata_path = self.cache_dir / (stem + ".json"), self.cache_dir / (stem + ".meta.json")
         if not self.refresh and raw_path.exists() and metadata_path.exists():
             raw = raw_path.read_bytes()
             meta = json.loads(metadata_path.read_text(encoding="utf-8"))
             if meta.get("source_url") == url and meta.get("sha256") == hashlib.sha256(raw).hexdigest():
                 payload = json.loads(raw)
-                self._validate(payload, session_key, driver_number)
+                validate(payload)
                 self.cache_hits += 1
                 self.records.append(meta)
                 return payload
         for attempt in range(3):
             try:
-                self.sleep(.36)
+                # Historical free tier: at most 30 requests per minute.
+                self.sleep(2.05)
                 self.requests += 1
                 with self.opener(Request(url, headers={"User-Agent": "LapDNA/0.1 historical analysis import", "Accept": "application/json"}), timeout=60) as response:
                     raw = response.read(MAX_SOURCE_BYTES + 1)
                 if len(raw) > MAX_SOURCE_BYTES:
                     raise ImportFailure("source_too_large", "Source response exceeds the reviewed file-size bound")
                 payload = json.loads(raw)
-                self._validate(payload, session_key, driver_number)
+                validate(payload)
                 meta = {"source_url": url, "retrieved_at": utc_now(), "sha256": hashlib.sha256(raw).hexdigest(), "rows": len(payload), "bytes": len(raw)}
                 temporary = raw_path.with_suffix(".json.tmp")
                 try:
@@ -246,9 +260,9 @@ def channel_statistics(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return {"rows": len(rows), "present": dict(present), "missing": dict(missing), "invalid": dict(invalid), "values_are_unmodified_source_records": True}
 
 
-def fetch_markers(cache_dir: Path, *, refresh: bool = False) -> tuple[dict[str, Any], dict[str, Any]]:
+def fetch_markers(cache_dir: Path, *, refresh: bool = False, circuit_key: int = 39, year: int = 2024, turn_count: int = 11) -> tuple[dict[str, Any], dict[str, Any]]:
     """Fetch the reviewed Monza layout annotations, separately from telemetry."""
-    url = "https://api.multiviewer.app/api/v1/circuits/39/2024"
+    url = f"https://api.multiviewer.app/api/v1/circuits/{circuit_key}/{year}"
     path, meta_path = cache_dir / "markers.json", cache_dir / "markers.meta.json"
     if not refresh and path.exists() and meta_path.exists():
         raw, meta = path.read_bytes(), json.loads(meta_path.read_text(encoding="utf-8"))
@@ -267,9 +281,9 @@ def fetch_markers(cache_dir: Path, *, refresh: bool = False) -> tuple[dict[str, 
         value = json.loads(raw)
     except (json.JSONDecodeError, UnicodeDecodeError):
         raise ImportFailure("markers_invalid", "Circuit annotation source returned invalid JSON") from None
-    if not isinstance(value, dict) or [row.get("number") for row in value.get("corners", [])] != list(range(1, 12)):
-        raise ImportFailure("markers_invalid", "Circuit annotation source does not contain the reviewed eleven Monza turns")
-    meta = {"source_url": url, "retrieved_at": utc_now(), "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw), "rows": 11, "role": "reference_annotations", "units": "source coordinates; no surveyed physical distance guarantee"}
+    if not isinstance(value, dict) or sorted({row.get("number") for row in value.get("corners", [])}) != list(range(1, turn_count + 1)):
+        raise ImportFailure("markers_invalid", "Circuit annotation source does not contain the expected complete turn numbers")
+    meta = {"source_url": url, "retrieved_at": utc_now(), "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw), "rows": len(value["corners"]), "role": "reference_annotations", "units": "source coordinates; no surveyed physical distance guarantee"}
     temporary = path.with_suffix(".json.tmp")
     try:
         temporary.write_bytes(raw)
@@ -280,8 +294,10 @@ def fetch_markers(cache_dir: Path, *, refresh: bool = False) -> tuple[dict[str, 
     return value, meta
 
 
-def import_session(cache_dir: Path, *, year: int = 2024, round_number: int = 16, session_key: int = 9586, expected_circuit: str = "Monza", refresh: bool = False, progress: Callable[[str], None] = print) -> Path:
-    if (year, round_number, session_key, expected_circuit) != (2024, 16, 9586, "Monza"):
+def import_session(cache_dir: Path, *, year: int = 2024, round_number: int = 16, session_key: int = 9586, expected_circuit: str = "Monza", refresh: bool = False, progress: Callable[[str], None] = print, spec: dict | None = None, bulk: bool = False) -> Path:
+    if spec is not None:
+        year, round_number, session_key, expected_circuit = spec["year"], spec["round"], spec["session_key"], spec["circuit_short_name"]
+    elif (year, round_number, session_key, expected_circuit) != (2024, 16, 9586, "Monza"):
         raise ImportFailure("unreviewed_session", "This reviewed pilot imports only 2024 round 16 Monza qualifying, source session 9586")
     client = OpenF1Client(cache_dir / "source", refresh=refresh)
     metadata = {endpoint: client.fetch(endpoint, session_key) for endpoint in METADATA_ENDPOINTS}
@@ -290,19 +306,53 @@ def import_session(cache_dir: Path, *, year: int = 2024, round_number: int = 16,
     session = metadata["sessions"][0]
     if session.get("year") != year or session.get("circuit_short_name") != expected_circuit or session.get("session_name") not in ("Qualifying", "Sprint Qualifying", "Sprint Shootout") or session.get("is_cancelled") is not False:
         raise ImportFailure("session_mismatch", "Resolved session does not match the reviewed event specification")
+    if spec and (session.get("meeting_key") != spec["meeting_key"] or session.get("circuit_key") != spec["circuit_key"] or session.get("date_start", "")[:10] != spec["qualifying_date"]):
+        raise ImportFailure("session_mismatch", "Resolved meeting, layout or date disagrees with the pinned specification")
     phase_windows(metadata["race_control"])
     drivers = metadata["drivers"]
     if not drivers or len({driver["driver_number"] for driver in drivers}) != len(drivers):
         raise ImportFailure("roster_invalid", "Source roster is empty or duplicated")
     car_data, position_data = {}, {}
-    for driver in sorted(drivers, key=lambda row: row["driver_number"]):
+    if bulk:
+        roster = {str(driver["driver_number"]) for driver in drivers}
+        edges = [(timestamp(row.get("date_start")), milliseconds(row.get("lap_duration"))) for row in metadata["laps"]]
+        starts = [start for start, _ in edges if start is not None]
+        ends = [start + timedelta(milliseconds=duration) for start, duration in edges if start is not None and duration is not None]
+        if not starts or not ends:
+            raise ImportFailure("native_window_missing", "Source lap timing cannot bound a historical native-stream request")
+        first, last = min(starts) - timedelta(seconds=5), max(ends) + timedelta(seconds=5)
+        if not timedelta(0) < last - first <= timedelta(hours=5):
+            raise ImportFailure("native_window_invalid", "Historical native-stream UTC window exceeds the reviewed bound")
+        for endpoint, target in (("car_data", car_data), ("location", position_data)):
+            # Whole-session OpenF1 requests can reject excessive row counts.
+            # Half-open ten-minute windows retain every returned native row
+            # without boundary duplication or signal resampling.
+            cursor, count = first, 0
+            while cursor < last:
+                stop = min(last, cursor + timedelta(minutes=10))
+                # Overlap queries to tolerate inclusive/exclusive provider
+                # bounds, then partition locally into exact half-open bins.
+                rows = client.fetch(endpoint, session_key, start=cursor - timedelta(seconds=1), end=stop + timedelta(seconds=1))
+                records = [row for row in rows if cursor <= timestamp(row["date"]) < stop]
+                for row in records:
+                    number = str(row.get("driver_number"))
+                    if number not in roster:
+                        raise ImportFailure("foreign_driver", "Native stream contains a driver absent from the verified session roster")
+                    target.setdefault(number, []).append(row)
+                count += len(records)
+                cursor = stop
+                progress(f"Imported {endpoint} through {stop.isoformat()} ({count} native records)")
+            for number in roster:
+                target.setdefault(number, [])
+            progress(f"Imported {count} native {endpoint} records for {len(roster)} source drivers")
+    for driver in ([] if bulk else sorted(drivers, key=lambda row: row["driver_number"])):
         number = driver["driver_number"]
         car_data[str(number)] = client.fetch("car_data", session_key, number)
         position_data[str(number)] = client.fetch("location", session_key, number)
         progress(f"Imported {driver.get('name_acronym', number)}: {len(car_data[str(number)])} car / {len(position_data[str(number)])} position records")
         atomic_json(cache_dir / "acquisition-progress.json", {"session_key": session_key, "retrieved_at": utc_now(), "complete_drivers": list(car_data), "source_records": client.records})
     normalized_laps = normalize_laps(metadata["laps"], metadata["race_control"], metadata["stints"], metadata["weather"], session_key)
-    markers, marker_meta = fetch_markers(cache_dir / "source", refresh=refresh)
+    markers, marker_meta = fetch_markers(cache_dir / "source", refresh=refresh, **({"circuit_key": spec["circuit_key"], "year": year, "turn_count": spec["turn_count"]} if spec else {}))
     client.records.append(marker_meta)
     manifest = {"schema_version": "1.0.0", "source": "openf1", "source_session": str(session_key), "year": year, "round": round_number, "circuit": expected_circuit, "retrieved_at": utc_now(),
         "eligibility_policy": POLICY_VERSION, "source_records": sorted(client.records, key=lambda record: record["source_url"]), "driver_count": len(drivers), "lap_count": len(normalized_laps), "timing_candidates": sum(lap["timing_candidate"] for lap in normalized_laps),
@@ -310,10 +360,13 @@ def import_session(cache_dir: Path, *, year: int = 2024, round_number: int = 16,
         "native_channel_units": {"speed": "km/h", "throttle": "%", "n_gear": "integer", "brake": "0/100 binary; other raw values unavailable", "rpm": "rev/min", "drs": "raw code"},
         "position_units": "source coordinates; coordinate scale requires geometry verification", "phase_windows": phase_windows(metadata["race_control"]),
         "limitations": ["OpenF1 date_start is approximate; endpoint timestamps are imposed from recorded durations", "FastF1-specific flags are unavailable in OpenF1 and are never assumed false", "Native car/location records retain unknown/sentinel values for downstream masking", "Timing candidates are not proof that later spatial/timing quality gates passed"]}
-    fingerprint = hashlib.sha256(json.dumps({"policy": POLICY_VERSION, "snapshot_schema": "1.0.0", "inputs": [(record["source_url"], record["sha256"]) for record in manifest["source_records"]]}, separators=(",", ":")).encode()).hexdigest()
+    fingerprint = hashlib.sha256(json.dumps({"policy": POLICY_VERSION, "snapshot_schema": "1.0.0", "import_spec": spec, "inputs": [(record["source_url"], record["sha256"]) for record in manifest["source_records"]]}, separators=(",", ":")).encode()).hexdigest()
     manifest["source_digest"] = fingerprint
     snapshot = {"schema_version": "1.0.0", "source": "openf1", "session": {**session, "round": round_number, "event_name": "Italian Grand Prix" if expected_circuit == "Monza" else expected_circuit}, "drivers": drivers, "laps": normalized_laps,
         "car_data": car_data, "position_data": position_data, "race_control": metadata["race_control"], "weather": metadata["weather"], "stints": metadata["stints"], "pit": metadata["pit"], "session_results": metadata["session_result"], "markers": markers, "provenance": manifest}
+    if spec:
+        snapshot["import_spec"] = spec
+        snapshot["session"]["event_name"] = spec["event_name"]
     revision_dir = cache_dir / "snapshots" / fingerprint[:24]
     snapshot_path = revision_dir / "snapshot.json"
     if not snapshot_path.exists():

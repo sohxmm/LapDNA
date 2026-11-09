@@ -86,3 +86,16 @@ def test_fixed_reference_length_preserves_swap_sign():
     delta = [elapsed_at(b, value) - elapsed_at(a, value) for value in grid]
     assert delta == pytest.approx([0, 250, 500, 1000])
     assert [elapsed_at(a, value) - elapsed_at(b, value) for value in grid] == pytest.approx([-x for x in delta])
+
+
+def test_marker_windows_merge_without_double_counting_and_keep_mixed_classes():
+    from lapdna.alignment.reference import marker_regions
+    markers = [{"marker_id": "T" + str(i), "label": "T" + str(i), "distance_m": distance,
+                "speed_class": band} for i, distance, band in ((1, 200., "low"), (2, 300., "medium"), (3, 800., "high"))]
+    regions = marker_regions(markers, 1000.)
+    assert sum(row["end_m"] - row["start_m"] for row in regions) == 1000.
+    assert all(a["end_m"] == b["start_m"] for a, b in zip(regions, regions[1:]))
+    complexes = [row for row in regions if row["kind"] == "complex"]
+    assert len(complexes) == 1 and complexes[0]["speed_class"] == "mixed"
+    assert markers[0]["segment_id"] == markers[1]["segment_id"]
+    assert markers[2]["segment_id"] != markers[0]["segment_id"]

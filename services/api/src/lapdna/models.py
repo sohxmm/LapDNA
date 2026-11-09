@@ -19,6 +19,7 @@ SpeedClass = Literal["low", "medium", "high"]
 SchemaVersion = Literal["1.2.0", "1.3.0"]
 Count = Annotated[int, Field(ge=0)]
 ShortText = Annotated[str, Field(min_length=1, max_length=600)]
+TeamColour = Annotated[str, Field(pattern=r"^#[0-9A-Fa-f]{6}$")]
 
 
 class Contract(BaseModel):
@@ -45,7 +46,7 @@ class SessionIdentity(Contract):
     year: Annotated[int, Field(strict=True, ge=2018, le=2100)]
     round: Annotated[int, Field(strict=True, ge=1, le=30)]
     session_type: Literal["Q"] = "Q"
-    circuit_id: Literal["monza", "silverstone", "suzuka"]
+    circuit_id: Identifier
     event_name: Annotated[str, Field(min_length=1, max_length=150)]
 
 
@@ -59,6 +60,8 @@ class LapIdentity(Contract):
 
 
 class LapMetadata(LapIdentity):
+    team_name: ShortText | None = None
+    team_colour: TeamColour | None = None
     lap_time_ms: Duration
     sector_times_ms: tuple[Duration, Duration, Duration]
     compound: str

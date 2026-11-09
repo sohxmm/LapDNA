@@ -107,8 +107,6 @@
 :root[data-theme] .landing-page { --paper: var(--page); --ink: var(--text); --accent: var(--editorial-accent); }
 :root[data-theme] .landing-page :focus-visible { outline-color: var(--a); }
 :root[data-theme] :is(.landing-header,.landing-bottom,.landing-footer) { border-color: var(--border); }
-:root[data-theme] :is(.landing-bottom>span,.landing-bottom p>span,.landing-preview .eyebrow,.landing-preview p:not(.eyebrow),.circuit-caption,.landing-footer) { color: var(--muted); }
-:root[data-theme] .landing-preview a { border-color: var(--border-strong); }
 :root[data-theme] .landing-cta { color: var(--page); background: var(--text); }
 :root[data-theme] .landing-cta:hover { background: var(--text-secondary); }
 :root[data-theme] .circuit-shadow { stroke: var(--surface-raised); }
@@ -116,11 +114,6 @@
 :root[data-theme] :is(.circuit-annotations text,.circuit-index) { fill: var(--muted); }
 :root[data-theme] .landing-circuit circle[fill] { fill: var(--text); }
 :root[data-theme] .landing-circuit path[stroke="#f1f0e8"] { stroke: var(--page); }
-:root[data-theme] .landing-traces { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
-:root[data-theme] .preview-grid { stroke: var(--chart-grid); }
-:root[data-theme] .preview-a { stroke: var(--a); }
-:root[data-theme] .preview-b { stroke: var(--b); }
-:root[data-theme] .preview-delta { stroke: var(--chart-delta); }
 
 /* Calendar and recorded results. */
 :root[data-theme] :is(.calendar-progress ol,.calendar-progress button,.calendar-explanation,.calendar-provenance,.calendar-schedule-details,.studio-event>p:not(.eyebrow),.studio-event .calendar-quali-context,.race-place,.race-quali,.race-card-top,.results-muted,.results-intro,.results-coverage,.results-source,.results-empty) { color: var(--muted); }
@@ -159,8 +152,8 @@
 :root[data-theme] .results-active-phase { background: color-mix(in srgb, var(--a) 6%, transparent); }
 
 /* Persistent context must remain legible in either mode. */
-:root[data-theme] :is(.calendar-warning,.results-warning,.sc-warning,.synthetic-banner) { background: var(--warning-bg); color: var(--warning-text); border-left-color: var(--warning-border); }
-:root[data-theme] .synthetic-banner strong { color: var(--warning-text); }
+:root[data-theme] :is(.calendar-warning,.results-warning,.sc-warning) { background: var(--warning-bg); color: var(--warning-text); border-left-color: var(--warning-border); }
+
 :root[data-theme] .session-browser .sc-compare { background: var(--a); color: var(--on-accent); border-color: var(--a); }
 :root[data-theme] .sc-lap-cards>div { background: var(--surface-raised); }
 :root[data-theme] :is(.sc-result,.sc-category) { border-color: var(--border); }
@@ -267,3 +260,12 @@
   :root[data-theme] .site-header .back-link { font-size: 10px; }
   .preview-header-actions { gap: 8px; }
 }
+
+/* Source team colours remain exact; stroke/pattern distinguishes teammates. */
+.same-team .bin.b { background: repeating-linear-gradient(135deg,var(--b) 0 3px,var(--surface) 3px 5px); }
+:root[data-theme] .sc-lap-cards>div { border-top: 3px solid var(--a); }
+:root[data-theme] .sc-lap-cards>div:last-child { border-top-color: var(--b); }
+:root[data-theme] .sc-lap-cards>div strong { color: var(--text); }
+:root[data-theme] .trace-legend :is(.key-a,.key-b) { color: var(--text-secondary); }
+.trace-legend .key-a::before,.trace-legend .key-b::before { content: ''; display: inline-block; width: 18px; border-top: 2px solid var(--a); margin-right: 6px; vertical-align: middle; }
+.trace-legend .key-b::before { border-top: 2px dashed var(--b); }

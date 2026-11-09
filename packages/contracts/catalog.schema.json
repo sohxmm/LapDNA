@@ -126,6 +126,33 @@
           "title": "Sector Times Ms",
           "type": "array"
         },
+        "team_colour": {
+          "anyOf": [
+            {
+              "pattern": "^#[0-9A-Fa-f]{6}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Team Colour"
+        },
+        "team_name": {
+          "anyOf": [
+            {
+              "maxLength": 600,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Team Name"
+        },
         "track_status": {
           "title": "Track Status",
           "type": "string"
@@ -163,11 +190,7 @@
       "additionalProperties": false,
       "properties": {
         "circuit_id": {
-          "enum": [
-            "monza",
-            "silverstone",
-            "suzuka"
-          ],
+          "pattern": "^[A-Za-z0-9_-]{1,100}$",
           "title": "Circuit Id",
           "type": "string"
         },
