@@ -68,3 +68,12 @@ def test_lap_window_excludes_stale_samples_but_rejects_unknown_driver_during_lap
     stream["1"][0]["date"] = "2019-07-27T13:01:00Z"
     with pytest.raises(ImportFailure, match="unknown driver inside"):
         lap_window_rows(stream, {"44"}, "2019-07-27T13:00:00Z", "2019-07-27T13:02:00Z")
+
+
+def test_unassigned_stream_is_quarantined_only_when_every_timed_driver_matches_roster():
+    from lapdna.ingestion.fastf1_native import quarantine_unrostered
+    stream = {"23":[{"speed":100}], "2":[{"speed":50}]}
+    kept, excluded = quarantine_unrostered(stream, {"23"}, {"23"})
+    assert kept == {"23":stream["23"]} and excluded == {"2":1}
+    with pytest.raises(ImportFailure, match="Actual lap timing"):
+        quarantine_unrostered(stream, {"23"}, {"23","2"})

@@ -98,6 +98,19 @@ def lap_window_rows(stream, roster, start, end):
     return retained, sum(map(len, stream.values())) - sum(map(len, retained.values()))
 
 
+def quarantine_unrostered(stream, roster, lap_drivers):
+    """Exclude unassigned streams, never create drivers from car-number keys.
+
+    The source DriverList and every parsed timing-lap identity must agree.
+    Extra streams without any timing identity are retained only in the raw
+    cache and provenance counts (e.g. the withdrawn car in Australia 2024).
+    """
+    if not lap_drivers <= roster:
+        raise ImportFailure("foreign_driver", "Actual lap timing includes a driver outside the source roster")
+    extra = {number:len(rows) for number, rows in stream.items() if number not in roster}
+    return {number:rows for number, rows in stream.items() if number in roster}, extra
+
+
 def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress=print, refresh: bool = False, session_type: str = "Q") -> Path:
     if not 2018 <= year <= 2026 or not 1 <= round_number <= 30:
         raise ImportFailure("unsupported_session", "Detailed native imports are limited to 2018–2026 qualifying")
@@ -279,6 +292,9 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
     ends = [row["lap_end_utc"] for row in laps if row["lap_end_utc"]]
     if not starts or not ends:
         raise ImportFailure("timing_unavailable", "Source has no actual lap-clock envelope")
+    lap_drivers = {row["driver_number"] for row in laps}
+    car, quarantined_car = quarantine_unrostered(car, roster, lap_drivers)
+    positions, quarantined_position = quarantine_unrostered(positions, roster, lap_drivers)
     car, excluded_car = lap_window_rows(car, roster, min(starts), max(ends))
     positions, excluded_position = lap_window_rows(positions, roster, min(starts), max(ends))
     spec = {"year": year, "round": round_number, "session_type": session_type, "circuit_id": race["circuit_id"],
@@ -291,6 +307,7 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
     provenance = {"source": "fastf1", "fastf1_version": VERSION, "retrieved_at": utc_now(), "source_records": records, "components": components,
                   "clock_origin_utc": t0.isoformat(), "native_mask_policy": "raw-presence-v1",
                   "native_window_policy": "actual-lap-envelope-v1", "outside_lap_window_samples": {"car": excluded_car, "position": excluded_position},
+                  "unassigned_native_streams": {"car":quarantined_car, "position":quarantined_position},
                   "limitations": ["Car and position rows decoded before library filling; absent channels remain absent", "Raw brake is binary 0/100 only", "Coordinate frame and circuit projection must pass year-specific publication checks"]}
     snapshot = {"source": "fastf1", "schema_version": "1.0.0", "import_spec": spec,
                 "session": {**spec, "session_key": info.get("Key")}, "drivers": drivers, "laps": laps,
