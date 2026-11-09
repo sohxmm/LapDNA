@@ -13,6 +13,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="https://lapdna.vercel.app")
     parser.add_argument("--output", type=Path, default=Path("work/deployment-checks.json"))
+    parser.add_argument("--expected-publication", type=Path)
     args = parser.parse_args()
     base = args.base_url.rstrip("/")
     def call(path, body=None):
@@ -28,6 +29,9 @@ def main():
     health, _ = call("health")
     inventory, _ = call("sessions")
     assert inventory["schema_version"] == "1.4.0"
+    if args.expected_publication:
+        expected = json.loads(args.expected_publication.read_text(encoding="utf-8"))
+        assert {row["session"]["session_id"] for row in inventory["sessions"]} == set(expected["sessions"]), "Hosted catalogue differs from the audited frozen release"
     checks = []
     cases = [("2024-16-monza-Q","NOR","RUS","Q3","telemetry"),
              ("2018-14-monza-Q","RAI","VET","Q3","telemetry"),

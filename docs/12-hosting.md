@@ -1,5 +1,7 @@
 # Hosted preview
 
+This is the first native-batch hosting record. See [the latest archive completion receipt](21-archive-coverage.md) for any later confirmed batch.
+
 Updated 10 November 2026. [LapDNA](https://lapdna.vercel.app) serves the audited 63-session native batch with the shared editorial landing, blue dark/off-white light themes, event-specific team colours and no synthetic preview or fabricated fallback data.
 
 ## Deployed release

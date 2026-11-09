@@ -1,5 +1,7 @@
 # Data availability by year and what LapDNA can do with it
 
+This guide records the first 63-session batch. [Latest audited archive coverage and confirmed deployment](21-archive-coverage.md) supersedes its import-status counts when a subsequent batch is released; the field semantics below remain applicable.
+
 Updated 10 November 2026. The current audited release batch contains 63 real native session publications. This is a bounded batch while the remaining archive imports continue; [hosting verification](12-hosting.md) records the actual deployed release. The [coverage ledger](../config/telemetry-coverage.json) records each source revision, roster/lap capabilities and comparison checks. A provider supporting a year never proves every event, lap or channel is available.
 
 The batch contains all 21 qualifying rounds in both 2018 and 2019; 17 Q and three SQ sessions in 2024; and Mexico 2026 qualifying with 134 eligible timing-only laps across 22 source drivers. It passed 19,010 fastest-eligible same-phase pairs, each in both input orders: 12,317 telemetry and 6,693 timing-only results. Arbitrary individual lap pairs remain checked when requested. Source agreement and numerical checks do not establish physical corner ground truth or driving causation.
