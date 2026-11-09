@@ -1,7 +1,7 @@
 # LapDNA implementation blueprint
 
 Prefinal update, 9 November 2026: [verified telemetry release](20-verified-telemetry-release.md) supersedes the former single-Monza/synthetic-preview scope and fixed A/B colours. The publication catalogue now supports independently checked sessions; exact live counts are recorded at release.
-Revision 6 · 8 November 2026. Status: **recorded qualifying results and the real Monza 2024 lap/telemetry pilot are implemented locally; final hosted pilot verification is pending**. R01 covers classifications across 1950–2026. The [pilot guide](19-monza-2024-pilot.md) records the implemented source/comparison pipeline. The [approved design and rollout](17-approved-ui-and-telemetry-rollout.md) selects the sports-editorial landing and G1 overlays, now extended with persistent blue dark/off-white light modes. Broader telemetry remains limited to verified sessions/channels in **2018–2026**; earlier years retain timing comparisons.
+Revision 7 · 10 November 2026. Status: **a 63-session real native batch is deployed and verified; the remaining 2018–2026 qualifying/SQ archive is importing**. R01 retains historical classifications. The [handoff](10-handoff.md), [coverage ledger](../config/telemetry-coverage.json) and [hosting record](12-hosting.md) define actual current implementation and deployment. The original Monza counts/source exception below are historical pilot context, superseded for operational scope by those documents. The approved interface remains sports-editorial A and G1 overlays with persistent blue dark/off-white light modes, source team colours and no synthetic preview. Earlier years retain timing comparisons.
 
 ## The product
 
@@ -9,7 +9,7 @@ Start with the current year, choose a race from that year's sourced calendar, th
 
 Choose any two different drivers from an imported qualifying session, choose each driver's Q1/Q2/Q3 phase independently, and select eligible laps. The app explains where their elapsed-time difference developed and which supported telemetry patterns accompany it. Same-phase selection is the default; cross-phase comparisons require explicit opt-in and persistent context warnings.
 
-All imported drivers appear in the roster. An eliminated driver's absent phase is unavailable with an explanation. No four-driver shortlist or six-pair restriction remains. Monza 2024 now has all 20 drivers and 276 actual lap records: 79 timing-eligible, of which 40 support telemetry and 39 are sector-only. All source-supported qualifying events in 2018–2026 remain the broader target, with session-level verification rather than a blanket year guarantee. Silverstone/Suzuka and other events still need ingestion and reviewed profiles. Actual SQ classifications are available in R01; native SQ/lap expansion remains separate. New or changed layouts require their own reviewed profiles.
+All imported drivers appear in the actual event roster. An eliminated driver's absent phase is unavailable with an explanation. There is no curated driver-pair limit. All 21 qualifying rounds in both 2018 and 2019 are in the audited batch, alongside 20 Q/SQ sessions in 2024 and timing-only Mexico 2026 Q. Actual 2023-onward SQ phases/laps are supported by contract 1.4.0. The full remaining archive remains the target, verified per session/channel. The authored Monza profile and explicitly approximate marker-vicinity profiles retain layout/year identity; a year range never proves a usable circuit reference.
 
 ## Core outputs
 
@@ -24,7 +24,7 @@ Corner classes use the frozen reference lap's reviewed apex windows, with initia
 
 ## Source fidelity
 
-The Monza pilot uses an explicit OpenF1 + pinned TracingInsights/FastF1 composite because the tested primary archive required authentication and its mirror lacked the metadata resource. Native car/position records remain OpenF1; all 276 lap identities and available lap/sector durations were matched to the archive before adopting its clocks/phases/validity flags. The original archive FastF1 version remains unknown. This is a reviewed pilot exception, not a completed direct FastF1 account adapter or a silent mixed-source series. Source definitions, clock offsets, exact hashes and FIA timing checks are in [the pilot guide](19-monza-2024-pilot.md).
+The primary adapter now uses locally authenticated pinned FastF1 3.9.2, decoding original compressed car/position messages before library filling and retaining exact timing/phase/validity lineage. It imports complete source rosters and actual laps offline. The original explicit OpenF1 + pinned TracingInsights composite remains separately identified for retained publications; its archive library version stays unknown. Neither adapter infers missing controls from speed. The [release guide](20-verified-telemetry-release.md) defines current methods; [the pilot guide](19-monza-2024-pilot.md) records the original composite identity/timing checks.
 
 The [20-source survey](13-data-source-audit.md) confirms native speed, throttle, gear and binary brake, so preserve all four features . The selected public feeds do not establish a measured steering-angle or brake-pressure channel. Missing channels stay unavailable; never derive pedal or gear states from speed. FastF1's inserted zero/False defaults must retain missing-data masks. OpenF1's mini-sector arrays contain status/color codes rather than measured durations. LapDNA therefore labels its 100 m splits **estimated mini-sectors**. If only recorded sectors are available, show a sector table and separate cumulative-gap points at crossings; do not invent a continuous curve, turn attribution or corner-class analysis.
 
@@ -42,8 +42,8 @@ The [20-source survey](13-data-source-audit.md) confirms native speed, throttle,
 | Delta | B elapsed minus A elapsed, milliseconds; positive favours A |
 | Observations | Deterministic evidence first; optional validated LLM narrative after the evidence engine |
 | Quality | pass / warn / block with raw residuals preserved |
-| Contracts | Comparison/inventory 1.3.0 with explicit composite lineage and geometry units; legacy 1.2.0 accepted; calendar/classifications 1.0.0 |
-| Persistence | Compact generated single-pilot publication, immutable result identity and bounded memory cache; durable multi-revision archive remains future work |
+| Contracts | Native comparison/inventory 1.4.0 with actual Q/SQ formats, event team colours and source lineage; legacy Q 1.2/1.3 accepted; calendar/classifications 1.0.0 |
+| Persistence | Frozen digest-checked session publications and content-addressed Vercel Blob artifacts, bounded caches and immutable current-method results; cross-method historical lookup remains future work |
 
 ## Read in order
 

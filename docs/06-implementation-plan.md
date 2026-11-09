@@ -1,6 +1,6 @@
 # Implementation tickets
 
-Updated 8 November 2026. T00 is the original scaffold; **T01–T10 now work for the verified live Monza 2024 pilot**, using the explicit reviewed source exception in [the pilot guide](19-monza-2024-pilot.md). T11's other circuits/archive expansion and T12's broader release work remain open. Take the first unfinished dependency-ready checkpoint, run its checks and record results in [handoff](10-handoff.md). Commit and push each independently usable change as it passes. The original schedule is not a promise for the expanded archive.
+Updated 10 November 2026. **T01–T10 operate across the audited 63-session native batch**, including the primary FastF1 adapter and actual SQ phases. Three pilot inventories plus all 2018/2019 Q rounds are audited, and a frozen 63-session batch is deployed. T11 remains open for the complete remaining archive; T12 retains broader durable cross-method history. Use the current [handoff](10-handoff.md), [coverage ledger](../config/telemetry-coverage.json) and [hosting record](12-hosting.md), rather than historical pilot counts below. Commit/push each checked bounded feature. The original two-week schedule is not a promise for the expanded archive.
 
 **User priority update, 7 November:** [R01 recorded results first](16-results-first-milestone.md) preceded native lap work and is complete. It imports final phase/session bests, event-specific driver/team records and same-phase comparisons across available years. The subsequent Monza milestone now supplies actual lap selection through the source/numerical gates; inferred run-number labels remain deferred. Classification ingestion alone never satisfies a telemetry ticket.
 
@@ -15,18 +15,18 @@ Updated 8 November 2026. T00 is the original scaffold; **T01–T10 now work for 
 | T00 | Contracts, local selection boundary, synthetic chart preview and source probe | — | Setup | Complete |
 | U01 | Approved landing and compact recorded-results studio | R01 | UI | Complete; original interface checkpoint |
 | U02 | Shared editorial theme and persistent dark/light modes | U01 | UI | Complete and verified live |
-| T01 | Full Monza session import with pinned explicit composite | T00 | 1 | Monza complete; direct FastF1 account adapter deferred |
-| T02 | Full qualifying roster, actual phase/lap inventory and eligibility | T01 | 2 | Monza complete: 20 drivers, 276 actual laps |
-| T03 | Frozen reference geometry, turn markers and reviewed windows | T02 | 3 | Monza complete; other layouts pending |
-| T04 | Offline lap normalization, raw delta and reconciliation | T03 | 4 | Monza complete: 40 telemetry, 39 eligible sector-only laps |
+| T01 | Whole-session primary/composite source import | T00 | 1 | Primary FastF1 and explicit composite implemented; full archive acquiring |
+| T02 | Full qualifying roster, actual phase/lap inventory and eligibility | T01 | 2 | Q/SQ selection implemented; 63 audited sessions |
+| T03 | Frozen reference geometry, turn markers and reviewed windows | T02 | 3 | Authored Monza plus approximate versioned marker windows; timing-only reference failures explicit |
+| T04 | Offline lap normalization, raw delta and reconciliation | T03 | 4 | Implemented; native masks and numerical gates preserved across batch |
 | T05 | Local pair resolver, two result tiers, findings and cache | T04 | 5 | Monza complete; durable multi-revision archive remains open |
 | T06 | Production driver/phase/lap selection | T05 | 5 | Monza complete; run-number labels deferred |
 | T07 | Synchronized real telemetry, turns, minisectors and sector fallback | T06 | 6 | Monza complete and verified live |
 | T08 | Performance map linked to shared distance | T07 | 7 | Monza complete and verified live; other layout reviews pending |
 | T09 | Category analysis, corner/straight ranking and evidence | T08 | 8 | Monza complete; no runtime LLM |
 | T10 | Shareable comparisons and PNG/JSON cards | T09 | 8 | Monza complete; light/dark cards and exact links inspected |
-| T11 | Three pilot inventories, then verified 2018–2026 session/layout expansion | T10 | Archive separately scoped | Open: Monza only; Silverstone/Suzuka/bulk pending |
-| T12 | Release packaging and verification | T11 | Release | Single-pilot deployment verified; broader durable archive gates open |
+| T11 | Three pilot inventories, then verified 2018–2026 session/layout expansion | T10 | Archive separately scoped | Three pilots and all 2018/2019 Q audited; remaining archive open |
+| T12 | Release packaging and verification | T11 | Release | Frozen 63-session release/Blob delivery verified; cross-method archive gates open |
 
 ## T00 — Existing foundation
 

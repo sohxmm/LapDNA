@@ -1,6 +1,12 @@
 # Data and API contracts
 
-Python is authoritative: `services/api/src/lapdna/models.py`, `inventory.py` and `calendar.py`. Run `npm run contracts` to regenerate OpenAPI, comparison/catalog JSON Schema and TypeScript. New real Monza artifacts use **1.3.0**; legacy **1.2.0** remains readable. Calendar/seasons and classifications keep their separate **1.0.0** contracts.
+Python is authoritative: `services/api/src/lapdna/models.py`, `inventory.py` and `calendar.py`. Run `npm run contracts` to regenerate OpenAPI, comparison/catalog JSON Schema and TypeScript. Current native artifacts/inventories use **1.4.0**, with legacy **1.2/1.3 Q** reads. Calendar/seasons and classifications retain separate **1.0.0** contracts.
+
+## Native archive 1.4.0
+
+Actual session format is Q or SQ, with matching Q1–Q3 or SQ1–SQ3 phases. SQ requires 1.4.0 and actual 2023-onward source sessions. Driver/lap metadata retain optional strict source team colours; absent colours are neutral, never current-team guesses. Production channel status is measured or missing; there is no synthetic branch. Timing-only artifacts omit spatial/channel arrays entirely. A whole timing-only publication contains real lap metadata/provenance without invented reference geometry.
+
+The browser guards explicitly accept 1.4.0 and refuse unknown future contracts. Exact selection links retain source hash, lap IDs, tier and comparison ID. The API checks normalized/source index identity and returned lap metadata before responding. A cold comparison may download a bounded immutable normalized Blob artifact and verify its pinned hash, but never imports or parses upstream telemetry in the request. See the generated contracts for exact fields and the release guide for schema-independent internal publication manifests.
 
 ## Real Monza 1.3.0 additions
 
