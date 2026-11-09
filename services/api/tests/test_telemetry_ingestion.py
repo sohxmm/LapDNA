@@ -235,3 +235,21 @@ def test_empty_filtered_native_range_stays_empty_without_masking_missing_metadat
     with pytest.raises(ImportFailure) as error:
         client.fetch("laps", 9586)
     assert error.value.code == "source_missing"
+
+
+def test_conditions_policy_can_admit_measured_wet_lap_but_never_unknown_validity():
+    from lapdna.analysis.publication import roster_and_laps, weather_context
+    row = normalized()
+    row.update(lap_start_utc="2024-08-31T14:53:00+00:00",lap_end_utc="2024-08-31T14:54:19.327+00:00",
+        compound="INTERMEDIATE",timing_candidate=False,exclusion_reasons=["dry_weather_unverified","dry_compound_unverified"])
+    snapshot={"drivers":[{"driver_number":4,"name_acronym":"NOR","full_name":"Test driver","team_colour":"FF8000"}],"laps":[row],
+        "weather":[{"date":"2024-08-31T14:53:20+00:00","rainfall":1}]}
+    _, options, metadata = roster_and_laps(snapshot)
+    assert options[0]["capability"] == "sector_only" and row["lap_id"] in metadata
+    assert weather_context(snapshot,row) == "rain_reported"
+    snapshot["weather"][0].pop("rainfall")
+    assert weather_context(snapshot,row) == "unknown"
+    row["exclusion_reasons"].append("lap_deleted_or_unknown")
+    _, options, metadata = roster_and_laps(snapshot)
+    assert options[0]["capability"] == "unavailable" and not metadata
+    assert row["exclusion_reasons"] == ["dry_weather_unverified","dry_compound_unverified","lap_deleted_or_unknown"]

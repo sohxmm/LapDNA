@@ -8,8 +8,9 @@ from math import ceil, floor
 from lapdna.alignment.native import linear
 from lapdna.models import ComparisonArtifact, SectorComparisonArtifact
 
-METHOD = "distance-v4-openf1-native-composite"
-PIPELINE = "native-composite-2"
+METHOD = "distance-v5-openf1-native-composite"
+LEGACY_METHOD = "distance-v4-openf1-native-composite"
+PIPELINE = "native-composite-3"
 SEVERITY = {"pass": 0, "warn": 1, "block": 2}
 
 
@@ -39,16 +40,23 @@ def check(driver, metric, basis, official, observed, passing=50., warning=150.):
 def comparison_identity(publication: dict, a: str, b: str, tier: str) -> str:
     tag = canonical_hash(publication["session"]["session_id"])[:8]
     return "cmp_" + tag + "_" + canonical_hash({"laps": sorted((a, b)), "publication": publication["publication_sha256"],
-                                    "method": publication.get("method", METHOD), "pipeline": PIPELINE, "schema": "1.3.0", "tier": tier})[:24]
+                                    "method": publication.get("method", LEGACY_METHOD), "pipeline": PIPELINE, "schema": "1.3.0", "tier": tier})[:24]
 
 
-def pairing(a, b):
+def pairing(a, b, records=()):
     cross = a["phase"] != b["phase"]
     warnings = []
     if cross:
         warnings.append(f"Different qualifying phases: {a['phase']} and {b['phase']}; track evolution and conditions may differ.")
     if a["compound"] != b["compound"]:
-        warnings.append(f"Different dry compounds: {a['driver_code']} {a['compound']}, {b['driver_code']} {b['compound']}.")
+        warnings.append(f"Different tyre compounds: {a['driver_code']} {a['compound']}, {b['driver_code']} {b['compound']}.")
+    if any(lap["compound"] in ("INTERMEDIATE", "WET") for lap in (a, b)):
+        warnings.append("Selected laps include wet-weather tyres; track grip and conditions are not controlled.")
+    contexts = [record.get("weather_context", "unknown") for record in records]
+    if "rain_reported" in contexts:
+        warnings.append("The source reported rainfall within 90 seconds of the selected lap windows; this is context, not a measurement of track grip.")
+    if "unknown" in contexts:
+        warnings.append("Rainfall context for one or both selected laps is unavailable; no dry-track assumption is made.")
     if a.get("tyre_life_laps") != b.get("tyre_life_laps"):
         warnings.append("The selected laps have different reported tyre ages.")
     if a.get("lap_start_utc") and b.get("lap_start_utc"):
@@ -64,7 +72,7 @@ def provenance(publication: dict, telemetry: bool):
         "source", "fastf1_version", "provider_version", "source_retrieved_at", "source_urls",
         "verification_scope", "components", "source_session", "source_snapshot_sha256", "generated_at",
     )}
-    value.update(pipeline_version=PIPELINE, methodology_version=publication.get("method", METHOD))
+    value.update(pipeline_version=PIPELINE, methodology_version=publication.get("method", LEGACY_METHOD))
     if telemetry:
         value.update(reference_sha256=publication["reference_sha256"],
                      circuit_revision=publication.get("circuit_revision", "monza-2024-projected-v1"), reference_lap_id=publication["reference_lap_id"])
@@ -80,7 +88,7 @@ def sector_result(publication: dict, first: str, second: str, reason: str):
     delta = [right - left for left, right in zip(a["sector_times_ms"], b["sector_times_ms"])]
     result = {"schema_version": "1.3.0", "comparison_id": comparison_identity(publication, first, second, "sector_only"),
               "detail_level": "sector_only", "session": publication["session"], "lap_a": a, "lap_b": b,
-              "pairing": pairing(a, b), "provenance": provenance(publication, False),
+              "pairing": pairing(a, b, [publication["laps"][first], publication["laps"][second]]), "provenance": provenance(publication, False),
               "quality": {"status": worst(*(item["status"] for item in checks)),
                           "warnings": ["Sector timing only; no continuous curve or corner attribution is supported for this pair."],
                           "checks": checks}, "fallback_reason": reason[:600], "sector_delta_ms": delta,
@@ -268,6 +276,7 @@ def summaries(publication, a, b, delta):
                 "medium_from_kph": 150., "high_from_kph": 250., "pattern": pattern,
                 "pattern_driver": None, "text": text[:600], "evidence_ids": [eid for row in categories for eid in row["evidence_ids"]],
                 "limitations": ["Class totals describe only these selected laps and the supported reference windows.",
+                                "Corner classes use the frozen reference lap and its conditions; track grip is not measured or controlled.",
                                 "Public brake is an on/off signal; steering angle and brake pressure are unavailable.",
                                 "One high-speed region cannot establish a consistent class-wide advantage."]}
     if publication.get("profile") == "marker-windows-v1":
@@ -316,7 +325,7 @@ def build_comparison(publication: dict, lap_a: str, lap_b: str, detail_level="au
                 for name, raw in raw_fields.items()}
     result = {"schema_version": "1.3.0", "comparison_id": comparison_identity(publication, first, second, "telemetry"),
               "detail_level": "telemetry", "session": publication["session"], "lap_a": a["metadata"], "lap_b": b["metadata"],
-              "pairing": pairing(a["metadata"], b["metadata"]), "provenance": provenance(publication, True),
+              "pairing": pairing(a["metadata"], b["metadata"], [a, b]), "provenance": provenance(publication, True),
               "distance_m": grid, "channels_a": a["channels"], "channels_b": b["channels"],
               "channel_provenance_a": channels(a), "channel_provenance_b": channels(b),
               "geometry": publication["geometry"], "delta_ms": delta, "valid": [value is not None for value in delta],

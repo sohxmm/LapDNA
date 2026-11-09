@@ -20,6 +20,26 @@ from lapdna.inventory import SessionLapIndex
 
 SESSION = {"session_id": "2024-16-monza-Q", "year": 2024, "round": 16,
            "session_type": "Q", "circuit_id": "monza", "event_name": "Italian Grand Prix"}
+KNOWN_COMPOUNDS = {"SOFT", "MEDIUM", "HARD", "SUPERSOFT", "ULTRASOFT", "HYPERSOFT", "INTERMEDIATE", "WET"}
+
+
+def weather_context(snapshot, lap):
+    """Source rain observations near the lap, never an inferred dry track."""
+    if not lap.get("lap_start_utc") or not lap.get("lap_end_utc"):
+        return "unknown"
+    start, end = utc_seconds(lap["lap_start_utc"]), utc_seconds(lap["lap_end_utc"])
+    observations = []
+    for row in snapshot.get("weather", []):
+        value = row.get("rainfall")
+        if type(value) not in (int, float, bool) or value not in (0, 1):
+            continue
+        try:
+            when = utc_seconds(row["date"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if start - 90 <= when <= end + 90:
+            observations.append(bool(value))
+    return "unknown" if not observations else "rain_reported" if any(observations) else "no_rain_reported"
 
 
 @contextmanager
@@ -79,8 +99,14 @@ def roster_and_laps(snapshot):
                  "lap_number": row["lap_number"], "lap_time_ms": row.get("lap_time_ms"),
                  "sector_times_ms": row["sector_times_ms"], "compound": row.get("compound"),
                  "tyre_life_laps": row.get("tyre_life_laps"), "lap_start_utc": row.get("lap_start_utc")}
-        reasons = list(row.get("exclusion_reasons", []))
-        candidate = row.get("timing_candidate") is True
+        original_reasons = list(row.get("exclusion_reasons", []))
+        # v5 changes conditions eligibility only. Never relax deletion,
+        # generated/accuracy, pit, phase, flag or raw timing requirements.
+        removed = {"dry_weather_unverified"}
+        if row.get("compound") in KNOWN_COMPOUNDS:
+            removed.add("dry_compound_unverified")
+        reasons = [reason for reason in original_reasons if reason not in removed]
+        candidate = not reasons and (row.get("timing_candidate") is True or bool(original_reasons))
         if candidate:
             duration, sectors = value["lap_time_ms"], value["sector_times_ms"]
             if duration is None or duration <= 0 or any(sector is None or sector <= 0 for sector in sectors):
@@ -216,7 +242,7 @@ def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
     retrieved = source_provenance.get("retrieved_at") or source_provenance.get("source_retrieved_at")
     if not retrieved:
         raise ValueError("snapshot must retain actual retrieval timestamp")
-    publication = {"schema_version": "1.3.0", "session": session, "reference_lap_id": reference_id,
+    publication = {"schema_version": "1.3.0", "session": session, "reference_lap_id": reference_id, "method": METHOD,
                    "circuit_revision": f"{session['circuit_id']}-{session['year']}-{profile}",
                    "profile": profile,
                    "distance_m": grid, "geometry": geometry, "regions": regions,
@@ -232,7 +258,7 @@ def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
     if primary:
         version = source_provenance["fastf1_version"]
         geometry["coordinate_note"] = "Primary native position coordinates retained in their year-specific source frame. The map is approximate; the distance axis is integrated speed, not map coordinates."
-        publication["method"] = "distance-v4-fastf1-native"
+        publication["method"] = "distance-v5-fastf1-native"
         publication["provenance"].update(source="fastf1", fastf1_version=version, provider_version=f"FastF1 {version}; raw-presence-v1 decoder",
             verification_scope="Native primary car/position rows decoded before library filling. Lap clocks, phases and validity use the pinned FastF1 parser. Native support and unadjusted timing consistency must pass; no independent physical validation is claimed.",
             source_session=f"{session['year']} {session['event_name']} Qualifying / primary timing session {snapshot['session']['session_key']}")
@@ -243,7 +269,7 @@ def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
     option_map = {option["lap_id"]: option for option in options}
     for candidate in candidates:
         identifier, raw = candidate["lap_id"], source_laps[candidate["lap_id"]]
-        record = {"metadata": candidate}
+        record = {"metadata": candidate, "weather_context": weather_context(snapshot, raw)}
         publication["laps"][identifier] = record
         if identifier not in prepared:
             option_map[identifier]["reasons"] = report["laps"][identifier]["reasons"]
@@ -285,6 +311,7 @@ def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
              "source_url": "https://openf1.org/docs/", "data_points": data_points,
              "warnings": ["Public telemetry supports approximate local analysis; brake is binary, not pressure.",
                           "Map coordinates remain in their source frame. Timing distance is integrated speed.",
+                          "Known wet tyres are supported. Source rainfall is context, not measured track grip; unknown weather never becomes assumed dry.",
                           "Eligible laps can still fall back to sectors when pair reconciliation fails."]}
     if primary:
         index.update(source_name="FastF1 / primary native records", source_url="https://docs.fastf1.dev/")

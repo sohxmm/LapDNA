@@ -241,11 +241,25 @@ def test_catalogue_loads_two_sessions_and_resolves_only_matching_session(tmp_pat
 
 
 def test_primary_fastf1_provenance_does_not_claim_composite_sources(publication):
-    publication["method"] = "distance-v4-fastf1-native"
+    publication["method"] = "distance-v5-fastf1-native"
     publication["provenance"].update(source="fastf1", fastf1_version="3.9.2", provider_version="FastF1 3.9.2 raw native")
     result = build_comparison(publication, "test-A", "test-B")
     assert result.provenance.source == "fastf1"
-    assert result.provenance.methodology_version == "distance-v4-fastf1-native"
+    assert result.provenance.methodology_version == "distance-v5-fastf1-native"
     assert result.channel_provenance_a.speed_kph.source_channel == "Speed"
     assert result.channel_provenance_a.brake.source_channel == "Brake"
     assert all("from OpenF1" not in text and "identity-matched TracingInsights" not in text for text in result.quality.warnings)
+
+
+def test_wet_pairing_preserves_native_channels_and_reports_unknown_conditions(publication):
+    original = deepcopy(publication["laps"]["test-A"]["channels"])
+    publication["laps"]["test-A"]["metadata"]["compound"] = "INTERMEDIATE"
+    publication["laps"]["test-B"]["metadata"]["compound"] = "WET"
+    publication["laps"]["test-A"]["weather_context"] = "rain_reported"
+    publication["laps"]["test-B"]["weather_context"] = "unknown"
+    result = build_comparison(publication, "test-A", "test-B")
+    assert result.detail_level == "telemetry"
+    assert any("wet-weather tyres" in warning for warning in result.pairing.warnings)
+    assert any("rainfall within 90 seconds" in warning for warning in result.pairing.warnings)
+    assert any("unavailable" in warning for warning in result.pairing.warnings)
+    assert result.channels_a.model_dump() == original

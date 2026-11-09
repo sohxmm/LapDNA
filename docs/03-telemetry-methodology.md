@@ -1,5 +1,6 @@
 # Telemetry methodology
 
+Current prefinal decision: [verified native release and conditions policy](20-verified-telemetry-release.md) supersedes dry-only eligibility. Measured wet telemetry is supported with explicit conditions context; native/missing masks, fixed reference and raw numerical quality gates are unchanged.
 The original implementation specification uses method identifier `distance-v2`. The implemented Monza pilot uses **`distance-v3-openf1-native-composite`**, preserving the numerical thresholds, sign convention and quality fallbacks below. It has been exercised on real qualifying comparisons; this does not establish precise corner ground truth or validation for every circuit.
 
 ### Implemented provider decision — 8 November 2026
