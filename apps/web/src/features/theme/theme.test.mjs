@@ -1,6 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { persistTheme, storedTheme, THEME_STORAGE_KEY } from './theme.ts';
+import { persistTheme, storedTheme, THEME_STORAGE_KEY,traceContrast,chartPalette } from './theme.ts';
+
+test('pale source colours require an outline in light mode while keeping their original hue',()=>{
+  const light=chartPalette('light'),dark=chartPalette('dark');
+  assert.ok(traceContrast('#FFFFFF',light.background)<3);
+  assert.ok(traceContrast('#FFF500',light.background)<3);
+  assert.ok(traceContrast('#FFFFFF',dark.background)>3);
+  assert.ok(traceContrast('#DC0000',light.background)>3);
+});
 
 test('a saved light preference survives a new page and invalid preferences default to dark', () => {
   const data = new Map();

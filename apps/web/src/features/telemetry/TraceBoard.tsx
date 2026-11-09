@@ -7,7 +7,7 @@ import {CanvasRenderer} from 'echarts/renderers';
 import {availableSignals, groupTurnMarkers, hasSupportedSignal, nearest, signalLabels, signalOrder, signed, supportedSample} from './view';
 import type {SignalName, TraceView} from './view';
 import {useTheme} from '../theme/ThemeProvider';
-import {chartPalette} from '../theme/theme';
+import {chartPalette,traceContrast} from '../theme/theme';
 
 use([LineChart, GridComponent, TooltipComponent, MarkLineComponent, AxisPointerComponent, CanvasRenderer]);
 export type TraceWindow = {label:string; start:number; end:number} | null;
@@ -41,8 +41,13 @@ function options(v:TraceView, start:number, end:number, colors:ReturnType<typeof
     const markers:Record<string,number>[] = [...divisions];
     if (extraLine) markers.push({yAxis:0});
     const first=!marked.has(actual); marked.add(actual);
+    const data=v.distance.map((d,i)=>[d,vals[i]]);
+    if(index<4&&traceContrast(color,colors.background)<3)series.push({name:name+' outline',type:'line',
+      xAxisIndex:actual,yAxisIndex:actual,data,showSymbol:false,animation:false,clip:true,silent:true,z:1,
+      step:step?'end':false,connectNulls:false,smooth:false,emphasis:{disabled:true},tooltip:{show:false},
+      lineStyle:{color:colors.pointer,width:index===0?4.3:3.8,type:dashed?'dashed':'solid'}});
     series.push({name,type:'line',xAxisIndex:actual,yAxisIndex:actual,
-      data:v.distance.map((d,i)=>[d,vals[i]]), showSymbol:false, animation:false, clip:true,
+      data, showSymbol:false, animation:false, clip:true,z:2,
       step:step?'end':false, connectNulls:false, smooth:false,
       emphasis:{disabled:true},lineStyle:{color,width:index===0?2.3:1.8,type:dashed?'dashed':'solid'},
       itemStyle:{color},...(!first?{}:{markLine:{silent:true,animation:false,symbol:'none',

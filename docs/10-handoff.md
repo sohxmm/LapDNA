@@ -94,3 +94,9 @@ Browser acceptance found and fixed the client version guard rejecting valid 1.4.
 
 
 Batch authentication is non-interactive even if a token is revoked mid-request: the pinned token manager raises a sanitized access-required condition instead of opening a password prompt. The user renews sign-in locally only when required.
+
+## Audited archive batch — 10 November
+
+The frozen 63-session batch passed source/manifest/normalized identity checks and 19,010 phase-best pairs plus reversed selections (12,317 telemetry; 6,693 sectors). See `config/telemetry-coverage.json`. All 21 Q rounds in both 2018 and 2019 are included, along with 17 Q/three SQ sessions in 2024 and timing-only Mexico 2026. These counts describe that batch, not later imports or all source candidates. All 63 compressed normalized files were independently downloaded/hash-verified after upload to Vercel Blob. Raw sources and account credentials were not uploaded.
+
+Full suite: 210 passed, one Windows symlink skip; 30 client tests pass. Contracts, typecheck and production build pass. A real Monza 2018 STR/SIR comparison verified white source-coloured lines in light mode: contrasting under-strokes preserve the exact team hue and solid/dashed distinction. Exported values use readable neutral text while team-colour rules/maps remain sourced. The remaining importer respects the shared source window and resumes from `work/fastf1/archive-report.json`. Hosting is updated only when deployment is explicitly verified in doc 12.

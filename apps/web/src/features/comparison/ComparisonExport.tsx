@@ -59,7 +59,7 @@ async function renderCard(result:PairResponse,theme:Theme) {
     ctx!.fillStyle=i===0?colors.a:colors.b;ctx!.fillRect(x,182,480,4);
     write((i===0?'A':'B')+' / '+lap.driver_name,x+19,220,23,text,650);
     write(lap.phase+' · Lap '+lap.lap_number+' · '+lap.compound,x+19,253,17,muted);
-    write(lapTime(lap.lap_time_ms),x+19,304,36,i===0?colors.a:colors.b,650);
+    write(lapTime(lap.lap_time_ms),x+19,304,36,text,650);
   });
   const gap=b.lap_time_ms-a.lap_time_ms;
   write('Recorded gap: '+signed(gap)+' s · '+(gap===0?'equal times':(gap>0?a.driver_code:b.driver_code)+' ahead'),52,381,25,text,650);
@@ -94,7 +94,7 @@ async function renderCard(result:PairResponse,theme:Theme) {
     artifact.analysis.categories.forEach((category,i)=>{
       const net=orient(category.net_gain_ms,swapped);
       write(category.speed_class.toUpperCase(),52+i*330,827,16,muted,650);
-      write(net===null?'Insufficient':signed(net,2)+' s',52+i*330,864,28,net===null||Math.abs(net)<5?muted:net>=0?colors.a:colors.b,650);
+      write(net===null?'Insufficient':signed(net,2)+' s',52+i*330,864,28,net===null?muted:text,650);
       write(category.independent_units+' supported · '+Math.round(category.distance_coverage*100)+'% coverage',52+i*330,892,14,muted);
       const assessment=category.assessment==='a_advantage'?artifact.lap_a.driver_code+' advantage':category.assessment==='b_advantage'?artifact.lap_b.driver_code+' advantage':category.assessment;
       write(assessment,52+i*330,915,14,muted);
@@ -102,8 +102,8 @@ async function renderCard(result:PairResponse,theme:Theme) {
     artifact.observations.forEach((observation,i)=>wrap((i+1)+'. '+observation.text,52,955+i*77,970,19,26,2));
     if(artifact.observations.length<3) wrap(artifact.insufficient_evidence_reason??'Fewer than three supported findings.',52,955+artifact.observations.length*77,970,18,25,2,muted);
   } else {
-    write('Sector',60,483,21,muted);write(a.driver_code,360,483,21,colors.a);write(b.driver_code,595,483,21,colors.b);write('B − A',830,483,21,muted);
-    a.sector_times_ms.forEach((value,i)=>{const y=546+i*70;write('S'+(i+1),60,y,25);write((value/1000).toFixed(3)+' s',360,y,25,colors.a);write((b.sector_times_ms[i]/1000).toFixed(3)+' s',595,y,25,colors.b);write(signed(b.sector_times_ms[i]-value)+' s',830,y,25);});
+    write('Sector',60,483,21,muted);write(a.driver_code,360,483,21,text);write(b.driver_code,595,483,21,text);write('B − A',830,483,21,muted);
+    a.sector_times_ms.forEach((value,i)=>{const y=546+i*70;write('S'+(i+1),60,y,25);write((value/1000).toFixed(3)+' s',360,y,25,text);write((b.sector_times_ms[i]/1000).toFixed(3)+' s',595,y,25,text);write(signed(b.sector_times_ms[i]-value)+' s',830,y,25);});
     wrap(artifact.fallback_reason,52,814,970,22,32,4,muted);
   }
   const warnings=[...artifact.pairing.warnings,...artifact.quality.warnings.filter(value=>!['Approximate local timing','Timing clocks/eligibility','Start/finish values'].some(prefix=>value.startsWith(prefix)))];

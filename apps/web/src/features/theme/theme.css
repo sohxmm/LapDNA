@@ -269,3 +269,7 @@
 :root[data-theme] .trace-legend :is(.key-a,.key-b) { color: var(--text-secondary); }
 .trace-legend .key-a::before,.trace-legend .key-b::before { content: ''; display: inline-block; width: 18px; border-top: 2px solid var(--a); margin-right: 6px; vertical-align: middle; }
 .trace-legend .key-b::before { border-top: 2px dashed var(--b); }
+:root[data-theme] .map-legend :is(.key-a,.key-b) { color: var(--text-secondary); }
+.map-legend .key-a::before,.map-legend .key-b::before { content: ''; display:inline-block; width:18px; border-top:3px solid var(--a); margin-right:6px; vertical-align:middle; }
+.map-legend .key-b::before { border-top-color:var(--b); }
+:is(.trace-legend,.map-legend) :is(.key-a,.key-b)::before { filter:drop-shadow(0 0 0.6px var(--text-secondary)); }
