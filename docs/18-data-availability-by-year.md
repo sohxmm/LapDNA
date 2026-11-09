@@ -1,10 +1,14 @@
 # Data availability by year and what LapDNA can do with it
 
-Reviewed 8 November 2026. This is a field/coverage guide, not a promise that every source field is present for every driver or event. Monza 2024's real lap/telemetry pilot is verified live: 20 drivers, 276 lap records, 79 timing-eligible laps, 40 telemetry laps and 39 eligible sector-only laps. The wider historical classification publication remains available. See [the pilot guide](19-monza-2024-pilot.md), [hosting verification](12-hosting.md), [source audit](13-data-source-audit.md), [field semantics](15-data-points-and-rollout.md) and [approved rollout](17-approved-ui-and-telemetry-rollout.md).
+Updated 10 November 2026. The current audited release batch contains 63 real native session publications. This is a bounded batch while the remaining archive imports continue; [hosting verification](12-hosting.md) records the actual deployed release. The [coverage ledger](../config/telemetry-coverage.json) records each source revision, roster/lap capabilities and comparison checks. A provider supporting a year never proves every event, lap or channel is available.
+
+The batch contains all 21 qualifying rounds in both 2018 and 2019; 17 Q and three SQ sessions in 2024; and Mexico 2026 qualifying with 134 eligible timing-only laps across 22 source drivers. It passed 19,010 fastest-eligible same-phase pairs, each in both input orders: 12,317 telemetry and 6,693 timing-only results. Arbitrary individual lap pairs remain checked when requested. Source agreement and numerical checks do not establish physical corner ground truth or driving causation.
+
+2024 regular qualifying in this batch: Bahrain, Saudi Arabia, Australia, Japan, China, Miami, Emilia Romagna, Monaco, Canada, Spain, Austria, Britain, Hungary, Belgium, Italy, São Paulo and Qatar. SQ: China, Miami and Austria. Remaining Q rounds: Netherlands, Azerbaijan, Singapore, USA, Mexico, Las Vegas and Abu Dhabi. Other actual SQ sessions are also pending. Detailed 2020–2023, 2025 and other completed 2026 imports are still in progress; future sessions are not imported in advance.
 
 ## Read the availability labels correctly
 
-- **Published now:** normalized classification snapshots and the generated Monza pilot, served live with source/retrieval stamps. The [hosting record](12-hosting.md) identifies the deployed version.
+- **Audited batch:** digest-checked native publications with tested phase-best pairs. The [hosting record](12-hosting.md) identifies which batch is actually deployed; ongoing local imports do not automatically update the website.
 - **Source coverage:** a provider documents the year range and field. A session import still has to establish actual rows, native presence and quality.
 - **Derived:** LapDNA calculates an estimate from supported source inputs. It is not a new sensor measurement.
 - **Optional context:** useful source fields to retain; their existence does not mean a new graph is implemented.
@@ -20,14 +24,14 @@ The current R01 manifest contains **1,168 qualifying classifications, 24 Sprint 
 | 1994–2005 | Same timing tier; Jolpica archive plus F1DB backfill/corrections | Legacy qualifying records; some separate historical components | Exact source-published component comparisons. Preserve format warnings; first six 2005 events have two components, and a component is not an aggregate result. |
 | 2006–2013 | Calendar, event-specific teams/drivers, Q1/Q2/Q3 best times and restrictions where present | Modern three-phase result records | Same-phase best comparison and phase tables. A Q3 best does not identify every Q3 attempt. |
 | **2014–2017** | Same modern timing tier | No verified continuous car-channel archive selected for LapDNA | **Timing comparisons only.** Keep the graphs/map/corner analysis unavailable for these years. |
-| **2018** | Modern timing tier | FastF1 detailed lap/sector timing, car/position streams and session context are documented from 2018 | Eligible real laps, supported telemetry overlays and estimated distance analysis after the import/alignment gates. Coordinate units require year-specific review. |
-| **2019** | Modern timing tier | Same candidate FastF1 field family | Same; do not assume later-year coordinate units. |
+| **2018** | Modern timings and all 21 native Q sessions in the audited batch | FastF1 detailed timing, original car/position streams and session context | Eligible laps support measured channels and approximate distance analysis. Per-lap exclusions remain explicit. |
+| **2019** | Modern timings and all 21 native Q sessions in the audited batch | Same primary field family | Includes repaired Monaco and Germany imports; per-lap and pair quality gates remain unchanged. |
 | **2020** | Modern timing tier | Same candidate FastF1 field family | Same; source parser explicitly documents position coordinates in tenths of a metre from 2020. |
 | **2021–2022** | Modern qualifying results; no separate invented SQ1/SQ2/SQ3 classification | FastF1 detailed data and actual weekend/session formats | Conventional qualifying lap comparison. Sprint weekends must follow their actual format; sprint race results cannot stand in for sprint qualifying. |
 | **2023** | Qualifying plus six actual Sprint Qualifying/Shootout classifications | FastF1 and OpenF1 historical car/lap/location/context data | Same supported telemetry features, plus actual SQ phase/lap comparison where the imported session supports it. |
-| **2024** | 24 qualifying and six SQ classifications; Monza qualifying's real live lap/telemetry pilot | Same source family; **Monza is the first completed real-data pilot** | Any two eligible Monza drivers/laps; supported synchronized graphs/map, local gains, tailored observations and export. Genuine quality failures stay sector-only. Other 2024 sessions are not implied. |
+| **2024** | 24 Q/six SQ classifications; audited native batch includes 17 Q/three SQ | Primary FastF1 plus explicitly identified OpenF1/TracingInsights composite | Actual lap selections, synchronized channels, approximate maps, observations and export where the selected pair passes. Other sessions remain pending. |
 | **2025** | 24 qualifying and six SQ classifications | FastF1/OpenF1 candidate data | Expand the same verified pipeline; do not imply the archive has already been imported. |
-| **2026** | 19 qualifying and six SQ classifications in the present snapshot; upcoming events remain absent | Candidate timing/car/location/context data for completed published sessions | Same conditional features. Preserve genuinely absent channels; the pinned FastF1 parser notes that raw DRS channel 45 is no longer included in 2026. |
+| **2026** | 19 Q/six SQ classifications in the current results snapshot; Mexico native Q is timing-only | Candidate native data for completed published sessions | Mexico's native gaps block detailed curves. Other completed sessions still need import; future data is not invented. Raw DRS channel 45 is absent in the pinned 2026 source definition. |
 
 FastF1 documents detailed timing, session, car and position coverage from 2018, typically arriving 30–120 minutes after a session, with possible archive failures. Its older results coverage is broader. [Pinned FastF1 data reference](https://github.com/theOehrly/Fast-F1/blob/v3.9.2/docs/data_reference/index.rst).
 
@@ -41,15 +45,15 @@ OpenF1 documents unauthenticated historical access from 2023; this establishes a
 | 2015 | 19 | 0 | Outside selected telemetry range |
 | 2016 | 21 | 0 | Outside selected telemetry range |
 | 2017 | 20 | 0 | Outside selected telemetry range |
-| 2018 | 21 | 0 | Source-supported candidate; not an imported archive |
-| 2019 | 21 | 0 | Source-supported candidate; not an imported archive |
+| 2018 | 21 | 0 | All 21 native Q publications audited; per-lap exclusions apply |
+| 2019 | 21 | 0 | All 21 native Q publications audited; per-lap exclusions apply |
 | 2020 | 17 | 0 | Source-supported candidate; not an imported archive |
 | 2021 | 22 | 0 | Source-supported candidate; actual weekend format required |
 | 2022 | 22 | 0 | Source-supported candidate; actual weekend format required |
 | 2023 | 22 | 6 | Source-supported candidate; not an imported archive |
-| 2024 | 24 | 6 | Monza real-data pilot verified live; other telemetry sessions are not implied |
+| 2024 | 24 | 6 | 17 Q/three SQ native sessions in the audited batch |
 | 2025 | 24 | 6 | Source-supported candidate; not an imported archive |
-| 2026 | 19 | 6 | Completed published sessions only; no future data |
+| 2026 | 19 | 6 | Mexico native Q timing-only; other detailed imports pending |
 
 Counts are the current publication, not a prediction of future sessions or a minimum service guarantee. An SQ count of zero before 2023 does not assert that sprint weekends did not exist.
 

@@ -2,9 +2,11 @@
 
 Where did the lap time go? Compare two qualifying laps on a common track-distance axis and connect approximate local gains to observed telemetry.
 
-**Hosted app:** [LapDNA](https://lapdna.vercel.app) · [Real Monza 2024 studio](https://lapdna.vercel.app/?year=2024&race=2024-16&view=studio) · [2026 Mexican GP qualifying](https://lapdna.vercel.app/?year=2026&race=2026-19&view=studio). The real Monza telemetry pilot and persistent dark/light themes are live and verified. See [deployment status](docs/12-hosting.md), [the pilot guide](docs/19-monza-2024-pilot.md) and [data availability by year](docs/18-data-availability-by-year.md).
+**Hosted app:** [LapDNA](https://lapdna.vercel.app). See [deployment status](docs/12-hosting.md) for the exact live release; local imports are not automatically deployed.
 
-**Status, 8 November 2026:** recorded-results comparison covers 1,168 qualifying events from 1950–2026 and 24 Sprint Qualifying sessions from 2023–2026. The Monza 2024 pilot adds all 20 event-specific drivers, 276 actual laps, same/independent Q phases, real speed/throttle/gear/binary-brake traces, raw distance delta, linked performance map, supported corner analysis and PNG/JSON export. It has 79 timing-eligible laps: 40 support telemetry and 39 remain sector-only; 197 ineligible records retain reasons. Shared dark/light themes persist across navigation/reload. Native car/position records come from OpenF1 and are identity-matched to pinned TracingInsights timing clocks/flags; source composition and uncertainty remain visible. Other circuits/years are not implied by this pilot. No synthetic preview or fabricated fallback data is shipped.
+**Status, 10 November 2026:** the audited native batch contains 63 sessions: all 21 Q rounds in both 2018 and 2019, 17 Q/three SQ sessions in 2024, and Mexico 2026 Q with timing-only output. Remaining 2018–2026 archive imports are in progress. [Exact audited coverage](config/telemetry-coverage.json) and [field/year availability](docs/18-data-availability-by-year.md) distinguish source support, actual import and validated comparisons. Recorded classifications retain broader historical coverage.
+
+The studio offers actual event-specific drivers/teams, Q/SQ phases and eligible lap selection; source-coloured synchronized speed, throttle, gear and binary-brake traces; distance delta; linked approximate performance maps; evidence-based observations and PNG/JSON export. Quality failures remain timing-only or unavailable. Dark/light themes persist. No synthetic preview, fabricated fallback channel or runtime LLM claim is shipped.
 
 ## Start here
 
