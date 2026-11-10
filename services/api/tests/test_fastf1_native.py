@@ -33,6 +33,21 @@ def test_brazil_name_alias_requires_the_same_actual_event_and_circuit():
     assert not calendar_event_matches(None,event,meeting)
 
 
+def test_relocated_bahrain_identity_keeps_its_actual_sepang_circuit():
+    race={"year":2026,"round":16,"name":"Bahrain Grand Prix in Malaysia",
+          "circuit_id":"sepang","country":"Malaysia","race_date":"2026-10-04"}
+    event={"RoundNumber":16,"EventName":"Bahrain Grand Prix","Country":"Bahrain",
+           "Location":"Kuala Lumpur","EventDate":"2026-10-04 00:00:00"}
+    meeting={"Number":16,"Name":"Bahrain Grand Prix","Location":"Kuala Lumpur",
+             "Country":{"Code":"BRN"},"Circuit":{"Key":12},
+             "OfficialName":"FORMULA 1 GULF AIR BAHRAIN GRAND PRIX IN MALAYSIA 2026"}
+    assert calendar_event_matches(race,event,meeting)
+    for changed in ({"year":2025},{"round":1},{"circuit_id":"bahrain"},{"race_date":"2026-04-12"}):
+        assert not calendar_event_matches({**race,**changed},event,meeting)
+    assert not calendar_event_matches(race,event,{**meeting,"Circuit":{"Key":63}})
+    assert not calendar_event_matches(race,event,{**meeting,"OfficialName":"BAHRAIN GRAND PRIX"})
+
+
 def test_missing_optional_weather_does_not_erase_real_channels_or_imply_dry_conditions():
     from lapdna.analysis.publication import weather_context
     assert resource_available("WeatherData.jsonStream",403,optional=True) is False

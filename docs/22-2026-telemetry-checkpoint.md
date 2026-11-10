@@ -72,3 +72,13 @@ is accepted only with matching round, race date, country, location and native
 Interlagos circuit key 14; wrong dates/rounds/circuits and unrelated names still
 fail. Source names remain in the retained metadata. This is an identity repair,
 not a relaxation of telemetry/timing quality checks.
+
+The relocated 2026 Bahrain event has a second exact identity exception. The
+source retains "Bahrain Grand Prix" and country/promoter Bahrain, while its
+full official title, location, date and circuit identify Sepang in Malaysia.
+The [official F1 event page](https://www.formula1.com/en/racing/2026/bahrain)
+confirms the relocation. Matching is restricted to 2026 round 16, 4 October,
+the exact full Malaysia title, Kuala Lumpur and native Sepang circuit key 12;
+other Bahrain rounds/years, wrong dates and circuit keys remain rejected.
+The canonical calendar retains the physical Malaysia/Sepang identity; original
+source country/name metadata is preserved, not rewritten.

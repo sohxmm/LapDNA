@@ -44,7 +44,7 @@ def calendar_event_matches(race, event, meeting):
     # The calendar retains the historical Brazilian GP label; the 2026
     # native schedule calls it São Paulo. Accept only this reviewed identity,
     # corroborated by date, country, location and source Interlagos circuit key.
-    return (race["name"] == "Brazilian Grand Prix" and race["circuit_id"] == "interlagos"
+    brazil = (race["name"] == "Brazilian Grand Prix" and race["circuit_id"] == "interlagos"
             and race["country"] == event.get("Country") == "Brazil"
             and str(event.get("EventName")) in ("São Paulo Grand Prix", "Sao Paulo Grand Prix")
             and str(event.get("Location")) in ("São Paulo", "Sao Paulo")
@@ -52,6 +52,22 @@ def calendar_event_matches(race, event, meeting):
             and meeting.get("Number") == race["round"]
             and meeting.get("Country", {}).get("Code") == "BRA"
             and meeting.get("Circuit", {}).get("Key") == 14)
+    if brazil:
+        return True
+    # The relocated 2026 event retains Bahrain as its source promoter/country.
+    # Its actual location and circuit are Sepang, corroborated by the official
+    # full event title. Do not generalize this exception to other Bahrain races.
+    return (race.get("year") == 2026 and race["round"] == 16
+            and race["name"] == "Bahrain Grand Prix in Malaysia"
+            and race["circuit_id"] == "sepang" and race["country"] == "Malaysia"
+            and race["race_date"] == "2026-10-04"
+            and str(event.get("EventDate"))[:10] == race["race_date"]
+            and event.get("EventName") == meeting.get("Name") == "Bahrain Grand Prix"
+            and event.get("Country") == "Bahrain"
+            and event.get("Location") == meeting.get("Location") == "Kuala Lumpur"
+            and meeting.get("Number") == 16 and meeting.get("Country", {}).get("Code") == "BRN"
+            and meeting.get("Circuit", {}).get("Key") == 12
+            and meeting.get("OfficialName") == "FORMULA 1 GULF AIR BAHRAIN GRAND PRIX IN MALAYSIA 2026")
 
 
 def resource_available(name, status, *, optional=False):
