@@ -1,5 +1,21 @@
 # Audited native archive coverage
 
+## Confirmed deployment — 10 November 2026
+
+The 198-session frozen batch is live at https://lapdna.vercel.app. Hosted checks
+passed at 10:43 UTC, including China 2026 Q1 Norris/Gasly distance telemetry,
+exact links, reverse orientation and source team colours. Source commit
+`cae68b47314049aff98a8890bc22526643bbb260`; deployment
+`dpl_zRyQdWynAzYEFDqYAuSfkpUzEjDR`. The catalogue digest is
+`c46d187083a2aa51f1d45ebe0de17079b4cc7013ad9a3d3ac58d3dd582ed1944`.
+The local operator receipt and browser proof are retained in the private release
+directory and `work/qa/2026-11-10-live-china-2026-graphs.png`.
+
+The 16 imported 2026 sessions include verified graph choices in China Q1,
+Miami SQ1, Canada Q1, Austria Q3, Britain SQ1/SQ3 and Belgium Q3. This does not
+imply that every lap or race has a usable distance comparison. More recent
+local imports are not included in this frozen deployment.
+
 This is the latest audited batch; deployment is complete only when the receipt below is confirmed.
 
 Source commit: `cae68b47314049aff98a8890bc22526643bbb260`. Frozen catalogue: `c46d187083a2aa51f1d45ebe0de17079b4cc7013ad9a3d3ac58d3dd582ed1944`.
