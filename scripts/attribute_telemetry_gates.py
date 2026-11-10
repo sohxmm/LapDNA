@@ -516,6 +516,12 @@ def render_report(audit):
 
 
 def main():
+    if "--method" in sys.argv and sys.argv[sys.argv.index("--method") + 1] == "v6":
+        from attribute_view_gates import main as view_main
+        arguments = sys.argv[1:]
+        index = arguments.index("--method")
+        del arguments[index:index + 2]
+        return view_main(arguments)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--publication", type=Path, default=ROOT / "services/api/src/lapdna/pilot_data")
     parser.add_argument("--ledger", type=Path, default=ROOT / "config/telemetry-coverage.json")

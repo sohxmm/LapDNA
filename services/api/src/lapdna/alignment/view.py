@@ -40,6 +40,8 @@ class CarStream:
         ordered = sorted(unique.items())
         self.times = [t for t, _ in ordered]
         self.values = [v for _, v in ordered]
+        self.speed_indices = [i for i, values in enumerate(self.values) if values[0] is not None]
+        self.speed_times = [self.times[i] for i in self.speed_indices]
 
     def view(self, metadata, start, end):
         if isinstance(metadata, dict):
@@ -49,6 +51,12 @@ class CarStream:
         first, last = bisect_right(self.times, start) - 1, bisect_left(self.times, end)
         if first < 0 or last >= len(self.times):
             raise ViewUnavailable("car_edges", "Native car samples do not bracket both timing edges.")
+        # Preserve real speed padding if the closest car timestamp has null speed.
+        before, after = bisect_right(self.speed_times, start) - 1, bisect_left(self.speed_times, end)
+        if before >= 0:
+            first = min(first, self.speed_indices[before])
+        if after < len(self.speed_times):
+            last = max(last, self.speed_indices[after])
         times = [(t - start) * 1000 for t in self.times[first:last + 1]]
         duration = (end - start) * 1000
         values = self.values[first:last + 1]

@@ -5,7 +5,7 @@ from hashlib import sha256
 from io import BytesIO
 import json
 from pathlib import Path
-from threading import RLock
+from threading import BoundedSemaphore, RLock
 
 from lapdna.analysis.engine import canonical_hash
 from lapdna.analysis.views import build_view
@@ -19,6 +19,7 @@ class ViewStore:
         self.directory = directory.resolve()
         self.cache = OrderedDict()
         self.lock = RLock()
+        self.capacity = BoundedSemaphore(2)
 
     def load(self, session_id):
         if not ID_PATTERN.fullmatch(session_id):
@@ -58,6 +59,15 @@ class ViewStore:
             return publication
 
     def compare(self, request, legacy_store=None):
+        from lapdna.analysis.store import ComparisonBusy
+        if not self.capacity.acquire(blocking=False):
+            raise ComparisonBusy
+        try:
+            return self._compare(request, legacy_store)
+        finally:
+            self.capacity.release()
+
+    def _compare(self, request, legacy_store):
         publication = self.load(request.session_id)
         a, b = request.lap_a_id, request.lap_b_id
         for identifier in (a, b):
@@ -71,5 +81,17 @@ class ViewStore:
             raise SelectionError(422, "same_driver", "Choose two different drivers.")
         if ma["phase"] != mb["phase"] and not request.allow_cross_phase:
             raise SelectionError(422, "cross_phase_not_enabled", "Enable cross-phase comparison for these laps.")
-        artifact = build_view(publication, a, b, request.requested_tier)
+        legacy_analysis = None
+        if request.requested_tier == "analysis" and legacy_store is not None:
+            from lapdna.analysis.engine import ComparisonUnavailable
+            from lapdna.store import ArtifactNotFound
+            if legacy_store.load(request.session_id)["publication_sha256"] != publication["legacy_publication_sha256"]:
+                raise InvalidArtifact("Legacy and view publications disagree")
+            try:
+                candidate = legacy_store.compare(request.session_id, a, b, "telemetry")
+                if candidate.detail_level == "telemetry":
+                    legacy_analysis = candidate
+            except (ComparisonUnavailable, ArtifactNotFound):
+                pass
+        artifact = build_view(publication, a, b, request.requested_tier, legacy_analysis)
         return ViewCompareResponse(artifact=artifact, swapped=artifact.lap_a.metadata.lap_id != a)

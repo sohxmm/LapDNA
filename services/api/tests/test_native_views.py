@@ -51,3 +51,13 @@ def test_unbracketed_car_stream_has_explicit_reason(artifact_payload):
     with pytest.raises(ViewUnavailable) as failure:
         view(artifact_payload, [.2, .8])
     assert failure.value.gate == "car_edges"
+
+
+def test_real_speed_padding_survives_a_null_closest_car_sample(artifact_payload):
+    from lapdna.alignment.view_delta import prepare_progress
+    data = rows([-1.5, -.1, .1, .5, 1.1])
+    data[1]["speed"] = None
+    result = CarStream(data).view(artifact_payload["lap_a"], EPOCH.timestamp(), EPOCH.timestamp() + 1)
+    assert result.elapsed_ms[0] == -1500
+    assert result.channels.speed_kph[1] is None
+    assert prepare_progress(result).bridges
