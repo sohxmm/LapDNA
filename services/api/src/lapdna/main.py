@@ -23,8 +23,11 @@ from lapdna.view_models import ViewCompareRequest, ViewCompareResponse
 
 def create_app(artifact_dir: Path | None = None, session_dir: Path | None = None,
                calendar_service: CalendarService | None = None,
-               classification_dir: Path | None = None) -> FastAPI:
+               classification_dir: Path | None = None,
+               view_dir: Path | None = None) -> FastAPI:
     application = FastAPI(title="LapDNA API", version=__version__)
+    from lapdna.analysis.view_store import ViewStore
+    views = ViewStore(view_dir or Path(os.getenv("LAPDNA_VIEW_DIR", str(Path(__file__).resolve().parent / "view_data"))))
     calendars = calendar_service or CalendarService()
     classifications = ClassificationStore(classification_dir or (
         Path(os.environ["LAPDNA_CLASSIFICATION_DIR"]) if "LAPDNA_CLASSIFICATION_DIR" in os.environ else None
@@ -161,7 +164,7 @@ def create_app(artifact_dir: Path | None = None, session_dir: Path | None = None
         422: {"model": ErrorResponse}, 503: {"model": ErrorResponse},
     })
     def compare_view(request: ViewCompareRequest) -> ViewCompareResponse:
-        raise SelectionError(409, "view_not_prepared", "This opt-in v6 view has not been prepared.")
+        return views.compare(request, pilot)
 
     return application
 

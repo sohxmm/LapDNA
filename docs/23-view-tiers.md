@@ -8,7 +8,7 @@ The gates for Tier 2 corner observations remain byte-for-byte unchanged.
 
 ## Current stop point
 
-**Step 0 was accepted. Steps 1â€“4 are now authorized; stop before Step 5.**
+**Step 0 was accepted. Steps 1Ã¢â‚¬â€œ4 are now authorized; stop before Step 5.**
 The owner clarified that Step 3b and Step 4 measurements should be reported
 together. The live application remains v5 until a separately reviewed rollout;
 this checkpoint implements backend/contracts and measures the new tiers.
@@ -55,7 +55,7 @@ selection update; visibility does not make them eligible for Tier 2 claims.
 | --- | --- | --- |
 | 0 | Attribute first and all failing gates for every telemetry failure; per-year histograms, native gaps and sample-spacing distributions; separate lap, reference and pair context | Complete: 217 sessions, 66,125 indexed laps; stopped before Step 1 |
 | 1 | Add `telemetry_view`, `aligned_delta`, `analysis` tiers to Pydantic-owned contracts; keep the v5 `detail_level` API unchanged; regenerate contracts; introduce separate `distance-v6-*` results | Complete: separate opt-in v6 contracts; legacy schemas unchanged |
-| 2 | Tier 0: when native car samples bracket both timing edges, publish actual available measured channels with null gaps and explicit `bridged`/`gap` masks; no claims or observations | Pending |
+| 2 | Tier 0: when native car samples bracket both timing edges, publish actual available measured channels with null gaps and explicit `bridged`/`gap` masks; no claims or observations | Complete: independent native stream, explicit null/masks, opt-in API |
 | 3 / 3b | Linear speed bridging up to 2.0 s, prescribed accumulated distance bound and delta band; grade-C interior annotations; year coverage/bound distributions and threshold proposals using existing references | Pending |
 | 4 | Reference selection independent of geometry/markers; report reference-less-session recovery, then stop | Pending |
 | 5 | Same-driver pairs; list flagged recorded laps and per-lap reasons without the current capability filter | Not authorized before checkpoint review |
@@ -82,7 +82,7 @@ selection update; visibility does not make them eligible for Tier 2 claims.
 - Tier 2 corner-observation support, materiality, boundary sensitivity, class
   thresholds and source-validity gates remain unchanged. New bridge/gap masks
   can exclude evidence; they cannot create support for an observation.
-- Keep event-specific source team colours, A solid/B dashed, Bâˆ’A sign,
+- Keep event-specific source team colours, A solid/B dashed, BÃ¢Ë†â€™A sign,
   source-specific drivers/teams and explicit cross-phase warnings.
 - Do not silently substitute another lap to produce a graph. No synthetic
   production data, demos, fake fallbacks, credentials or raw caches enter Git.
@@ -100,7 +100,7 @@ measure later checks where a frozen reference exists; it does not insert
 samples or accept gaps. Where a reference or native edge support is absent,
 later gates are not evaluated rather than marked passing.
 
-Car-edge feasibility in this v5 audit uses its existing Â±1 s crop. A failed
+Car-edge feasibility in this v5 audit uses its existing Ã‚Â±1 s crop. A failed
 bracketing check is not automatically proof that the entire source lacks car
 data; the nearest outside-edge sample might lie beyond that crop. Tier 0's
 eventual coverage must be measured after implementation, not inferred from
@@ -133,4 +133,4 @@ Checks passed: Python suite (one Windows symlink skip), nine new audit checks,
 `npm run test:web`, and `npm run build`. The existing chart-size advisory and
 upstream TestClient deprecation warning remain non-fatal. No API/UI behaviour,
 selection permission, accepted lap, methodology version or observation gate
-changed. Nothing from Steps 1â€“6 has been deployed.
+changed. Nothing from Steps 1Ã¢â‚¬â€œ6 has been deployed.

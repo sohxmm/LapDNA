@@ -20,6 +20,7 @@ data/artifacts/*
 data/reports/
 data/sessions/
 services/api/src/lapdna/pilot_data/
+services/api/src/lapdna/view_data/
 work/
 *.log
 .DS_Store
