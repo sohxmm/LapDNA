@@ -244,3 +244,7 @@ A session with telemetry-capable laps still applies pairwise checks. Timing-only
 None among the actual attempted past-session candidates.
 
 The detailed ledger records exact source hashes, methods and phase-best pair checks. Source agreement is not physical corner ground truth. Brake is on/off, not pressure; no missing control input is inferred from speed.
+
+## Confirmed deployment
+
+The frozen batch above was deployed to https://lapdna.vercel.app and passed hosted session-inventory, comparison, reversal, exact-link and roster checks. The private operator release directory retains the deployment output and hosted-check receipt. Earlier 63-session figures in historical release notes describe the earlier batch.
