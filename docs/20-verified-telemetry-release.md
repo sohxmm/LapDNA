@@ -1,5 +1,9 @@
 # Verified telemetry expansion and prefinal release
 
+10 November archive repair: the raw adapter now follows FastF1 3.9.2's declared primary/mirror resource fallback, matching the library's own acquisition path. Previously, the library could parse a mirror's timing while the raw collector incorrectly required the primary URL to succeed; 2022 resources returned AccessDenied there. Each successful raw resource retains its actual chosen URL/hash, mirror use is disclosed, and no filled telemetry is adopted. Native origin checks accept only the pinned resource paths, including encoded event names. Missing optional weather remains unknown. Missing year/layout annotations retain recorded lap selection through the timing-only publication rather than erasing the whole session. No native-gap, validity or reconciliation threshold changed.
+
+The actual 2023 provider identifier is `SS` (Sprint Shootout), while LapDNA's public format remains SQ with actual SQ1/2/3 phases. The former blanket `SQ` provider request caused the six 2023 imports to fail before loading. Session-metadata and phase-load failures are now bounded source errors; unexpected programming errors return a distinct failed-pass status rather than masquerading as a completed import. These are importer/operations repairs, not evidence that a documented year lacks telemetry.
+
 Decision update, 9 November 2026. This supersedes earlier instructions to preserve the synthetic preview, restrict publication to Monza, or assign cyan/orange to A/B. The requested telemetry range remains **2018–2026**, with timing comparisons before 2018. A provider's advertised date range is not a verified session inventory.
 
 ## Product changes

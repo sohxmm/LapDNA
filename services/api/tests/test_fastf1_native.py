@@ -6,7 +6,7 @@ import zlib
 
 import pytest
 
-from lapdna.ingestion.fastf1_native import native_rows, stream_records
+from lapdna.ingestion.fastf1_native import native_rows, stream_records, resource_available, native_resource_urls, provider_session_identifier
 from lapdna.ingestion.openf1 import ImportFailure
 
 
@@ -14,6 +14,31 @@ def frame(value):
     compressor = zlib.compressobj(wbits=-zlib.MAX_WBITS)
     raw = compressor.compress(json.dumps(value).encode()) + compressor.flush()
     return b"00:00:01.000" + json.dumps(base64.b64encode(raw).decode()).encode() + b"\r\n"
+
+
+def test_missing_optional_weather_does_not_erase_real_channels_or_imply_dry_conditions():
+    from lapdna.analysis.publication import weather_context
+    assert resource_available("WeatherData.jsonStream",403,optional=True) is False
+    assert weather_context({"weather":[]},{"lap_start_utc":"2022-03-19T15:00:00Z","lap_end_utc":"2022-03-19T15:02:00Z"}) == "unknown"
+    with pytest.raises(ImportFailure,match="CarData.z.jsonStream returned HTTP 403"):
+        resource_available("CarData.z.jsonStream",403,optional=True)
+    for status,code in [(401,"access_required"),(429,"rate_limited")]:
+        with pytest.raises(ImportFailure) as error:
+            resource_available("WeatherData.jsonStream",status,optional=True)
+        assert error.value.code == code
+
+
+def test_raw_resource_fallback_keeps_same_session_and_encodes_event_identity():
+    urls=native_resource_urls('/static/2024/São_Paulo/Qualifying/','TimingData.jsonStream',
+        'https://livetiming.formula1.com','https://livetiming-mirror.fastf1.dev')
+    assert urls[0]=='https://livetiming.formula1.com/static/2024/S%C3%A3o_Paulo/Qualifying/TimingData.jsonStream'
+    assert urls[1].split('.dev',1)[1]==urls[0].split('.com',1)[1]
+
+
+def test_actual_2023_shootout_identifier_is_not_later_sprint_qualifying_identifier():
+    assert provider_session_identifier(2023,"SQ")=="SS"
+    assert provider_session_identifier(2024,"SQ")=="SQ"
+    assert provider_session_identifier(2023,"Q")=="Q"
 
 
 def test_native_absence_never_becomes_zero_false_or_another_drivers_sample():

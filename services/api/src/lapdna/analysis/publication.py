@@ -198,7 +198,8 @@ def timing_publication(snapshot, session, roster, options, metadata, report, com
     retrieved = source.get("retrieved_at") or source.get("source_retrieved_at")
     if not retrieved:
         raise ValueError("Source retrieval timestamp is missing")
-    reasons = sorted({reason for row in report["laps"].values() for reason in row.get("reasons", [])})
+    reasons = sorted({reason for row in report["laps"].values() for reason in row.get("reasons", [])}
+                     | {row["reason"] for row in report["reference_attempts"] if row.get("reason")})
     reason = ("No eligible lap supplies a verified distance/position reference. " + "; ".join(reasons[:2]))[:600]
     rows = {row["lap_id"]: row for row in snapshot["laps"]}
     publication = {"schema_version": SCHEMA, "session": session, "capability": "sector_only",
@@ -214,6 +215,11 @@ def timing_publication(snapshot, session, roster, options, metadata, report, com
     for option in options:
         if option["lap_id"] in metadata:
             option.update(capability="sector_only", reasons=report["laps"].get(option["lap_id"], {}).get("reasons") or [reason])
+    mirror = primary and any("livetiming-mirror.fastf1.dev" in item.get("url","") for item in components)
+    if mirror:
+        publication["provenance"]["provider_version"] = f"FastF1 {source.get('fastf1_version')} native archive; mirror resources included"
+        publication["provenance"]["verification_scope"] += " Per-resource origin URLs and hashes include the pinned FastF1 mirror; no filled car/position rows are used."
+        publication["publication_sha256"] = canonical_hash({key:value for key,value in publication.items() if key != "publication_sha256"})
     index = {"schema_version": SCHEMA, "session": session, "source_snapshot_sha256": source_hash, "drivers": roster, "laps": options,
         "source_name": "FastF1 / primary timing" if primary else "OpenF1 + TracingInsights",
         "source_url": "https://docs.fastf1.dev/" if primary else "https://openf1.org/",
@@ -221,6 +227,8 @@ def timing_publication(snapshot, session, roster, options, metadata, report, com
         "warnings": [reason, "Sector crossings are discrete timing observations; no intermediate curve or corner attribution is inferred."]}
     report.update(reference_lap_id=None, reference_length_m=None, telemetry_laps=0,
                   sector_only_laps=len(metadata), unavailable_laps=len(options)-len(metadata), telemetry_unavailable_reason=reason)
+    if mirror:
+        index["source_name"] = "FastF1 / native archive (mirror resources)"
     return publication, SessionLapIndex.model_validate_json(json.dumps(index)), report
 
 
@@ -298,6 +306,10 @@ def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
         publication["provenance"].update(source="fastf1", fastf1_version=version, provider_version=f"FastF1 {version}; raw-presence-v1 decoder",
             verification_scope="Native primary car/position rows decoded before library filling. Lap clocks, phases and validity use the pinned FastF1 parser. Native support and unadjusted timing consistency must pass; no independent physical validation is claimed.",
             source_session=f"{session['year']} {session['event_name']} {session_label} / primary timing session {snapshot['session']['session_key']}")
+        if any("livetiming-mirror.fastf1.dev" in item.get("url","") for item in components):
+            geometry["coordinate_note"] = "Native archive position coordinates retained in their source frame; resource URLs and hashes identify primary/mirror delivery. The map is approximate and timing distance is integrated speed."
+            publication["provenance"]["verification_scope"] = "Native car/position rows decoded before library filling. The pinned FastF1 primary/mirror fallback is declared per resource URL and hash. Lap clocks, phases and validity use the pinned parser; native support and unadjusted timing consistency must pass. No independent physical validation is claimed."
+            publication["provenance"]["provider_version"] += "; mirror resources included"
     publication["reference_sha256"] = canonical_hash({"reference_lap_id": reference_id, "geometry": geometry,
                                                       "regions": regions, "corners": publication["corners"], "grid": grid,
                                                       "method": publication.get("method", METHOD)})
@@ -351,6 +363,8 @@ def prepare_publication(snapshot: dict) -> tuple[dict, SessionLapIndex, dict]:
                           "Eligible laps can still fall back to sectors when pair reconciliation fails."]}
     if primary:
         index.update(source_name="FastF1 / primary native records", source_url="https://docs.fastf1.dev/")
+        if any("livetiming-mirror.fastf1.dev" in item.get("url","") for item in components):
+            index["source_name"] = "FastF1 / native archive (mirror resources)"
     if profile == "marker-windows-v1":
         note = "Turn vicinities use fixed ±120 m source-marker windows; overlapping windows form a complex. They are approximate analysis zones, not measured corner boundaries."
         index["warnings"].append(note)

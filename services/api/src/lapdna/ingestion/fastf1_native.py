@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 import re
 from urllib.request import Request, urlopen
+from urllib.parse import quote
 import zlib
 
 from .openf1 import ImportFailure, atomic_json, timestamp, utc_now
@@ -20,6 +21,32 @@ VERSION = "3.9.2"
 MAX_RAW_BYTES = 128 * 1024 * 1024
 MAX_FRAME_BYTES = 2 * 1024 * 1024
 CHANNELS = {"0": "rpm", "2": "speed", "3": "n_gear", "4": "throttle", "5": "brake", "45": "drs"}
+
+
+def native_resource_urls(path, name, primary, mirror):
+    # Requests encodes non-ASCII event names before sending. Pin the same
+    # encoded resource identity before verifying a returned response URL.
+    encoded = quote(path, safe="/%")
+    return (primary + encoded + name, mirror + encoded + name)
+
+
+def provider_session_identifier(year, session_type):
+    # FastF1 distinguishes 2023's Sprint Shootout (SS) from the later Sprint
+    # Qualifying (SQ). LapDNA's external SQ format keeps actual SQ1/2/3 phases.
+    return "SS" if year == 2023 and session_type == "SQ" else session_type
+
+
+def resource_available(name, status, *, optional=False):
+    """Missing context never creates measurements or hides required failures."""
+    if status == 200:
+        return True
+    if status == 401:
+        raise ImportFailure("access_required", "The timing source rejected the local sign-in; renew it in your terminal")
+    if status == 429:
+        raise ImportFailure("rate_limited", "The timing source requested a rate-limit pause; cached progress is retained")
+    if optional and name == "WeatherData.jsonStream" and status in (403,404,410,500,502,503,504):
+        return False
+    raise ImportFailure("fastf1_source_unavailable", f"Required native resource {name} returned HTTP {status if status is not None else 'no response'}")
 
 
 def stream_records(raw: bytes, *, compressed: bool):
@@ -151,19 +178,27 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
     token_manager._default_auth_func = require_local_sign_in
     (cache / "library").mkdir(parents=True, exist_ok=True)
     Cache.configure(cache_dir=str(cache / "library"), force_renew=refresh)
-    records = []
+    records, unavailable = [], []
 
-    def raw_resource(name):
-        url = "https://livetiming.formula1.com" + session.api_path + name
+    def raw_resource(name, *, optional=False):
+        # Follow the pinned library's own native-resource fallback. Its parser
+        # may already have obtained timing from the mirror while the primary
+        # returns AccessDenied; requesting only the primary discards real data.
+        urls = native_resource_urls(session.api_path,name,_api.base_url,_api.base_url_mirror)
         path, metadata_path = cache / "source" / name, cache / "source" / (name + ".meta.json")
         if path.exists() and metadata_path.exists() and not refresh:
             raw, meta = path.read_bytes(), json.loads(metadata_path.read_text(encoding="utf-8"))
-            if meta.get("source_url") == url and meta.get("sha256") == sha256(raw).hexdigest():
+            if meta.get("source_url") in urls and meta.get("sha256") == sha256(raw).hexdigest():
                 records.append(meta)
                 return raw
-        response = Cache.requests_get(url, headers=_api.headers, timeout=60)
-        if response is None or response.status_code != 200:
-            raise ImportFailure("fastf1_source_unavailable", "Authenticated timing source did not return a complete native resource")
+        response = Cache.requests_get(urls, headers=_api.headers, timeout=60)
+        status = None if response is None else response.status_code
+        if not resource_available(name, status, optional=optional):
+            unavailable.append({"source_urls":list(urls),"resource":name,"http_status":status,"retrieved_at":utc_now()})
+            return None
+        url = response.url
+        if url not in urls:
+            raise ImportFailure("unexpected_resource_origin", "Native response left the pinned library's declared resource origins")
         raw = response.content
         if len(raw) > MAX_RAW_BYTES:
             raise ImportFailure("source_too_large", "Native resource exceeds the reviewed import bound")
@@ -177,7 +212,7 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
         return raw
 
     try:
-        session = fastf1.get_session(year, round_number, session_type)
+        session = fastf1.get_session(year, round_number, provider_session_identifier(year,session_type))
         expected_names = ("Sprint Qualifying", "Sprint Shootout") if session_type == "SQ" else ("Qualifying",)
         if session.name not in expected_names:
             raise ImportFailure("session_mismatch", "The selected source format does not match the requested qualifying session")
@@ -186,21 +221,26 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
         # Library clocks/phases/accuracy checks are retained with their exact
         # version. Its filled car/position arrays are deliberately never used.
         session.load(laps=True, telemetry=True, weather=False, messages=True)
+        info = session.session_info
+        if not isinstance(info, dict) or not info:
+            raise ImportFailure("session_metadata_unavailable", "The source did not load the actual qualifying session metadata")
         if session.t0_date is None or session.laps.empty:
             raise ImportFailure("timing_unavailable", "FastF1 did not establish lap timing and the session UTC origin")
         t0 = pd.Timestamp(session.t0_date)
         t0 = t0.tz_localize("UTC") if t0.tzinfo is None else t0.tz_convert("UTC")
         car = native_rows(raw_resource("CarData.z.jsonStream"), "car")
         positions = native_rows(raw_resource("Position.z.jsonStream"), "position")
-        raw_weather = raw_resource("WeatherData.jsonStream")
+        raw_weather = raw_resource("WeatherData.jsonStream", optional=True)
         weather = []
-        for clock, value in stream_records(raw_weather, compressed=False):
+        for clock, value in (stream_records(raw_weather, compressed=False) if raw_weather is not None else ()):
             if value.get("Rainfall") in ("0", "1", 0, 1) and value.get("Rainfall") is not None:
                 weather.append({"date": (t0 + pd.Timedelta(clock)).isoformat(), "rainfall": int(value["Rainfall"])})
         # Capture exact primary timing inputs underlying the parsed lap flags.
         for name in ("TimingData.jsonStream", "TimingAppData.jsonStream", "SessionInfo.jsonStream", "SessionStatus.jsonStream", "TrackStatus.jsonStream", "RaceControlMessages.jsonStream", "DriverList.jsonStream"):
             raw_resource(name)
         source_drivers = _api.driver_info(session.api_path)
+        if not isinstance(source_drivers, dict) or not source_drivers:
+            raise ImportFailure("roster_unavailable", "The source did not establish the actual qualifying driver roster")
     except ImportFailure:
         if budget.status()[1] > 0:
             raise ImportFailure("rate_limited", "The shared historical import window is full; cached progress is retained until the source window resets") from None
@@ -220,12 +260,11 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
     race = next((race for race in calendar["races"] if race["round"] == round_number), None)
     if race is None or race["name"] != str(session.event["EventName"]):
         raise ImportFailure("calendar_identity_mismatch", "Source event name/round does not match the local calendar; review the identity mapping")
-    info = session.session_info
     circuit_key = info.get("Meeting", {}).get("Circuit", {}).get("Key")
-    if not isinstance(circuit_key, int):
-        raise ImportFailure("layout_missing", "Source session has no circuit annotation identity")
-    marker_url = f"https://api.multiviewer.app/api/v1/circuits/{circuit_key}/{year}"
+    marker_url = f"https://api.multiviewer.app/api/v1/circuits/{circuit_key}/{year}" if isinstance(circuit_key,int) else None
     try:
+        if marker_url is None:
+            raise ValueError("missing circuit annotation identity")
         with urlopen(Request(marker_url, headers={"User-Agent": "LapDNA verified circuit annotations"}), timeout=30) as response:
             marker_bytes = response.read(1024 * 1024 + 1)
         if len(marker_bytes) > 1024 * 1024:
@@ -235,8 +274,12 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
         if not numbers or numbers != list(range(1, max(numbers) + 1)):
             raise ValueError
     except Exception:
-        raise ImportFailure("annotations_unavailable", "No complete year/layout-specific source annotation inventory was established") from None
-    records.append({"source_url": marker_url, "retrieved_at": utc_now(), "sha256": sha256(marker_bytes).hexdigest(), "bytes": len(marker_bytes)})
+        # An absent annotation source must not erase real recorded lap times.
+        # Reference construction will withhold spatial output on an empty set.
+        markers = {"corners":[]}
+        unavailable.append({"source_url":marker_url,"resource":"year/layout turn annotations","retrieved_at":utc_now()})
+    else:
+        records.append({"source_url": marker_url, "retrieved_at": utc_now(), "sha256": sha256(marker_bytes).hexdigest(), "bytes": len(marker_bytes)})
     drivers = []
     for number, row in source_drivers.items():
         name = row.get("FullName") or " ".join(filter(None, [row.get("FirstName"), row.get("LastName")]))
@@ -259,7 +302,11 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
 
     phases = {}
     phase_names = ("SQ1", "SQ2", "SQ3") if session_type == "SQ" else ("Q1", "Q2", "Q3")
-    for phase, frame in zip(phase_names, session.laps.split_qualifying_sessions()):
+    try:
+        phase_frames = session.laps.split_qualifying_sessions()
+    except Exception:
+        raise ImportFailure("phase_unavailable", "The source did not establish actual qualifying phase boundaries") from None
+    for phase, frame in zip(phase_names, phase_frames):
         if frame is not None:
             for _, row in frame.iterrows():
                 phases[(str(row["DriverNumber"]), int(row["LapNumber"]))] = phase
@@ -313,6 +360,8 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
                    "license_name": "Underlying data rights remain separate from the FastF1 software licence",
                    "license_url": "https://github.com/theOehrly/Fast-F1/blob/v3.9.2/LICENSE" if "multiviewer" not in item["source_url"] else None} for item in records]
     provenance = {"source": "fastf1", "fastf1_version": VERSION, "retrieved_at": utc_now(), "source_records": records, "components": components,
+                  "unavailable_optional_resources": unavailable,
+                  "native_resource_origins": sorted({item["source_url"].split('/')[2] for item in records}),
                   "clock_origin_utc": t0.isoformat(), "native_mask_policy": "raw-presence-v1",
                   "native_window_policy": "actual-lap-envelope-v1", "outside_lap_window_samples": {"car": excluded_car, "position": excluded_position},
                   "unassigned_native_streams": {"car":quarantined_car, "position":quarantined_position},
