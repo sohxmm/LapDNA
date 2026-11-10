@@ -17,3 +17,12 @@ def test_background_release_stops_if_reviewed_source_changes(monkeypatch):
     monkeypatch.setattr(release.subprocess,"check_output",lambda *a,**k:" M apps/web/src/App.tsx")
     with pytest.raises(ValueError,match="clean checkpoint"):
         release.require_unchanged("reviewed")
+
+
+def test_partial_release_uses_audited_success_and_counts_unattempted_candidates():
+    expected={(2022,1,"Q"):{"year":2022,"round":1,"session_type":"Q","event_name":"Bahrain"},
+              (2022,2,"Q"):{"year":2022,"round":2,"session_type":"Q","event_name":"Saudi Arabia"}}
+    coverage={"sessions":[{"year":2022,"round":1,"session_id":"2022-1-bahrain-Q"}]}
+    attempts={"results":{"2022-1-Q":{"status":"unavailable","code":"old_failure"}}}
+    missing=release.remaining_candidates(expected,coverage,attempts)
+    assert len(missing)==1 and missing[0]["round"]==2 and missing[0]["code"]=="not_attempted"

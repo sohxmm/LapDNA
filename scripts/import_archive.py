@@ -45,6 +45,7 @@ def main():
                 while True:
                     row = {"year":year, "round":race["round"], "session_type":kind, "event_name":race["name"], "checked_at":utc_now()}
                     print(f"Importing {key} {race['name']}", flush=True)
+                    fatal = False
                     try:
                         snapshot = import_fastf1_session(base / key, year, race["round"], session_type=kind)
                         report, _, compressed = write_publication(snapshot, args.output)
@@ -57,9 +58,17 @@ def main():
                         row.update(status="unavailable", code=exc.code, reason=str(exc))
                     except (ValueError, OSError) as exc:
                         row.update(status="unavailable", code="publication_failed", reason=str(exc)[:600])
+                    except Exception as exc:
+                        # A programming/unsupported-parser failure is different
+                        # from a recorded source refusal. Do not pretend a
+                        # crashed pass completed or log potentially private text.
+                        row.update(status="unavailable",code="unexpected_import_error",reason=f"Unexpected {type(exc).__name__}; retained progress requires operator review")
+                        fatal = True
                     history["results"][key] = row
                     history["updated_at"] = utc_now()
                     atomic_json(args.report, history)
+                    if fatal:
+                        return 3
                     if row.get("code") == "access_required":
                         print("Local sign-in needs renewal. Completed work is retained.", flush=True)
                         return 2

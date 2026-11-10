@@ -4,7 +4,7 @@ Run from the Desktop repository. No source limits are bypassed. Any local
 code change or sign-in failure stops publication for explicit follow-up.
 """
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 import json
 from pathlib import Path
 import shutil
@@ -36,14 +36,47 @@ def require_unchanged(commit):
         raise ValueError("Source changed during acquisition; audit/release requires a reviewed clean checkpoint")
 
 
+def expected_candidates(root, today=None):
+    cutoff = today or date.today().isoformat()
+    result = {}
+    for year in range(2018,2027):
+        calendar=json.loads((root / f"services/api/src/lapdna/calendar_snapshots/{year}.json").read_text(encoding="utf-8"))
+        classifications=json.loads((root / f"services/api/src/lapdna/classification_snapshots/{year}.json").read_text(encoding="utf-8"))
+        sprints={event["round"] for event in classifications["events"] if any(s["session_type"]=="sprint_qualifying" for s in event["sessions"])}
+        for race in calendar["races"]:
+            if not race.get("qualifying_date") or race["qualifying_date"]>cutoff:
+                continue
+            for kind in (["Q","SQ"] if year>=2023 and race["round"] in sprints else ["Q"]):
+                result[(year,race["round"],kind)]={"year":year,"round":race["round"],"session_type":kind,"event_name":race["name"]}
+    return result
+
+
+def remaining_candidates(expected, coverage, attempts):
+    # The audited active publication is authoritative. A successful targeted
+    # retry can supersede an old failed batch entry without rewriting history.
+    published={(row["year"],row["round"],row["session_id"].rsplit('-',1)[1]) for row in coverage["sessions"]}
+    remaining=[]
+    for key,identity in expected.items():
+        if key in published:
+            continue
+        attempted=attempts["results"].get(f"{key[0]}-{key[1]}-{key[2]}")
+        remaining.append({**identity,"code":attempted.get("code","not_published") if attempted else "not_attempted",
+            "reason":attempted.get("reason","No audited native publication is active for this session") if attempted else "Detailed native import has not completed for this past-session candidate"})
+    return remaining
+
+
 def main():
+    import argparse
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--publish-current",action="store_true",help="Audit and publish the ready catalogue without waiting for unfinished imports")
+    args=parser.parse_args()
     python = sys.executable
     baseline = head()
     require_unchanged(baseline)
     state("importing", code_commit=baseline)
     # A second bounded pass retries actual source/publication failures while
     # skipping completed primary sessions. Rate-limited work waits in-place.
-    for attempt in range(2):
+    for attempt in range(0 if args.publish_current else 2):
         imported = subprocess.run([python,"-u","scripts/import_archive.py"],cwd=ROOT)
         if imported.returncode == 2:
             state("needs_local_sign_in", code_commit=baseline, instruction="Renew FastF1 sign-in locally, then run this command again. Do not share credentials.")
@@ -69,7 +102,7 @@ def main():
     require_unchanged(baseline)
     coverage = json.loads(ledger.read_text(encoding="utf-8"))
     attempts = json.loads((ROOT / "work/fastf1/archive-report.json").read_text(encoding="utf-8"))
-    unresolved = [row for row in attempts["results"].values() if row["status"] != "published"]
+    unresolved = remaining_candidates(expected_candidates(ROOT),coverage,attempts)
     # Only an audited frozen ledger is committed. No raw cache or credentials.
     shutil.copy2(ledger, ROOT / "config/telemetry-coverage.json")
     notes = ["# Audited native archive coverage", "", "This is the latest audited batch; deployment is complete only when the receipt below is confirmed.", "",
