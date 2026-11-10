@@ -2,10 +2,23 @@
 
 Read `docs/10-handoff.md`, `docs/00-blueprint.md`, and the selected ticket in `docs/06-implementation-plan.md` before editing. This file applies throughout the repository.
 
+## Owner-approved view-tier decision
+
+`docs/23-view-tiers.md` is the owner's explicit decision update. It supersedes
+the prohibitions on relaxing gates for coverage and redesigning alignment only
+for the approved Tier 0/Tier 1 scope. Tier 2 corner-observation gates remain
+byte-for-byte unchanged. The immediate work is **Step 0 measurement only**:
+produce `docs/23-gate-attribution.md` and the ledger, show the report, and stop
+before implementing Step 1. That checkpoint is complete for the 217-session
+baseline; do not repeat it unless inputs change or the owner requests it.
+This checkpoint takes precedence over the older
+ticket ordering below; do not continue to tiers without the owner's review and
+instruction to resume. All other boundaries remain in force.
+
 ## Execution
 
 1. Implement the first uncompleted ticket whose dependencies are complete. Work on one bounded feature at a time.
-2. Read the contract and the ticket's named documents. Do not redesign the stack, sign convention, alignment method, or scope while implementing a ticket.
+2. Read the contract and the ticket's named documents. Do not redesign the stack, sign convention, alignment method, or scope outside an explicit approved decision; the scoped Tier 0/Tier 1 exception is in `docs/23-view-tiers.md`.
 3. If evidence contradicts a numerical assumption or an upstream API changes, record the finding and propose the smallest documented decision update. Never invent real telemetry to proceed.
 4. Make the smallest coherent change, run the ticket's checks, and update the status and handoff with exact commands/results and remaining limitations.
 5. Commit each completed feature with a descriptive imperative subject, such as `Add qualifying lap eligibility filters`. Push the commit to the configured GitHub branch after checks pass. Never force push, rewrite shared commits, commit secrets/raw caches, or attribute commits to tools/models. Use the existing Git identity.
@@ -22,7 +35,7 @@ Read `docs/10-handoff.md`, `docs/00-blueprint.md`, and the selected ticket in `d
 - Preserve raw reconciliation errors. Never force curves to agree with timing and then claim independent validation.
 - All three observation slots require evidence; display fewer observations when necessary.
 - Do not ship synthetic previews, fabricated graphs, demo routes or fake fallback data. Artificial fixtures are permitted only in automated tests. No production fake driver times, maps, claims, or silent fallback data.
-- Known wet compounds are supported; missing rain context stays unknown. Preserve condition warnings and do not interpret rain reports as measured track grip. Never relax validity or numerical gates to increase coverage.
+- Known wet compounds are supported; missing rain context stays unknown. Preserve condition warnings and do not interpret rain reports as measured track grip. Outside the owner-approved Tier 0/Tier 1 scope in `docs/23-view-tiers.md`, never relax validity or numerical gates to increase coverage. Tier 2 observation gates remain byte-for-byte unchanged.
 - Keep downloaded data, access tokens and credentials outside Git. A cache is disposable; an exported analysis must carry provenance.
 - Changes in algorithms require methodology version changes and regression checks. Changes in schema require generation and compatibility review.
 

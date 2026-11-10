@@ -1,5 +1,24 @@
 # Current handoff
 
+## Active owner decision — Step 0 complete; stop before Step 1
+
+The owner explicitly approved [view tiers](23-view-tiers.md), superseding the
+older alignment/coverage restrictions only for Tier 0/Tier 1. Tier 2 corner
+observation gates remain byte-for-byte unchanged. The measurement checkpoint is
+complete: [the report](23-gate-attribution.md) covers 217 sessions and 66,125
+indexed laps; first/all failures, distributions, conditional checks and pair
+context are in the coverage ledger and `config/gate-attribution-laps.jsonl.gz`.
+Of 14,840 timing-eligible laps without graphs, 13,393 first fail the native gap
+gate. All 25,271 eligible laps have in-lap car observations; 25,232 have both
+edges bracketed within the existing ±1 s crop. These are feasibility findings,
+not implemented Tier 0 coverage. Seven runtime files/ten Tier 2 function bodies
+are byte-unchanged. Python, contracts, typecheck, 31 client tests and build pass.
+Reproduce using `scripts/attribute_telemetry_gates.py` followed by
+`scripts/render_gate_attribution.py`; the latter also accepts `--lap-id`.
+**Stopped for owner report review before Step 1.** The deployed v5
+application, contracts, selection rules and numerical behaviour are unchanged
+by Step 0. Read that decision before following the older remaining-work text.
+
 Updated 10 November 2026. Use **C:/Users/soham/OneDrive/Desktop/LapDNA**, remote
 https://github.com/sohxmm/LapDNA.git, main branch. The Documents checkout is an
 older copy. The user authorized remaining verified imports, repairs, commits,
