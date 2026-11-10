@@ -17,8 +17,8 @@
             "QUALIFYING"
           ],
           "source": "f1db",
-          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
-          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.20.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-10T11:09:39.797478Z",
           "status": "completed",
           "drivers": [
             {
@@ -231,7 +231,7 @@
             }
           ],
           "warnings": [
-            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "F1DB v2026.20.0 · CC BY 4.0 · normalized for LapDNA.",
             "Published classification facts; individual laps and runs are not imported.",
             "Historical qualifying format: two session. This is not modern Q1/Q2/Q3."
           ]
@@ -254,8 +254,8 @@
             "QUALIFYING"
           ],
           "source": "f1db",
-          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
-          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.20.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-10T11:09:39.797478Z",
           "status": "completed",
           "drivers": [
             {
@@ -532,7 +532,7 @@
             }
           ],
           "warnings": [
-            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "F1DB v2026.20.0 · CC BY 4.0 · normalized for LapDNA.",
             "Published classification facts; individual laps and runs are not imported.",
             "Historical qualifying format: two session. This is not modern Q1/Q2/Q3."
           ]
@@ -555,8 +555,8 @@
             "QUALIFYING"
           ],
           "source": "f1db",
-          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
-          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.20.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-10T11:09:39.797478Z",
           "status": "completed",
           "drivers": [
             {
@@ -1089,7 +1089,7 @@
             }
           ],
           "warnings": [
-            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "F1DB v2026.20.0 · CC BY 4.0 · normalized for LapDNA.",
             "Published classification facts; individual laps and runs are not imported.",
             "Historical qualifying format: four laps. This is not modern Q1/Q2/Q3.",
             "This format's overall qualifying duration is not a single flying-lap time."
@@ -1113,8 +1113,8 @@
             "QUALIFYING"
           ],
           "source": "f1db",
-          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
-          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.20.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-10T11:09:39.797478Z",
           "status": "completed",
           "drivers": [
             {
@@ -1375,7 +1375,7 @@
             }
           ],
           "warnings": [
-            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "F1DB v2026.20.0 · CC BY 4.0 · normalized for LapDNA.",
             "Published classification facts; individual laps and runs are not imported.",
             "Historical qualifying format: two session. This is not modern Q1/Q2/Q3."
           ]
@@ -1398,8 +1398,8 @@
             "QUALIFYING"
           ],
           "source": "f1db",
-          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
-          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.20.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-10T11:09:39.797478Z",
           "status": "completed",
           "drivers": [
             {
@@ -1724,7 +1724,7 @@
             }
           ],
           "warnings": [
-            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "F1DB v2026.20.0 · CC BY 4.0 · normalized for LapDNA.",
             "Published classification facts; individual laps and runs are not imported.",
             "Historical qualifying format: two session. This is not modern Q1/Q2/Q3."
           ]
@@ -1747,8 +1747,8 @@
             "QUALIFYING"
           ],
           "source": "f1db",
-          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
-          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.20.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-10T11:09:39.797478Z",
           "status": "completed",
           "drivers": [
             {
@@ -2201,7 +2201,7 @@
             }
           ],
           "warnings": [
-            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "F1DB v2026.20.0 · CC BY 4.0 · normalized for LapDNA.",
             "Published classification facts; individual laps and runs are not imported.",
             "Historical qualifying format: two session. This is not modern Q1/Q2/Q3."
           ]
@@ -2224,8 +2224,8 @@
             "QUALIFYING"
           ],
           "source": "f1db",
-          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
-          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.20.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-10T11:09:39.797478Z",
           "status": "completed",
           "drivers": [
             {
@@ -2582,7 +2582,7 @@
             }
           ],
           "warnings": [
-            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "F1DB v2026.20.0 · CC BY 4.0 · normalized for LapDNA.",
             "Published classification facts; individual laps and runs are not imported.",
             "Historical qualifying format: two session. This is not modern Q1/Q2/Q3."
           ]
@@ -2605,8 +2605,8 @@
             "QUALIFYING"
           ],
           "source": "f1db",
-          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
-          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.20.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-10T11:09:39.797478Z",
           "status": "completed",
           "drivers": [
             {
@@ -3011,7 +3011,7 @@
             }
           ],
           "warnings": [
-            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "F1DB v2026.20.0 · CC BY 4.0 · normalized for LapDNA.",
             "Published classification facts; individual laps and runs are not imported.",
             "Historical qualifying format: two session. This is not modern Q1/Q2/Q3."
           ]

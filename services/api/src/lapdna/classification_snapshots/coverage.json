@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "generated_at": "2026-11-06T20:50:08.771186Z",
+  "generated_at": "2026-11-10T11:09:48.577829Z",
   "years": [
     1950,
     1951,
@@ -852,12 +852,12 @@
     },
     {
       "year": 2026,
-      "event_count": 19,
+      "event_count": 20,
       "calendar_events": 23,
-      "qualifying_sessions": 19,
+      "qualifying_sessions": 20,
       "sprint_qualifying_sessions": 6,
-      "driver_results": 545,
-      "timed_results": 538
+      "driver_results": 567,
+      "timed_results": 560
     }
   ],
   "sources": [
@@ -868,8 +868,8 @@
     },
     {
       "source": "f1db",
-      "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
-      "retrieved_at": "2026-11-06T20:44:01.809786Z"
+      "source_url": "https://github.com/f1db/f1db/releases/download/v2026.20.0/f1db-json-splitted.zip",
+      "retrieved_at": "2026-11-10T11:09:39.797478Z"
     },
     {
       "source": "openf1",

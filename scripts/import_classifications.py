@@ -21,7 +21,7 @@ DEFAULT_CACHE = ROOT / "work" / "classification-source"
 MAX_BYTES = 20 * 1024 * 1024
 JOLPICA = "https://api.jolpi.ca/ergast/f1"
 OPENF1 = "https://api.openf1.org/v1"
-F1DB_TAG = "v2026.19.0"
+F1DB_TAG = "v2026.20.0"
 
 
 def stamp():

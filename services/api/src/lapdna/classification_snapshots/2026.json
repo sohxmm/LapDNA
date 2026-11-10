@@ -1649,8 +1649,8 @@
             "Q3"
           ],
           "source": "f1db",
-          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
-          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.20.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-10T11:09:39.797478Z",
           "status": "completed",
           "drivers": [
             {
@@ -2051,7 +2051,7 @@
             }
           ],
           "warnings": [
-            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "F1DB v2026.20.0 · CC BY 4.0 · normalized for LapDNA.",
             "Published classification facts; individual laps and runs are not imported."
           ]
         },
@@ -10038,8 +10038,8 @@
             "Q3"
           ],
           "source": "f1db",
-          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.19.0/f1db-json-splitted.zip",
-          "retrieved_at": "2026-11-06T20:44:01.809786Z",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.20.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-10T11:09:39.797478Z",
           "status": "completed",
           "drivers": [
             {
@@ -10440,7 +10440,7 @@
             }
           ],
           "warnings": [
-            "F1DB v2026.19.0 · CC BY 4.0 · normalized for LapDNA.",
+            "F1DB v2026.20.0 · CC BY 4.0 · normalized for LapDNA.",
             "Published classification facts; individual laps and runs are not imported."
           ]
         }
@@ -10448,6 +10448,432 @@
       "warnings": [
         "This complete F1DB classification preserves native exclusion/disqualification status that the Jolpica phase-time response does not expose. No driver rows were combined across providers."
       ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "year": 2026,
+      "round": 20,
+      "event_name": "Formula 1 MSC Cruises Grande Prêmio de São Paulo 2026",
+      "circuit_id": "interlagos",
+      "sessions": [
+        {
+          "session_id": "2026-20-qualifying",
+          "label": "Qualifying",
+          "session_type": "qualifying",
+          "phases": [
+            "Q1",
+            "Q2",
+            "Q3"
+          ],
+          "source": "f1db",
+          "source_url": "https://github.com/f1db/f1db/releases/download/v2026.20.0/f1db-json-splitted.zip",
+          "retrieved_at": "2026-11-10T11:09:39.797478Z",
+          "status": "completed",
+          "drivers": [
+            {
+              "driver_id": "f1db_lando-norris",
+              "driver_number": "1",
+              "driver_code": "NOR",
+              "driver_name": "Lando Norris",
+              "team_id": "mclaren",
+              "team_name": "McLaren",
+              "position": 1,
+              "phase_times_ms": {
+                "Q1": 90939,
+                "Q2": 89207,
+                "Q3": 87470
+              },
+              "latest_timed_phase": "Q3",
+              "latest_time_ms": 87470,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_george-russell",
+              "driver_number": "63",
+              "driver_code": "RUS",
+              "driver_name": "George Russell",
+              "team_id": "mercedes",
+              "team_name": "Mercedes",
+              "position": 2,
+              "phase_times_ms": {
+                "Q1": 91206,
+                "Q2": 86745,
+                "Q3": 87674
+              },
+              "latest_timed_phase": "Q3",
+              "latest_time_ms": 87674,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_kimi-antonelli",
+              "driver_number": "12",
+              "driver_code": "ANT",
+              "driver_name": "Kimi Antonelli",
+              "team_id": "mercedes",
+              "team_name": "Mercedes",
+              "position": 3,
+              "phase_times_ms": {
+                "Q1": 92229,
+                "Q2": 89302,
+                "Q3": 88095
+              },
+              "latest_timed_phase": "Q3",
+              "latest_time_ms": 88095,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_charles-leclerc",
+              "driver_number": "16",
+              "driver_code": "LEC",
+              "driver_name": "Charles Leclerc",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 4,
+              "phase_times_ms": {
+                "Q1": 92121,
+                "Q2": 88082,
+                "Q3": 88289
+              },
+              "latest_timed_phase": "Q3",
+              "latest_time_ms": 88289,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_liam-lawson",
+              "driver_number": "30",
+              "driver_code": "LAW",
+              "driver_name": "Liam Lawson",
+              "team_id": "racing-bulls",
+              "team_name": "Racing Bulls",
+              "position": 5,
+              "phase_times_ms": {
+                "Q1": 92085,
+                "Q2": 87049,
+                "Q3": 88321
+              },
+              "latest_timed_phase": "Q3",
+              "latest_time_ms": 88321,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_nico-hulkenberg",
+              "driver_number": "27",
+              "driver_code": "HUL",
+              "driver_name": "Nico Hülkenberg",
+              "team_id": "audi",
+              "team_name": "Audi",
+              "position": 6,
+              "phase_times_ms": {
+                "Q1": 91693,
+                "Q2": 88361,
+                "Q3": 88668
+              },
+              "latest_timed_phase": "Q3",
+              "latest_time_ms": 88668,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_isack-hadjar",
+              "driver_number": "6",
+              "driver_code": "HAD",
+              "driver_name": "Isack Hadjar",
+              "team_id": "red-bull",
+              "team_name": "Red Bull",
+              "position": 7,
+              "phase_times_ms": {
+                "Q1": 92059,
+                "Q2": 87218,
+                "Q3": 88763
+              },
+              "latest_timed_phase": "Q3",
+              "latest_time_ms": 88763,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_oliver-bearman",
+              "driver_number": "87",
+              "driver_code": "BEA",
+              "driver_name": "Oliver Bearman",
+              "team_id": "haas",
+              "team_name": "Haas",
+              "position": 8,
+              "phase_times_ms": {
+                "Q1": 93030,
+                "Q2": 89130,
+                "Q3": 89831
+              },
+              "latest_timed_phase": "Q3",
+              "latest_time_ms": 89831,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_fernando-alonso",
+              "driver_number": "14",
+              "driver_code": "ALO",
+              "driver_name": "Fernando Alonso",
+              "team_id": "aston-martin",
+              "team_name": "Aston Martin",
+              "position": 9,
+              "phase_times_ms": {
+                "Q1": 92092,
+                "Q2": 89072,
+                "Q3": 90311
+              },
+              "latest_timed_phase": "Q3",
+              "latest_time_ms": 90311,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_alexander-albon",
+              "driver_number": "23",
+              "driver_code": "ALB",
+              "driver_name": "Alexander Albon",
+              "team_id": "williams",
+              "team_name": "Williams",
+              "position": 10,
+              "phase_times_ms": {
+                "Q1": 93150,
+                "Q2": 88918,
+                "Q3": 90456
+              },
+              "latest_timed_phase": "Q3",
+              "latest_time_ms": 90456,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_lewis-hamilton",
+              "driver_number": "44",
+              "driver_code": "HAM",
+              "driver_name": "Lewis Hamilton",
+              "team_id": "ferrari",
+              "team_name": "Ferrari",
+              "position": 11,
+              "phase_times_ms": {
+                "Q1": 91666,
+                "Q2": 90001,
+                "Q3": null
+              },
+              "latest_timed_phase": "Q2",
+              "latest_time_ms": 90001,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_oscar-piastri",
+              "driver_number": "81",
+              "driver_code": "PIA",
+              "driver_name": "Oscar Piastri",
+              "team_id": "mclaren",
+              "team_name": "McLaren",
+              "position": 12,
+              "phase_times_ms": {
+                "Q1": 92251,
+                "Q2": 90369,
+                "Q3": null
+              },
+              "latest_timed_phase": "Q2",
+              "latest_time_ms": 90369,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_rafael-camara",
+              "driver_number": "51",
+              "driver_code": "CAM",
+              "driver_name": "Rafael Câmara",
+              "team_id": "haas",
+              "team_name": "Haas",
+              "position": 13,
+              "phase_times_ms": {
+                "Q1": 92809,
+                "Q2": 91515,
+                "Q3": null
+              },
+              "latest_timed_phase": "Q2",
+              "latest_time_ms": 91515,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_arvid-lindblad",
+              "driver_number": "41",
+              "driver_code": "LIN",
+              "driver_name": "Arvid Lindblad",
+              "team_id": "racing-bulls",
+              "team_name": "Racing Bulls",
+              "position": 14,
+              "phase_times_ms": {
+                "Q1": 92306,
+                "Q2": 91687,
+                "Q3": null
+              },
+              "latest_timed_phase": "Q2",
+              "latest_time_ms": 91687,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_carlos-sainz-jr",
+              "driver_number": "55",
+              "driver_code": "SAI",
+              "driver_name": "Carlos Sainz Jr.",
+              "team_id": "williams",
+              "team_name": "Williams",
+              "position": 15,
+              "phase_times_ms": {
+                "Q1": 92959,
+                "Q2": 91785,
+                "Q3": null
+              },
+              "latest_timed_phase": "Q2",
+              "latest_time_ms": 91785,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_max-verstappen",
+              "driver_number": "3",
+              "driver_code": "VER",
+              "driver_name": "Max Verstappen",
+              "team_id": "red-bull",
+              "team_name": "Red Bull",
+              "position": 16,
+              "phase_times_ms": {
+                "Q1": 91238,
+                "Q2": null,
+                "Q3": null
+              },
+              "latest_timed_phase": "Q1",
+              "latest_time_ms": 91238,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_franco-colapinto",
+              "driver_number": "43",
+              "driver_code": "COL",
+              "driver_name": "Franco Colapinto",
+              "team_id": "alpine",
+              "team_name": "Alpine",
+              "position": 17,
+              "phase_times_ms": {
+                "Q1": 93327,
+                "Q2": null,
+                "Q3": null
+              },
+              "latest_timed_phase": "Q1",
+              "latest_time_ms": 93327,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_pierre-gasly",
+              "driver_number": "10",
+              "driver_code": "GAS",
+              "driver_name": "Pierre Gasly",
+              "team_id": "alpine",
+              "team_name": "Alpine",
+              "position": 18,
+              "phase_times_ms": {
+                "Q1": 93449,
+                "Q2": null,
+                "Q3": null
+              },
+              "latest_timed_phase": "Q1",
+              "latest_time_ms": 93449,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_lance-stroll",
+              "driver_number": "18",
+              "driver_code": "STR",
+              "driver_name": "Lance Stroll",
+              "team_id": "aston-martin",
+              "team_name": "Aston Martin",
+              "position": 19,
+              "phase_times_ms": {
+                "Q1": 93653,
+                "Q2": null,
+                "Q3": null
+              },
+              "latest_timed_phase": "Q1",
+              "latest_time_ms": 93653,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_valtteri-bottas",
+              "driver_number": "77",
+              "driver_code": "BOT",
+              "driver_name": "Valtteri Bottas",
+              "team_id": "cadillac",
+              "team_name": "Cadillac",
+              "position": 20,
+              "phase_times_ms": {
+                "Q1": 93774,
+                "Q2": null,
+                "Q3": null
+              },
+              "latest_timed_phase": "Q1",
+              "latest_time_ms": 93774,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_sergio-perez",
+              "driver_number": "11",
+              "driver_code": "PER",
+              "driver_name": "Sergio Pérez",
+              "team_id": "cadillac",
+              "team_name": "Cadillac",
+              "position": 21,
+              "phase_times_ms": {
+                "Q1": 94509,
+                "Q2": null,
+                "Q3": null
+              },
+              "latest_timed_phase": "Q1",
+              "latest_time_ms": 94509,
+              "status": "timed",
+              "reason": null
+            },
+            {
+              "driver_id": "f1db_gabriel-bortoleto",
+              "driver_number": "5",
+              "driver_code": "BOR",
+              "driver_name": "Gabriel Bortoleto",
+              "team_id": "audi",
+              "team_name": "Audi",
+              "position": 22,
+              "phase_times_ms": {
+                "Q1": 101564,
+                "Q2": null,
+                "Q3": null
+              },
+              "latest_timed_phase": "Q1",
+              "latest_time_ms": 101564,
+              "status": "timed",
+              "reason": null
+            }
+          ],
+          "warnings": [
+            "F1DB v2026.20.0 · CC BY 4.0 · normalized for LapDNA.",
+            "Published classification facts; individual laps and runs are not imported."
+          ]
+        }
+      ],
+      "warnings": []
     }
   ]
 }

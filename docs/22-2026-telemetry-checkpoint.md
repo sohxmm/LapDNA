@@ -82,3 +82,12 @@ the exact full Malaysia title, Kuala Lumpur and native Sepang circuit key 12;
 other Bahrain rounds/years, wrong dates and circuit keys remain rejected.
 The canonical calendar retains the physical Malaysia/Sepang identity; original
 source country/name metadata is preserved, not rewritten.
+
+The separate recorded-results publication was still pinned before Brazil's
+2026 qualifying. [F1DB v2026.20.0](https://github.com/f1db/f1db/releases/tag/v2026.20.0)
+is now fetched with its release checksum and normalized in an isolated review.
+All 1,192 prior session driver/position/status/phase-time records compare exactly
+with the previous publication; one 22-driver qualifying classification is added.
+Mexico retains HAM/LEC +119 ms in Q3, the -9 ms Q2 reversal and LAW's DSQ status.
+The source-data update is distinct from the unchanged 217 native publications;
+the final hosting receipt identifies its deployment.
