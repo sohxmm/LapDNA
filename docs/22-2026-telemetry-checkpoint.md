@@ -63,3 +63,12 @@ unique sibling files and bounded retries for a transient destination lock.
 Tests check recovery, a permanent failure preserving the previous receipt, and
 invalid numeric JSON never replacing it. This changes file publication only;
 the analytical method and all numerical gates are unchanged.
+
+Brazil's 2026 native import was additionally blocked by the calendar label
+"Brazilian Grand Prix" versus the source schedule's "São Paulo Grand Prix".
+The [official event page](https://www.formula1.com/en/racing/2026/brazil) and
+retained SessionInfo identify the same 7–8 November Interlagos event. The alias
+is accepted only with matching round, race date, country, location and native
+Interlagos circuit key 14; wrong dates/rounds/circuits and unrelated names still
+fail. Source names remain in the retained metadata. This is an identity repair,
+not a relaxation of telemetry/timing quality checks.

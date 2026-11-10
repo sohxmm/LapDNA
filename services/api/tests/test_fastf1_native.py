@@ -6,7 +6,7 @@ import zlib
 
 import pytest
 
-from lapdna.ingestion.fastf1_native import native_rows, stream_records, resource_available, native_resource_urls, provider_session_identifier
+from lapdna.ingestion.fastf1_native import native_rows, stream_records, resource_available, native_resource_urls, provider_session_identifier, calendar_event_matches
 from lapdna.ingestion.openf1 import ImportFailure
 
 
@@ -14,6 +14,23 @@ def frame(value):
     compressor = zlib.compressobj(wbits=-zlib.MAX_WBITS)
     raw = compressor.compress(json.dumps(value).encode()) + compressor.flush()
     return b"00:00:01.000" + json.dumps(base64.b64encode(raw).decode()).encode() + b"\r\n"
+
+
+def test_brazil_name_alias_requires_the_same_actual_event_and_circuit():
+    race={"name":"Brazilian Grand Prix","circuit_id":"interlagos","round":20,
+          "country":"Brazil","race_date":"2026-11-08"}
+    event={"EventName":"São Paulo Grand Prix","RoundNumber":20,"Country":"Brazil",
+           "Location":"São Paulo","EventDate":"2026-11-08 00:00:00"}
+    meeting={"Number":20,"Country":{"Code":"BRA"},"Circuit":{"Key":14}}
+    assert calendar_event_matches(race,event,meeting)
+    assert calendar_event_matches(race,{**event,"EventName":"Sao Paulo Grand Prix"},meeting)
+    for changed in ({"RoundNumber":19},{"EventDate":"2026-11-15"},{"Country":"Mexico"},
+                    {"EventName":"Unknown Grand Prix"},{"Location":"Rio de Janeiro"}):
+        assert not calendar_event_matches(race,{**event,**changed},meeting)
+    assert not calendar_event_matches(race,event,{**meeting,"Circuit":{"Key":63}})
+    assert not calendar_event_matches(race,event,{**meeting,"Number":19})
+    assert not calendar_event_matches({**race,"circuit_id":"rodriguez"},event,meeting)
+    assert not calendar_event_matches(None,event,meeting)
 
 
 def test_missing_optional_weather_does_not_erase_real_channels_or_imply_dry_conditions():

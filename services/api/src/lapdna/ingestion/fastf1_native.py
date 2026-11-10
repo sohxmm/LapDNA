@@ -36,6 +36,24 @@ def provider_session_identifier(year, session_type):
     return "SS" if year == 2023 and session_type == "SQ" else session_type
 
 
+def calendar_event_matches(race, event, meeting):
+    if race is None or event.get("RoundNumber") != race["round"]:
+        return False
+    if race["name"] == str(event.get("EventName")):
+        return True
+    # The calendar retains the historical Brazilian GP label; the 2026
+    # native schedule calls it São Paulo. Accept only this reviewed identity,
+    # corroborated by date, country, location and source Interlagos circuit key.
+    return (race["name"] == "Brazilian Grand Prix" and race["circuit_id"] == "interlagos"
+            and race["country"] == event.get("Country") == "Brazil"
+            and str(event.get("EventName")) in ("São Paulo Grand Prix", "Sao Paulo Grand Prix")
+            and str(event.get("Location")) in ("São Paulo", "Sao Paulo")
+            and str(event.get("EventDate"))[:10] == race["race_date"]
+            and meeting.get("Number") == race["round"]
+            and meeting.get("Country", {}).get("Code") == "BRA"
+            and meeting.get("Circuit", {}).get("Key") == 14)
+
+
 def resource_available(name, status, *, optional=False):
     """Missing context never creates measurements or hides required failures."""
     if status == 200:
@@ -258,7 +276,7 @@ def import_fastf1_session(cache: Path, year: int, round_number: int, *, progress
 
     calendar = json.loads((Path(__file__).resolve().parents[1] / "calendar_snapshots" / f"{year}.json").read_text(encoding="utf-8"))
     race = next((race for race in calendar["races"] if race["round"] == round_number), None)
-    if race is None or race["name"] != str(session.event["EventName"]):
+    if not calendar_event_matches(race, session.event, info.get("Meeting", {})):
         raise ImportFailure("calendar_identity_mismatch", "Source event name/round does not match the local calendar; review the identity mapping")
     circuit_key = info.get("Meeting", {}).get("Circuit", {}).get("Key")
     marker_url = f"https://api.multiviewer.app/api/v1/circuits/{circuit_key}/{year}" if isinstance(circuit_key,int) else None
