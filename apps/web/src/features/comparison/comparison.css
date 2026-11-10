@@ -22,6 +22,14 @@
 .sc-lap-cards > div { padding: 12px 14px; background: #192329; }
 .sc-lap-cards p { margin: 5px 0; }
 .sc-analysis { margin: 18px 0; }
+.sc-result-anchor:focus { outline: none; }
+.sc-telemetry-availability { margin: 20px 0; padding: 18px; border: 1px solid var(--border); border-radius: 4px; }
+.sc-telemetry-availability h3 { margin: 0 0 8px; }
+.sc-telemetry-availability details { margin-top: 14px; }
+.sc-telemetry-availability summary { cursor: pointer; }
+.sc-telemetry-choice { margin: 12px 0; padding: 12px 0; border-top: 1px solid var(--border); }
+.sc-telemetry-choice p { margin: 0 0 8px; }
+.sc-telemetry-choice .secondary-button { margin: 0; min-height: 44px; }
 .sc-category { padding: 10px 0; border-bottom: 1px solid var(--border); }
 .sc-category summary,.sc-slot summary,.session-browser form summary { cursor: pointer; }
 @media (max-width: 640px) { .sc-slots,.sc-lap-cards { grid-template-columns: 1fr; } .session-browser { padding: 16px; } }

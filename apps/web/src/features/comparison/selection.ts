@@ -106,3 +106,16 @@ export function telemetryAlternative(index:Index,draft:Draft):Draft|null {
   if(!a||!b||(a.lap_id===draft.a.lapId&&b.lap_id===draft.b.lapId))return null;
   return {...draft,a:{...draft.a,lapId:a.lap_id},b:{...draft.b,lapId:b.lap_id}};
 }
+
+/** Navigation choices only: the server still checks the selected pair. */
+export function telemetryLapGroups(index:Index):{phase:Phase;laps:Lap[];draft:Draft|null}[] {
+  return [...sessionPhases(index)].reverse().map(phase=>{
+    const laps=index.drivers.flatMap(driver=>{
+      const best=available(index,driver.driver_number,phase).find(lap=>lap.capability==='telemetry');
+      return best?[best]:[];
+    }).sort((a,b)=>(a.lap_time_ms??Infinity)-(b.lap_time_ms??Infinity)
+      ||Number(a.driver_number)-Number(b.driver_number));
+    const slot=(lap:Lap):Slot=>({driver:lap.driver_number,phase,lapId:lap.lap_id});
+    return {phase,laps,draft:laps.length>=2?{a:slot(laps[0]),b:slot(laps[1]),independent:false}:null};
+  });
+}

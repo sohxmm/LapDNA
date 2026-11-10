@@ -38,12 +38,14 @@ def main():
              ("2019-11-hockenheimring-Q","HAM","VER","Q3",None),
              ("2019-6-monaco-Q","HAM","BOT","Q3",None),
              ("2024-6-miami-SQ","VER","LEC","SQ3","telemetry"),
-             ("2026-19-rodriguez-Q","HAM","LEC","Q3","sector_only")]
+             ("2026-19-rodriguez-Q","HAM","LEC","Q3","sector_only"),
+             ("2026-2-shanghai-Q","NOR","GAS","Q1","telemetry")]
     for session, driver_a, driver_b, phase, tier in cases:
         index, _ = call(f"sessions/{session}/laps")
         selected = []
         for driver in (driver_a,driver_b):
-            laps = [lap for lap in index["laps"] if lap["driver_code"] == driver and lap["phase"] == phase and lap["capability"] != "unavailable"]
+            laps = [lap for lap in index["laps"] if lap["driver_code"] == driver and lap["phase"] == phase and lap["capability"] != "unavailable"
+                    and (session != "2026-2-shanghai-Q" or lap["capability"] == "telemetry")]
             selected.append(min(laps, key=lambda lap:(lap["lap_time_ms"],lap["lap_number"])))
         a,b = selected
         request = {"session_id":session,"lap_a_id":a["lap_id"],"lap_b_id":b["lap_id"],"detail_level":"auto"}

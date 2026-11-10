@@ -16,7 +16,7 @@ from lapdna.ingestion.openf1 import ImportFailure, atomic_json, utc_now
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--years", type=int, nargs="+", default=[2024, 2018, 2019, 2020, 2021, 2022, 2023, 2025, 2026])
+    parser.add_argument("--years", type=int, nargs="+", default=list(range(2026, 2017, -1)))
     parser.add_argument("--output", type=Path, default=Path("services/api/src/lapdna/pilot_data"))
     parser.add_argument("--report", type=Path, default=Path("work/fastf1/archive-report.json"))
     args = parser.parse_args()

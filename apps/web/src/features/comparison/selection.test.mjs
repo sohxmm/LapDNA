@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { initialDraft, changeMode, changePhase, changeDriver, sessionPhases } from './selection.ts';
+import { initialDraft, changeMode, changePhase, changeDriver, sessionPhases, telemetryLapGroups } from './selection.ts';
 import { traceView } from './resultView.ts';
 import { availableSignals, supportedSample, signed, groupTurnMarkers } from '../telemetry/view.ts';
 
@@ -25,6 +25,23 @@ const index = { drivers, laps: [
   lap('1','Q2',4,78000,'unavailable'), lap('1','Q3',5,77000),
   lap('2','Q1',1,81000), lap('2','Q2',2,80000), lap('3','Q1',1,82000),
 ] };
+
+test('telemetry discovery exposes sparse real phase choices without replacing the timing default',()=>{
+  const sparse={...index,laps:[
+    lap('1','Q3',10,77000,'sector_only'),lap('2','Q3',10,77500,'sector_only'),
+    lap('1','Q1',2,80000),lap('1','Q1',3,81000),lap('2','Q1',2,80500),
+    lap('3','Q1',2,79000,'unavailable'),lap('3','Q2',5,78000),
+  ]};
+  const before=JSON.stringify(sparse);
+  const groups=telemetryLapGroups(sparse);
+  assert.deepEqual(groups.map(group=>[group.phase,group.laps.length,!!group.draft]),[['Q3',0,false],['Q2',1,false],['Q1',2,true]]);
+  assert.deepEqual([groups[2].draft.a.lapId,groups[2].draft.b.lapId],['1_Q1_2','2_Q1_2']);
+  assert.equal(initialDraft(sparse).a.phase,'Q3');
+  assert.equal(JSON.stringify(sparse),before);
+  assert.deepEqual(telemetryLapGroups({...sparse,drivers:[...drivers].reverse()}),groups);
+  const sprint={...sparse,session:{session_type:'SQ'},laps:[lap('1','SQ1',1,80000),lap('2','SQ1',1,81000)]};
+  assert.deepEqual(telemetryLapGroups(sprint).map(group=>group.phase),['SQ3','SQ2','SQ1']);
+});
 test('default selects fastest eligible laps in highest common phase with lower lap as tie-break', () => {
   const draft = initialDraft(index);
   assert.deepEqual([draft.a.lapId, draft.b.lapId], ['1_Q2_2','2_Q2_2']);

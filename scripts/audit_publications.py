@@ -57,6 +57,7 @@ def main():
                "event_name": index.session.event_name, "source": publication["provenance"]["source"],
                "drivers": len(index.drivers), "lap_records": len(index.laps), "capabilities": dict(capabilities),
                "verified_fastest_phase_pairs": validation["pair_counts"],
+               "telemetry_discovery_choices": validation["telemetry_discovery_choices"],
                "source_snapshot_sha256": index.source_snapshot_sha256, "publication_sha256": publication["publication_sha256"],
                "method": manifests[identifier]["method"]}
         results.append(row)

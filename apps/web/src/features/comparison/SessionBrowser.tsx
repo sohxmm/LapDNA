@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import { compareLaps, loadLaps, loadSessions } from './api';
 import ComparisonResult from './ComparisonResult';
 import type { PairResponse } from './resultView';
-import { available, changeDriver, changeMode, changePhase, lapTime, sessionPhases, lapSelectionSearch, restoreLapSelection, telemetryAlternative } from './selection';
+import { available, changeDriver, changeMode, changePhase, lapTime, sessionPhases, lapSelectionSearch, restoreLapSelection, telemetryAlternative, telemetryLapGroups } from './selection';
 import type { Draft, Index, Phase, SlotName } from './selection';
 import { sessionsForRace } from '../navigation/routing';
 import './comparison.css';
@@ -79,6 +79,14 @@ function ComparisonForm({ index }: { index: Index }) {
   const readDetail=():Detail=>{const value=new URLSearchParams(window.location.search).get('detail');return value==='telemetry'||value==='sector_only'?value:'auto';};
   const [detail,setDetail]=useState<Detail>(readDetail);
   const pending = useRef<AbortController | null>(null);
+  const resultAnchor=useRef<HTMLDivElement>(null),focusResult=useRef(false);
+  useEffect(()=>{
+    if(result&&focusResult.current){
+      focusResult.current=false;
+      resultAnchor.current?.focus({preventScroll:true});
+      resultAnchor.current?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+    }
+  },[result]);
   useEffect(() => () => pending.current?.abort(), []);
   useEffect(()=>{
     if(!restored.warning)void execute(restored.draft,'replace',readDetail());
@@ -104,6 +112,7 @@ function ComparisonForm({ index }: { index: Index }) {
     && selectedA.capability !== 'unavailable' && selectedB.capability !== 'unavailable' && (!across || draft.independent);
   const sectorOnly = selectedA?.capability === 'sector_only' || selectedB?.capability === 'sector_only';
   const alternative=sectorOnly?telemetryAlternative(index,draft):null;
+  const telemetryGroups=telemetryLapGroups(index);
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (!valid || busy) return;
@@ -112,6 +121,7 @@ function ComparisonForm({ index }: { index: Index }) {
   async function execute(next:Draft,historyMode:'push'|'replace'|'none',requestedDetail:Detail) {
     const first=index.laps.find(lap=>lap.lap_id===next.a.lapId),second=index.laps.find(lap=>lap.lap_id===next.b.lapId);
     if(!first||!second||first.driver_number===second.driver_number||first.capability==='unavailable'||second.capability==='unavailable'||(first.phase!==second.phase&&!next.independent))return;
+    focusResult.current=historyMode==='push';
     pending.current?.abort();
     const controller = new AbortController();
     pending.current = controller;
@@ -139,6 +149,23 @@ function ComparisonForm({ index }: { index: Index }) {
   }
   const withoutLaps = index.drivers.filter(d => !available(index, d.driver_number).length);
   return <>
+    <section className="sc-telemetry-availability" aria-labelledby="telemetry-availability-title">
+      <h3 id="telemetry-availability-title">Distance telemetry</h3>
+      {telemetryGroups.some(group=>group.draft)?<>
+        <p className="sc-muted">Choose the actual laps below to explore the graphs. Pair checks still apply.</p>
+        {telemetryGroups.filter(group=>group.draft).map(group=>{
+          const first=group.laps[0],second=group.laps[1],choice=group.draft!;
+          return <div className="sc-telemetry-choice" key={group.phase}>
+            <p><strong>{group.phase}</strong> · {group.laps.length} drivers with telemetry-supported laps</p>
+            <p className="sc-muted">{first.driver_code} lap {first.lap_number} · {lapTime(first.lap_time_ms)} / {second.driver_code} lap {second.lap_number} · {lapTime(second.lap_time_ms)}</p>
+            <button type="button" className="secondary-button" disabled={busy} onClick={()=>{update(choice);setDetail('auto');void execute(choice,'push','auto');}}>Compare {first.driver_code} / {second.driver_code} · {group.phase}</button>
+          </div>;
+        })}
+      </>:<p className="sc-muted">No same-phase two-driver distance comparison is available in this import. Recorded lap and sector timings remain available.</p>}
+      <details><summary>Telemetry-supported drivers by phase</summary>
+        <ul>{telemetryGroups.map(group=><li key={group.phase}>{group.phase} · {group.laps.map(lap=>lap.driver_code).join(', ')||'None'}</li>)}</ul>
+      </details>
+    </section>
     <form onSubmit={submit}>
       <label className="sc-switch"><input type="checkbox" checked={draft.independent}
         onChange={e => update(changeMode(index, draft, e.target.checked))}/> Allow different qualifying phases</label>
@@ -165,7 +192,7 @@ function ComparisonForm({ index }: { index: Index }) {
       {index.source_url&&<a href={index.source_url} target="_blank" rel="noreferrer">Source and attribution ↗</a>}
       <ul>{index.data_points?.map(item=><li key={item}>{item}</li>)}</ul>{index.warnings?.map((warning,i)=><p key={i}>{warning}</p>)}
     </details>
-    {result && <ComparisonResult result={result}/>}
+    {result && <div className="sc-result-anchor" ref={resultAnchor} tabIndex={-1}><ComparisonResult result={result}/></div>}
   </>;
 }
 

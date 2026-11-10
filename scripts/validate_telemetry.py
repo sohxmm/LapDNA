@@ -46,6 +46,30 @@ def main():
                             "comparison_id": artifact.comparison_id, "tier": artifact.detail_level,
                             "quality": artifact.quality.status, "observations": len(getattr(artifact, "observations", [])),
                             "fallback_reason": getattr(artifact, "fallback_reason", None)})
+    discovery = []
+    for phase in (("SQ1", "SQ2", "SQ3") if index.session.session_type == "SQ" else ("Q1", "Q2", "Q3")):
+        by_driver = {}
+        for lap in index.laps:
+            if lap.phase != phase or lap.capability != "telemetry":
+                continue
+            previous = by_driver.get(lap.driver_number)
+            if previous is None or (lap.lap_time_ms, lap.lap_number) < (previous.lap_time_ms, previous.lap_number):
+                by_driver[lap.driver_number] = lap
+        candidates = sorted(by_driver.values(), key=lambda lap:(lap.lap_time_ms, int(lap.driver_number)))
+        if len(candidates) < 2:
+            continue
+        a, b = candidates[:2]
+        artifact = store.compare(session_id, a.lap_id, b.lap_id, "auto")
+        reverse = store.compare(session_id, b.lap_id, a.lap_id, "auto")
+        assert reverse.model_dump() == artifact.model_dump()
+        if artifact.detail_level == "telemetry":
+            final = artifact.delta_ms[-1] - artifact.delta_ms[0]
+            assert abs(sum(segment.gain_ms for segment in artifact.segments) - final) < 1e-6
+            assert abs(sum(section.gain_ms for section in artifact.estimated_minisectors) - final) < 1e-6
+        discovery.append({"phase":phase,"a":a.lap_id,"b":b.lap_id,
+            "comparison_id":artifact.comparison_id,"tier":artifact.detail_level,
+            "observations":len(getattr(artifact,"observations",[])),
+            "fallback_reason":getattr(artifact,"fallback_reason",None)})
     official_by_driver = {
         "NOR": (79327., [26492., 26579., 26256.]),
         "PIA": (79436., [26407., 26643., 26386.]),
@@ -68,7 +92,7 @@ def main():
             official[matches[0].lap_id] = (lap_ms, sectors)
     report = {"session_id": session_id, "source_snapshot_sha256": index.source_snapshot_sha256,
               "publication_sha256": publication["publication_sha256"],
-              "scope": "All distinct-driver, fastest eligible same-phase pairs; source download disabled/not used. This does not exhaust every actual lap pair.",
+              "scope": "All distinct-driver, fastest eligible same-phase pairs plus the explicit telemetry-discovery choice in each phase; source download disabled/not used. This does not exhaust every actual lap pair.",
               "driver_count": len(index.drivers), "indexed_laps": len(index.laps),
               "capabilities": dict(Counter(lap.capability for lap in index.laps)),
               "pair_counts": dict(Counter(result["tier"] for result in results)),
@@ -79,7 +103,7 @@ def main():
                                       "url": official_url,
                                       "lap_number_note": "FIA report ordinals differ from provider ordinals; matching uses driver, phase, duration and sector triple.",
                                       "records": {identifier: {"lap_time_ms": duration, "sector_times_ms": sectors} for identifier, (duration, sectors) in official.items()}},
-              "results": results}
+              "results": results, "telemetry_discovery_choices": discovery}
     if session_id not in ("2024-16-monza-Q", "2018-14-monza-Q"):
         report["official_spot_checks"] = None
     args.output.parent.mkdir(parents=True, exist_ok=True)
