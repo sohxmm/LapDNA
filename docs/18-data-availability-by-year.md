@@ -1,12 +1,10 @@
 # Data availability by year and what LapDNA can do with it
 
-This guide records the first 63-session batch. [Latest audited archive coverage and confirmed deployment](21-archive-coverage.md) supersedes its import-status counts when a subsequent batch is released; the field semantics below remain applicable.
+Updated 10 November 2026. All **217 past qualifying/actual Sprint Qualifying sessions** in the approved 2018–2026 scope are imported, audited and deployed. The [coverage ledger](../config/telemetry-coverage.json) records every source, roster, lap capability and tested comparison; [hosting](12-hosting.md) identifies the live source release.
 
-Updated 10 November 2026. The current audited release batch contains 63 real native session publications. This is a bounded batch while the remaining archive imports continue; [hosting verification](12-hosting.md) records the actual deployed release. The [coverage ledger](../config/telemetry-coverage.json) records each source revision, roster/lap capabilities and comparison checks. A provider supporting a year never proves every event, lap or channel is available.
+The audit checks 70,382 fastest-eligible same-phase pairs and their reversals: 26,751 return telemetry and 43,631 return recorded sectors. It also checks 464 explicit telemetry-discovery choices. These are selected-lap capabilities, not a claim that every driver pair or lap is usable. The 2026 archive has 20 Q/six SQ imports and verified graph choices in 12 sessions. [The 2026 checkpoint](22-2026-telemetry-checkpoint.md) explains why Mexico remains timing-only and why source sample existence does not independently validate a distance curve.
 
-The batch contains all 21 qualifying rounds in both 2018 and 2019; 17 Q and three SQ sessions in 2024; and Mexico 2026 qualifying with 134 eligible timing-only laps across 22 source drivers. It passed 19,010 fastest-eligible same-phase pairs, each in both input orders: 12,317 telemetry and 6,693 timing-only results. Arbitrary individual lap pairs remain checked when requested. Source agreement and numerical checks do not establish physical corner ground truth or driving causation.
-
-2024 regular qualifying in this batch: Bahrain, Saudi Arabia, Australia, Japan, China, Miami, Emilia Romagna, Monaco, Canada, Spain, Austria, Britain, Hungary, Belgium, Italy, São Paulo and Qatar. SQ: China, Miami and Austria. Remaining Q rounds: Netherlands, Azerbaijan, Singapore, USA, Mexico, Las Vegas and Abu Dhabi. Other actual SQ sessions are also pending. Detailed 2020–2023, 2025 and other completed 2026 imports are still in progress; future sessions are not imported in advance.
+Recorded classifications now include Brazil 2026 through checksum-verified F1DB v2026.20.0. All 1,192 prior session driver/position/status/phase-time records were preserved, including Mexico’s LAW DSQ, +119 ms Q3 and -9 ms Q2 comparisons. Future events are never populated in advance.
 
 ## Read the availability labels correctly
 
@@ -16,11 +14,11 @@ The batch contains all 21 qualifying rounds in both 2018 and 2019; 17 Q and thre
 - **Optional context:** useful source fields to retain; their existence does not mean a new graph is implemented.
 - **Unavailable:** no usable verified measurement in the selected public feeds. Do not infer or substitute a value.
 
-The current R01 manifest contains **1,168 qualifying classifications, 24 Sprint Qualifying classifications, 27,581 driver-result rows and 27,270 timed eligible rows across 1950–2026**. Some drivers and historical timing fields are genuinely missing. A full event count is not proof that every driver has a recorded time. These counts come from [the committed coverage manifest](../services/api/src/lapdna/classification_snapshots/coverage.json), not from an advertised API range.
+The current R01 manifest contains **1,169 qualifying classifications, 24 Sprint Qualifying classifications, 27,603 driver-result rows and 27,292 timed eligible rows across 1950–2026**. Some drivers and historical timing fields are genuinely missing. A full event count is not proof that every driver has a recorded time. These counts come from [the committed coverage manifest](../services/api/src/lapdna/classification_snapshots/coverage.json), not from an advertised API range.
 
 ## Year coverage
 
-| Years | Published in LapDNA now | Additional documented source data | What we can build after verification |
+| Years | Published in LapDNA now | Source data | Available outputs and limits |
 | --- | --- | --- | --- |
 | 1950–1993 | Event calendars, historical driver/team entries and qualifying result/time fields where present; predominantly F1DB whole-event backfill | Historical result archives and individual official documents | Two-driver timing gaps, classification tables and historical formats. No continuous telemetry or corner-time claims. |
 | 1994–2005 | Same timing tier; Jolpica archive plus F1DB backfill/corrections | Legacy qualifying records; some separate historical components | Exact source-published component comparisons. Preserve format warnings; first six 2005 events have two components, and a component is not an aggregate result. |
@@ -28,12 +26,12 @@ The current R01 manifest contains **1,168 qualifying classifications, 24 Sprint 
 | **2014–2017** | Same modern timing tier | No verified continuous car-channel archive selected for LapDNA | **Timing comparisons only.** Keep the graphs/map/corner analysis unavailable for these years. |
 | **2018** | Modern timings and all 21 native Q sessions in the audited batch | FastF1 detailed timing, original car/position streams and session context | Eligible laps support measured channels and approximate distance analysis. Per-lap exclusions remain explicit. |
 | **2019** | Modern timings and all 21 native Q sessions in the audited batch | Same primary field family | Includes repaired Monaco and Germany imports; per-lap and pair quality gates remain unchanged. |
-| **2020** | Modern timing tier | Same candidate FastF1 field family | Same; source parser explicitly documents position coordinates in tenths of a metre from 2020. |
-| **2021–2022** | Modern qualifying results; no separate invented SQ1/SQ2/SQ3 classification | FastF1 detailed data and actual weekend/session formats | Conventional qualifying lap comparison. Sprint weekends must follow their actual format; sprint race results cannot stand in for sprint qualifying. |
-| **2023** | Qualifying plus six actual Sprint Qualifying/Shootout classifications | FastF1 and OpenF1 historical car/lap/location/context data | Same supported telemetry features, plus actual SQ phase/lap comparison where the imported session supports it. |
-| **2024** | 24 Q/six SQ classifications; audited native batch includes 17 Q/three SQ | Primary FastF1 plus explicitly identified OpenF1/TracingInsights composite | Actual lap selections, synchronized channels, approximate maps, observations and export where the selected pair passes. Other sessions remain pending. |
-| **2025** | 24 qualifying and six SQ classifications | FastF1/OpenF1 candidate data | Expand the same verified pipeline; do not imply the archive has already been imported. |
-| **2026** | 19 Q/six SQ classifications in the current results snapshot; Mexico native Q is timing-only | Candidate native data for completed published sessions | Mexico's native gaps block detailed curves. Other completed sessions still need import; future data is not invented. Raw DRS channel 45 is absent in the pinned 2026 source definition. |
+| **2020** | 17 native Q publications; 15 sessions have a verified graph choice | Native car/position, detailed timing and context | Same distance features where quality passes; missing references stay timing-only. |
+| **2021–2022** | 22 native Q publications in each year; graph choices in 22/21 sessions respectively | Actual qualifying lap inventories and source weekend formats | Conventional qualifying comparisons; no invented SQ1/SQ2/SQ3 for sprint-race formats. |
+| **2023** | 22 Q/six actual SQ publications; 24 sessions have a verified graph choice | Pinned FastF1 primary/mirror and explicitly identified native composite sources | Actual Q/SQ phase/lap selection and supported distance analysis; provider SS means the actual Sprint Shootout. |
+| **2024** | 24 Q/six SQ publications; all 30 have verified graph choices | Native telemetry, timing, positions, source turns and context | Selected-lap traces, approximate maps, observations and export; individual pairs can still fail. |
+| **2025** | 24 Q/six SQ publications; 17 sessions have a verified graph choice | Actual native source records, not an advertised provider range | Same supported outputs; many laps fail continuous alignment checks. |
+| **2026** | 20 Q/six SQ native publications; 12 sessions have verified graph choices; 20 Q/six SQ recorded classifications | Measured native channels where present, timing/rosters and source geometry/context | Use the explicit Distance telemetry choices. Gaps block many laps, including Mexico; raw DRS channel 45 is absent in the pinned source definition. |
 
 FastF1 documents detailed timing, session, car and position coverage from 2018, typically arriving 30–120 minutes after a session, with possible archive failures. Its older results coverage is broader. [Pinned FastF1 data reference](https://github.com/theOehrly/Fast-F1/blob/v3.9.2/docs/data_reference/index.rst).
 

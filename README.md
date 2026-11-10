@@ -6,7 +6,7 @@ Where did the lap time go? Compare two qualifying laps on a common track-distanc
 
 [Latest archive completion and deployment receipt](docs/21-archive-coverage.md) supersedes the first-batch checkpoint below when a later batch is confirmed.
 
-**Status, 10 November 2026:** the audited native batch contains 63 sessions: all 21 Q rounds in both 2018 and 2019, 17 Q/three SQ sessions in 2024, and Mexico 2026 Q with timing-only output. Remaining 2018–2026 archive imports are in progress. [Exact audited coverage](config/telemetry-coverage.json) and [field/year availability](docs/18-data-availability-by-year.md) distinguish source support, actual import and validated comparisons. Recorded classifications retain broader historical coverage.
+**Status, 10 November 2026:** all 217 past qualifying and actual Sprint Qualifying sessions in the approved 2018–2026 scope are imported, audited and deployed. The 2026 archive contains 20 Q and six SQ sessions; 12 offer verified graph choices. Import coverage does not imply every lap/pair supports distance analysis. The [coverage ledger](config/telemetry-coverage.json), [live receipt](docs/21-archive-coverage.md) and [year/field guide](docs/18-data-availability-by-year.md) record the distinction. Earlier years retain recorded timing comparisons.
 
 The studio offers actual event-specific drivers/teams, Q/SQ phases and eligible lap selection; source-coloured synchronized speed, throttle, gear and binary-brake traces; distance delta; linked approximate performance maps; evidence-based observations and PNG/JSON export. Quality failures remain timing-only or unavailable. Dark/light themes persist. No synthetic preview, fabricated fallback channel or runtime LLM claim is shipped.
 

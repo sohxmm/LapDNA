@@ -62,7 +62,7 @@ def main():
                "method": manifests[identifier]["method"]}
         results.append(row)
         print(identifier, dict(capabilities), validation["pair_counts"], flush=True)
-    output = {"schema_version": "1.0.0", "scope": "Digest-checked actual native publications and fastest eligible same-phase pairs plus reversals. Calendar/provider year ranges do not imply coverage; arbitrary actual-lap pairs are checked when requested.",
+    output = {"schema_version": "1.0.0", "scope": "Digest-checked actual native publications, fastest eligible same-phase pairs and explicit telemetry-discovery choices plus reversals. Calendar/provider year ranges do not imply coverage; arbitrary actual-lap pairs are checked when requested.",
               "source_year_target": [2018, 2026], "session_count": len(results),
               "sessions_by_year": dict(sorted(Counter(str(row["year"]) for row in results).items())),
               "sessions": results}

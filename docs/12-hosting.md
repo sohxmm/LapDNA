@@ -1,38 +1,56 @@
-# Hosted preview
+# Hosted application
 
-This is the first native-batch hosting record. See [the latest archive completion receipt](21-archive-coverage.md) for any later confirmed batch.
+Updated 10 November 2026. [LapDNA](https://lapdna.vercel.app) serves the audited
+217-session past 2018–2026 Q/actual SQ archive with recorded classifications,
+source-coloured telemetry where supported and persistent dark/light themes.
+No synthetic preview or fabricated fallback data is shipped.
 
-Updated 10 November 2026. [LapDNA](https://lapdna.vercel.app) serves the audited 63-session native batch with the shared editorial landing, blue dark/off-white light themes, event-specific team colours and no synthetic preview or fabricated fallback data.
+## Exact release
 
-## Deployed release
+- Application source: `5e117098727475a20394359f6a7a8d0adf8316a8`.
+- Deployment: `dpl_DW72dC1W4D9bEgCvNYJpLNLUGU8R`.
+- Frozen release: `work/releases/5e117098-20261110T111308Z`.
+- Native catalogue SHA-256: `a6dd7043ee2ba38f46fcdf54e06f3f291afc27dce4b5ba1dcb6b099aa64c47d9`.
+- Native audit base: `fb91de2468e1fb4d3f1fb8668dbca20994990269`.
+- Recorded source: checksum-verified F1DB v2026.20.0, including Brazil 2026.
 
-- Source commit: `071f0d75fa3c9d43894af12672282e693c262159`.
-- Deployment: `dpl_9Gn8YBXj8QYwQDdgyQFjvCuh9boX`.
-- Frozen release: `work/releases/071f0d75-20261109T195342Z`.
-- Catalogue SHA-256: `cda8a8aa1a88d0100e11cbabfc930b9f6a5951d6ead44334942cf46f6067411d`.
-- Audited publications: 21 Q sessions in 2018, 21 Q in 2019, 17 Q/three SQ in 2024, and timing-only Mexico 2026 Q.
-- [Coverage ledger](../config/telemetry-coverage.json): 19,010 phase-best pairs plus reversals; 12,317 telemetry and 6,693 timing-only results. Every publication, source identity and inventory is digest-checked. This is not the Cartesian product of every actual lap.
+All runtime Python, frontend source, contracts, native manifests and native
+catalogue match the 217-session audit exactly. The classification refresh keeps
+all 1,192 prior session driver facts and adds Brazil's 22-driver qualifying.
+`audit-reuse.json`, `hosted-checks.json` and `recorded-hosted-checks.json` in the
+private release directory record reuse and actual hosted checks. [Coverage](21-archive-coverage.md)
+distinguishes imports from usable graph choices; [field/year guide](18-data-availability-by-year.md)
+defines measurements and derived outputs.
 
-The remaining 2018–2026 archive import is still in progress. The deployed batch does not automatically grow when local imports finish. Future sessions and absent source measurements are never invented. [Year/field coverage](18-data-availability-by-year.md) gives the exact scope.
+## Storage and verification
 
-## Hosting and storage
+Vercel serves React/Vite and FastAPI. Small indices/manifests/classifications are
+bundled; normalized telemetry uses hash-addressed public Blob objects. The API
+validates origin, size and digest before use. No upstream credentials or raw
+caches enter the deployment. Acquisition runs offline, never inside a web
+comparison request. Three decoded sessions, 48 results, eight compressed blobs
+and two builders bound runtime caches/work. Pushes alone do not deploy.
 
-Vercel serves the React/Vite frontend and FastAPI comparison service. Small indices, manifests and recorded classifications are bundled. The 63 normalized publications (about 108 MB including indices/reports before offloading) have content-addressed public Vercel Blob objects; each upload was independently downloaded and SHA-256 checked. Runtime downloads only an immutable normalized artifact, verifies its pinned hash and size, then performs bounded calculations. No upstream telemetry parse or account login occurs on requests.
+The audit checks 70,382 phase-best pairs plus reversals, with 26,751 telemetry
+and 43,631 timing-only results, and 464 explicit discovery choices. Hosted
+checks cover inventory, selected real comparisons, exact links, swaps, colours,
+Australia's source roster and Brazil/Mexico recorded facts. A first cold check
+timed out; its retry passed. Cold/network loading can be slow, and receipts
+retain observed request durations. The chart-library size warning is advisory.
 
-Source caches, raw telemetry, optional FastF1/numerical import dependencies and all operator credentials remain outside Git and deployment. The private GitHub repository remains private. The production Blob write credential stays server-side and is not required by the public artifact reader or frontend.
-
-Frozen source/data prevent imports from changing an in-progress deployment. Failed imports preserve the prior active publication. The runtime retains at most eight compressed files, three decoded publications and 48 comparison results per process, with two concurrent builds. Verified source gaps, incomplete flags and numerical failures reduce capability instead of forcing a curve to match timing.
-
-## Verification
-
-The deployed API was checked for Monza 2024 NOR/RUS, Monza 2018 RAI/VET, Germany 2019 HAM/VER, Monaco 2019 HAM/BOT, Miami 2024 SQ3 VER/LEC and Mexico 2026 HAM/LEC. All returned source-matching lap IDs/times/colours, reversed selections retained canonical artifacts, and immutable GETs reproduced the results. Australia 2024 exposes 19 actual source drivers without fabricating an entry for the unassigned stream. First comparison requests in this check took roughly 0.5–4.1 seconds, including transport and cold artifact access; this is a small acceptance sample, not a latency guarantee. Monaco's selected phase-best pair correctly returned timing-only output.
-
-Mexico HAM Q3 source lap 19 is 1:16.514; LEC source lap 23 is 1:16.633, recorded gap +0.119 s. Native speed gaps block the distance reference, so no continuous curve, map or corner claim is shown. Local browser checks confirmed Q/SQ switching, Back restoration, the real SQ3 comparison, the Mexico fallback, themed PNG export and white Williams traces on a light background. Mobile 390×844 has no page-level horizontal overflow and the keyboard distance cursor works. Final hosted visual evidence is recorded with the release handoff.
-
-Checks: 210 Python tests passed, one Windows symlink test skipped; 30 client tests passed; generated contracts, typecheck and production build passed. The lazy ECharts chunk has an existing non-fatal size advisory.
+Local browser checks cover 390 × 844 light mode, keyboard graph selection and
+result focus, no horizontal page overflow and source colours. Live China 2026
+proof is retained at `work/qa/2026-11-10-live-china-2026-graphs.png`.
 
 ## Current limits
 
-Detailed 2020–2023, 2025 and other completed 2026 imports, plus the remaining 2024 Q/SQ sessions, are pending. The native importer respects both the library's limit and a persistent project request budget, waiting for the source window instead of resetting clients to bypass it. Authentication expiry stops with a local sign-in instruction.
+All 26 past 2026 Q/SQ sessions are imported, but only 12 have verified displayed
+graph choices. Selected laps still pass pairwise checks; many timing bests,
+including Mexico, fail continuous alignment. The UI offers explicit supported
+laps and otherwise shows recorded sectors. These gates were not relaxed.
 
-Corner/straight zones outside the authored Monza profile are approximate fixed marker-vicinity windows, not measured entry/apex/exit boundaries. Brake is binary on/off; steering angle and brake pressure are unavailable. Optional RPM/DRS plots, inferred run labels and runtime LLM wording are not implemented. Exact links preserve the current method/source identity; arbitrary cross-method historical retention is still open. Public source access and software licences do not independently settle all underlying data redistribution rights.
+Public telemetry supports approximate analysis, not driving causation or
+surveyed corner boundaries. Brake is binary; steering angle/brake pressure are
+unavailable. RPM/DRS plots, inferred run labels, clustering and runtime LLM
+wording are deferred. Current-method exact links work; durable cross-method
+history is still open. Future qualifying data is not invented in advance.

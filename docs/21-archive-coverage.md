@@ -1,23 +1,30 @@
 # Audited native archive coverage
 
+Latest application deployment: `dpl_DW72dC1W4D9bEgCvNYJpLNLUGU8R`, source `5e117098727475a20394359f6a7a8d0adf8316a8`.
+The recorded-results refresh includes Brazil 2026 through F1DB v2026.20.0;
+hosted complete-event checks match the reviewed Brazil/Mexico publication.
+The native catalogue/digests/runtime are byte-identical to the full audit below,
+so its 217-session native results are retained without changing the method.
+
+
 This is the latest audited batch; deployment is complete only when the receipt below is confirmed.
 
 Source commit: `fb91de2468e1fb4d3f1fb8668dbca20994990269`. Frozen catalogue: `a6dd7043ee2ba38f46fcdf54e06f3f291afc27dce4b5ba1dcb6b099aa64c47d9`.
-Audited sessions: **217**. Remaining source/publication failures: **0**.
+Audited sessions: **217**. Past sessions awaiting a verified publication: **0**.
 
 A session with telemetry-capable laps still applies pairwise checks. Timing-only and excluded laps remain explicit. Future calendar sessions are not downloaded before they exist.
 
-| Year | Native Q | Native SQ |
-| --- | ---: | ---: |
-| 2018 | 21 | 0 |
-| 2019 | 21 | 0 |
-| 2020 | 17 | 0 |
-| 2021 | 22 | 0 |
-| 2022 | 22 | 0 |
-| 2023 | 22 | 6 |
-| 2024 | 24 | 6 |
-| 2025 | 24 | 6 |
-| 2026 | 20 | 6 |
+| Year | Imported Q | Imported SQ | Sessions with verified graph choices |
+| --- | ---: | ---: | ---: |
+| 2018 | 21 | 0 | 21 |
+| 2019 | 21 | 0 | 21 |
+| 2020 | 17 | 0 | 15 |
+| 2021 | 22 | 0 | 22 |
+| 2022 | 22 | 0 | 21 |
+| 2023 | 22 | 6 | 24 |
+| 2024 | 24 | 6 | 30 |
+| 2025 | 24 | 6 | 17 |
+| 2026 | 20 | 6 | 12 |
 
 | Session | Telemetry-capable laps | Timing-only laps |
 | --- | ---: | ---: |
@@ -239,7 +246,7 @@ A session with telemetry-capable laps still applies pairwise checks. Timing-only
 | 2026-9-silverstone-Q · British Grand Prix | 0 | 80 |
 | 2026-9-silverstone-SQ · British Grand Prix | 6 | 102 |
 
-## Unresolved source/publication failures
+## Unpublished past sessions
 
 None among the actual attempted past-session candidates.
 
@@ -248,3 +255,31 @@ The detailed ledger records exact source hashes, methods and phase-best pair che
 ## Confirmed deployment
 
 The frozen batch above was deployed to https://lapdna.vercel.app and passed hosted session-inventory, comparison, reversal, exact-link and roster checks. The private operator release directory retains the deployment output and hosted-check receipt. Earlier 63-session figures in historical release notes describe the earlier batch.
+
+A verified graph choice means at least one explicit displayed lap pair passed. It does not mean all laps/pairs in that session support telemetry. The native audit additionally checks the recorded phase-best pairs; its ledger preserves exact capabilities and fallback results.
+
+## 2026 graph choices
+
+In the studio, use the **Distance telemetry** buttons to select these actual
+supported laps. Their lap numbers/times are disclosed before changing the pair.
+These are verified examples, not a promise for all drivers' fastest laps.
+
+| Grand Prix | Qualifying examples | Sprint Qualifying examples |
+| --- | --- | --- |
+| China | Q1 NOR / GAS | — |
+| Miami | — | SQ1 NOR / BOR |
+| Canada | Q1 LAW / ALB | — |
+| Austria | Q3 NOR / HAD | — |
+| Britain | — | SQ1 NOR / COL; SQ3 VER / HAD |
+| Belgium | Q3 ANT / LEC | — |
+| Netherlands | Q1 ANT / VER; Q3 HAM / VER | SQ2 NOR / LAW |
+| Italy | Q2 VER / LAW | — |
+| Singapore | Q1 HUL / PER | SQ3 VER / LEC |
+| United States | Q2 NOR / ANT; Q3 LEC / HAM | — |
+
+All 26 past 2026 Q/SQ sessions are imported. The remaining sessions have no
+same-phase two-driver discovery choice under the current gates; source channels
+may still exist without supporting a reliable continuous distance comparison.
+Mexico remains timing-only after primary and composite source checks. No
+missing brake/gear/throttle is inferred from speed, and no numerical gate was
+relaxed to produce this list.

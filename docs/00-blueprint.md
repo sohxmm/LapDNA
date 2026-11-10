@@ -1,7 +1,7 @@
 # LapDNA implementation blueprint
 
 Prefinal update, 9 November 2026: [verified telemetry release](20-verified-telemetry-release.md) supersedes the former single-Monza/synthetic-preview scope and fixed A/B colours. The publication catalogue now supports independently checked sessions; exact live counts are recorded at release.
-Revision 7 · 10 November 2026. Status: **a 63-session real native batch is deployed and verified; the remaining 2018–2026 qualifying/SQ archive is importing**. R01 retains historical classifications. The [handoff](10-handoff.md), [coverage ledger](../config/telemetry-coverage.json) and [hosting record](12-hosting.md) define actual current implementation and deployment. The original Monza counts/source exception below are historical pilot context, superseded for operational scope by those documents. The approved interface remains sports-editorial A and G1 overlays with persistent blue dark/off-white light modes, source team colours and no synthetic preview. Earlier years retain timing comparisons.
+Revision 8 · 10 November 2026. Status: **all 217 past qualifying/Sprint Qualifying candidates in the approved 2018–2026 scope are imported, audited and deployed**. Quality remains per selected pair: 2026 has 26 imports and verified graph choices in 12. [Current handoff](10-handoff.md), [coverage](21-archive-coverage.md) and [hosting](12-hosting.md) supersede historical pilot counts below. Sports-editorial A, G1 overlays, persistent dark/light themes and source team colours remain approved; no synthetic preview is shipped.
 
 ## The product
 
@@ -9,7 +9,7 @@ Start with the current year, choose a race from that year's sourced calendar, th
 
 Choose any two different drivers from an imported qualifying session, choose each driver's Q1/Q2/Q3 phase independently, and select eligible laps. The app explains where their elapsed-time difference developed and which supported telemetry patterns accompany it. Same-phase selection is the default; cross-phase comparisons require explicit opt-in and persistent context warnings.
 
-All imported drivers appear in the actual event roster. An eliminated driver's absent phase is unavailable with an explanation. There is no curated driver-pair limit. All 21 qualifying rounds in both 2018 and 2019 are in the audited batch, alongside 20 Q/SQ sessions in 2024 and timing-only Mexico 2026 Q. Actual 2023-onward SQ phases/laps are supported by contract 1.4.0. The full remaining archive remains the target, verified per session/channel. The authored Monza profile and explicitly approximate marker-vicinity profiles retain layout/year identity; a year range never proves a usable circuit reference.
+All actual imported drivers appear in their event roster. An eliminated driver’s absent phase stays unavailable. There is no curated driver-pair limit. All 217 past Q/actual SQ candidates in 2018–2026 are published; future sessions are not imported before source publication. The authored Monza profile and explicitly approximate marker-vicinity profiles retain layout/year identity. Import availability never proves that an individual lap, pair or channel supports a graph.
 
 ## Core outputs
 

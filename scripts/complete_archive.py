@@ -107,16 +107,17 @@ def main():
     shutil.copy2(ledger, ROOT / "config/telemetry-coverage.json")
     notes = ["# Audited native archive coverage", "", "This is the latest audited batch; deployment is complete only when the receipt below is confirmed.", "",
              f"Source commit: `{baseline}`. Frozen catalogue: `{receipt['catalogue_sha256']}`.",
-             f"Audited sessions: **{coverage['session_count']}**. Remaining source/publication failures: **{len(unresolved)}**.", "",
+             f"Audited sessions: **{coverage['session_count']}**. Past sessions awaiting a verified publication: **{len(unresolved)}**.", "",
              "A session with telemetry-capable laps still applies pairwise checks. Timing-only and excluded laps remain explicit. Future calendar sessions are not downloaded before they exist.", "",
-             "| Year | Native Q | Native SQ |", "| --- | ---: | ---: |"]
+             "| Year | Imported Q | Imported SQ | Sessions with verified graph choices |", "| --- | ---: | ---: | ---: |"]
     for year in range(2018,2027):
         rows = [row for row in coverage["sessions"] if row["year"] == year]
-        notes.append(f"| {year} | {sum(row['session_id'].endswith('-Q') for row in rows)} | {sum(row['session_id'].endswith('-SQ') for row in rows)} |")
+        graphs=sum(any(choice["tier"] == "telemetry" for choice in row.get("telemetry_discovery_choices", [])) for row in rows)
+        notes.append(f"| {year} | {sum(row['session_id'].endswith('-Q') for row in rows)} | {sum(row['session_id'].endswith('-SQ') for row in rows)} | {graphs} |")
     notes.extend(["", "| Session | Telemetry-capable laps | Timing-only laps |", "| --- | ---: | ---: |"])
     for row in coverage["sessions"]:
         notes.append(f"| {row['session_id']} · {row['event_name']} | {row['capabilities'].get('telemetry',0)} | {row['capabilities'].get('sector_only',0)} |")
-    notes.extend(["", "## Unresolved source/publication failures", ""])
+    notes.extend(["", "## Unpublished past sessions", ""])
     notes.extend([f"- {row['year']} R{row['round']} {row['session_type']} · {row['event_name']}: {row.get('reason','No verified native publication')}" for row in unresolved] or ["None among the actual attempted past-session candidates."])
     notes.extend(["", "The detailed ledger records exact source hashes, methods and phase-best pair checks. Source agreement is not physical corner ground truth. Brake is on/off, not pressure; no missing control input is inferred from speed.", ""])
     document = ROOT / "docs/21-archive-coverage.md"
