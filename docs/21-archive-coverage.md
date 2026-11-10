@@ -1,5 +1,7 @@
 # Audited native archive coverage
 
+Presentation update: source `c40bcf4123ebf74c65628374fe4d9f68015a7f36`, deployment `dpl_B22ASreGMupkaSAQw5Y8MqJ6qoXX`, retains the exact 166-session audited catalogue below. The only rendering change formats cumulative-delta axis ticks to two decimals; analytical/server source and all referenced data hashes were checked unchanged. Production identity/comparison/reversal checks pass, and the real 2022 Bahrain MAG/MSC Q1 graphs were inspected in the browser. Year-wide source support still does not guarantee that each selected lap pair passes telemetry quality gates.
+
 This is the latest audited batch; deployment is complete only when the receipt below is confirmed.
 
 Source commit: `ec985ab4d0261d7819aa2aae241dea65b761fe57`. Frozen catalogue: `1108d842fdc2b7e7bcea02af2b07259e95dcaeaf61b434e476720ca3c8603800`.
