@@ -18,6 +18,7 @@ from lapdna.inventory import (
 )
 from lapdna.models import Artifact, Catalog, ErrorResponse, Health
 from lapdna.store import ArtifactNotFound, ArtifactStore, InvalidArtifact, QualityBlocked
+from lapdna.view_models import ViewCompareRequest, ViewCompareResponse
 
 
 def create_app(artifact_dir: Path | None = None, session_dir: Path | None = None,
@@ -154,6 +155,13 @@ def create_app(artifact_dir: Path | None = None, session_dir: Path | None = None
     })
     def compare(request: CompareRequest) -> CompareResponse:
         return sessions.compare(request, store)
+
+    @application.post("/api/v1/views/compare", response_model=ViewCompareResponse, responses={
+        404: {"model": ErrorResponse}, 409: {"model": ErrorResponse},
+        422: {"model": ErrorResponse}, 503: {"model": ErrorResponse},
+    })
+    def compare_view(request: ViewCompareRequest) -> ViewCompareResponse:
+        raise SelectionError(409, "view_not_prepared", "This opt-in v6 view has not been prepared.")
 
     return application
 

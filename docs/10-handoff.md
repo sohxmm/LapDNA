@@ -1,6 +1,10 @@
+## Step 1 receipt — view contracts
+
+Opt-in `/api/v1/views/compare` and schema 2.0.0 define all three tiers, native null/mask semantics and cumulative-bound/delta-band fields. The endpoint is deliberately not prepared until the backend steps complete. Legacy request/detail_level, response models and seven protected runtime files are unchanged. Generated contracts are current. Checks: 235 Python passes, one Windows skip; 31 web passes; contracts:check, typecheck and build pass (existing upstream deprecation/chart-size advisories only). Steps 2–4 remain; no deployment.
+
 # Current handoff
 
-## Active owner decision — Step 0 complete; stop before Step 1
+## Active owner decision â€” Steps 1â€“4 authorized; stop before Step 5
 
 The owner explicitly approved [view tiers](23-view-tiers.md), superseding the
 older alignment/coverage restrictions only for Tier 0/Tier 1. Tier 2 corner
@@ -10,12 +14,15 @@ indexed laps; first/all failures, distributions, conditional checks and pair
 context are in the coverage ledger and `config/gate-attribution-laps.jsonl.gz`.
 Of 14,840 timing-eligible laps without graphs, 13,393 first fail the native gap
 gate. All 25,271 eligible laps have in-lap car observations; 25,232 have both
-edges bracketed within the existing ±1 s crop. These are feasibility findings,
+edges bracketed within the existing Â±1 s crop. These are feasibility findings,
 not implemented Tier 0 coverage. Seven runtime files/ten Tier 2 function bodies
 are byte-unchanged. Python, contracts, typecheck, 31 client tests and build pass.
 Reproduce using `scripts/attribute_telemetry_gates.py` followed by
 `scripts/render_gate_attribution.py`; the latter also accepts `--lap-id`.
-**Stopped for owner report review before Step 1.** The deployed v5
+The owner accepted Step 0 and clarified continuation through Step 4: linear
+speed bridging up to 2 s with `dt * |v2-v1| / 2` distance bounds, not the earlier
+monotone/position method. Report Step 3b and Step 4 measurements together and
+stop before Step 5 selection/Step 6 UI work. The deployed v5
 application, contracts, selection rules and numerical behaviour are unchanged
 by Step 0. Read that decision before following the older remaining-work text.
 
@@ -26,7 +33,7 @@ pushes and Vercel deployment. Credentials and raw caches stay private/ignored.
 
 ## Actual live scope
 
-All **217 past Q/actual SQ candidates in 2018–2026** are imported, audited and
+All **217 past Q/actual SQ candidates in 2018â€“2026** are imported, audited and
 deployed at https://lapdna.vercel.app; no past import candidate is unresolved.
 Future sessions wait for actual source publication. Import coverage does not
 mean every lap/pair can produce distance graphs.
@@ -38,14 +45,14 @@ the full year/session ledger. Mexico remains timing-only under unchanged native
 gap/reference gates; both primary and OpenF1 composite attempts were checked.
 
 Recorded results separately contain 1,169 Q and 24 SQ classifications across
-1950–2026. F1DB v2026.20.0 adds Brazil's 22-driver qualifying, preserving all
+1950â€“2026. F1DB v2026.20.0 adds Brazil's 22-driver qualifying, preserving all
 1,192 prior session driver/position/status/phase-time records. Mexico keeps
 HAM/LEC +119 ms Q3, -9 ms Q2 and LAW DSQ. Native rosters are event-specific,
 including substitutes; never construct drivers/teams from a current-year list.
 
 ## Product and analysis
 
-Sports-editorial landing → year → calendar → studio. Persistent blue dark and
+Sports-editorial landing â†’ year â†’ calendar â†’ studio. Persistent blue dark and
 off-white light themes. React/TypeScript/Vite with one ECharts Canvas stack;
 Python owns selection, alignment, delta, quality, regions/classes and evidence.
 Team colours come from each event; A solid/B dashed, including teammates.
@@ -57,7 +64,7 @@ Successful explicit comparisons move focus/scroll to the result. Independent
 phases require opt-in and persistent context. Never silently change a timing
 best to manufacture graphs. Pair checks still apply to telemetry-ready laps.
 
-Supported pairs show speed, throttle, gear, measured binary brake and B−A delta
+Supported pairs show speed, throttle, gear, measured binary brake and Bâˆ’A delta
 over shared distance, numbered turns, approximate performance map, estimated
 100 m bins, ranked regions, corner-speed classes and up to three observations.
 Positive delta favours A. Missing channels/spans stay null; brake is not pressure.
@@ -68,7 +75,7 @@ there is no runtime LLM or synthetic production fallback.
 
 Contracts 1.4.0 (legacy Q 1.2/1.3 reads), pipeline `native-sessions-4`, methods
 `distance-v5-fastf1-native` / `distance-v5-openf1-native-composite`. Monza has an
-authored disjoint profile; other layouts use approximate ±120 m marker windows
+authored disjoint profile; other layouts use approximate Â±120 m marker windows
 with merged complexes. These are not surveyed entry/apex/exit boundaries or
 causal driver/car conclusions. No validity, gap or raw residual gate was relaxed.
 
@@ -77,7 +84,7 @@ causal driver/car conclusions. No validity, gap or raw residual gate was relaxed
 Pinned FastF1 3.9.2 decodes original compressed car/position rows before default
 filling; actual primary/mirror URLs and hashes identify delivery. Optional
 weather may remain unknown. Missing annotations retain timing-only output.
-2023 provider SS maps to actual SQ1–3. Reviewed 2026 Brazil/Sepang label aliases
+2023 provider SS maps to actual SQ1â€“3. Reviewed 2026 Brazil/Sepang label aliases
 require corroborating date/round/circuit identity; original metadata is retained.
 See [the repair checkpoint](22-2026-telemetry-checkpoint.md).
 

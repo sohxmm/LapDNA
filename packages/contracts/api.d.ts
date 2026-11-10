@@ -170,10 +170,85 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/views/compare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Compare View */
+        post: operations["compare_view_api_v1_views_compare_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AlignedDelta */
+        AlignedDelta: {
+            /**
+             * Bound Model
+             * @default linear_endpoint_speed_v1
+             * @constant
+             */
+            bound_model: "linear_endpoint_speed_v1";
+            /** Delta Lower Ms */
+            delta_lower_ms: number[];
+            /** Delta Ms */
+            delta_ms: number[];
+            /** Delta Upper Ms */
+            delta_upper_ms: number[];
+            /** Distance M */
+            distance_m: number[];
+            /** Elapsed A Ms */
+            elapsed_a_ms: number[];
+            /** Elapsed B Ms */
+            elapsed_b_ms: number[];
+            lap_a: components["schemas"]["AlignedLap"];
+            lap_b: components["schemas"]["AlignedLap"];
+            /**
+             * Quality Grade
+             * @enum {string}
+             */
+            quality_grade: "C" | "ungraded";
+            /** Recorded Lap Gap Ms */
+            recorded_lap_gap_ms: number;
+            reference: components["schemas"]["ViewReference"];
+            /** Warnings */
+            warnings: string[];
+        };
+        /** AlignedLap */
+        AlignedLap: {
+            /** Bridges */
+            bridges: components["schemas"]["SpeedBridge"][];
+            /** Cumulative Bound M */
+            cumulative_bound_m: number[];
+            /** Distance Lower M */
+            distance_lower_m: number[];
+            /** Distance M */
+            distance_m: number[];
+            /** Distance Upper M */
+            distance_upper_m: number[];
+            /** Elapsed Ms */
+            elapsed_ms: number[];
+            /** Endpoint Residual Ms */
+            endpoint_residual_ms: number;
+            /** Integrated Length M */
+            integrated_length_m: number;
+            /** Scale Factor */
+            scale_factor: number;
+            /** Sector Annotations */
+            sector_annotations: components["schemas"]["SectorAnnotation"][];
+            /** Source Duration Ms */
+            source_duration_ms: number;
+        };
         /** AnalysisSummary */
         AnalysisSummary: {
             /** Categories */
@@ -298,6 +373,30 @@ export interface components {
             gear: components["schemas"]["ChannelProvenance"];
             speed_kph: components["schemas"]["ChannelProvenance"];
             throttle_pct: components["schemas"]["ChannelProvenance"];
+        };
+        /** ChannelSpan */
+        ChannelSpan: {
+            /**
+             * Channel
+             * @enum {string}
+             */
+            channel: "speed_kph" | "throttle_pct" | "rpm" | "gear" | "brake";
+            /** End Elapsed Ms */
+            end_elapsed_ms: number;
+            /** Reason */
+            reason: string;
+            /**
+             * Render Hint
+             * @enum {string}
+             */
+            render_hint: "dashed_connector" | "hatched_no_data" | "blank_gap";
+            /** Start Elapsed Ms */
+            start_elapsed_ms: number;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "bridged" | "gap";
         };
         /** ClassificationCoverage */
         ClassificationCoverage: {
@@ -811,6 +910,40 @@ export interface components {
             /** Value B */
             value_b: number | null;
         };
+        /** NativeChannels */
+        NativeChannels: {
+            /** Brake */
+            brake: (boolean | null)[];
+            /** Gear */
+            gear: (number | null)[];
+            /** Rpm */
+            rpm: (number | null)[];
+            /** Speed Kph */
+            speed_kph: (number | null)[];
+            /** Throttle Pct */
+            throttle_pct: (number | null)[];
+        };
+        /** NativeLapView */
+        NativeLapView: {
+            channels: components["schemas"]["NativeChannels"];
+            /** Elapsed Ms */
+            elapsed_ms: number[];
+            /** Interpolation */
+            interpolation: {
+                [key: string]: "linear_connector" | "none";
+            };
+            metadata: components["schemas"]["LapMetadata"];
+            /** Sample Masks */
+            sample_masks: {
+                [key: string]: ("measured" | "gap")[];
+            };
+            /** Source Duration Ms */
+            source_duration_ms: number;
+            /** Spans */
+            spans: components["schemas"]["ChannelSpan"][];
+            /** Warnings */
+            warnings: string[];
+        };
         /** Observation */
         Observation: {
             /** Evidence Ids */
@@ -952,6 +1085,30 @@ export interface components {
             schema_version: "1.0.0";
             /** Years */
             years: number[];
+        };
+        /** SectorAnnotation */
+        SectorAnnotation: {
+            /**
+             * Basis
+             * @enum {string}
+             */
+            basis: "reference_timing_constraint" | "shared_progress_estimate";
+            /** Estimated Elapsed Ms */
+            estimated_elapsed_ms: number;
+            /**
+             * Grade
+             * @enum {string}
+             */
+            grade: "C" | "ungraded";
+            /** Official Elapsed Ms */
+            official_elapsed_ms: number;
+            /** Residual Ms */
+            residual_ms: number;
+            /**
+             * Sector
+             * @enum {integer}
+             */
+            sector: 1 | 2;
         };
         /** SectorComparisonArtifact */
         SectorComparisonArtifact: {
@@ -1122,6 +1279,29 @@ export interface components {
             /** Version */
             version?: string | null;
         };
+        /** SpeedBridge */
+        SpeedBridge: {
+            /** End Elapsed Ms */
+            end_elapsed_ms: number;
+            /**
+             * Excluded From Analysis
+             * @default true
+             * @constant
+             */
+            excluded_from_analysis: true;
+            /** Full Interval Bound M */
+            full_interval_bound_m: number;
+            /** In Lap Bound M */
+            in_lap_bound_m: number;
+            /** Native Interval Ms */
+            native_interval_ms: number;
+            /** Speed After Kph */
+            speed_after_kph: number;
+            /** Speed Before Kph */
+            speed_before_kph: number;
+            /** Start Elapsed Ms */
+            start_elapsed_ms: number;
+        };
         /** TimingProvenance */
         TimingProvenance: {
             /**
@@ -1179,6 +1359,94 @@ export interface components {
             x: (number | null)[];
             /** Y */
             y: (number | null)[];
+        };
+        /** ViewArtifact */
+        ViewArtifact: {
+            alignment: components["schemas"]["AlignedDelta"] | null;
+            /** Comparison Id */
+            comparison_id: string;
+            /**
+             * Detail Level
+             * @default telemetry
+             * @constant
+             */
+            detail_level: "telemetry";
+            lap_a: components["schemas"]["NativeLapView"];
+            lap_b: components["schemas"]["NativeLapView"];
+            legacy_analysis: components["schemas"]["ComparisonArtifact"] | null;
+            /**
+             * Methodology Version
+             * @enum {string}
+             */
+            methodology_version: "distance-v6-fastf1-native" | "distance-v6-openf1-native-composite";
+            provenance: components["schemas"]["TimingProvenance"];
+            /**
+             * Requested Tier
+             * @enum {string}
+             */
+            requested_tier: "telemetry_view" | "aligned_delta" | "analysis";
+            /**
+             * Schema Version
+             * @default 2.0.0
+             * @constant
+             */
+            schema_version: "2.0.0";
+            session: components["schemas"]["SessionIdentity"];
+            /** Unavailable Reasons */
+            unavailable_reasons: {
+                [key: string]: string[];
+            };
+            /**
+             * View Tier
+             * @enum {string}
+             */
+            view_tier: "telemetry_view" | "aligned_delta" | "analysis";
+            /** Warnings */
+            warnings: string[];
+        };
+        /** ViewCompareRequest */
+        ViewCompareRequest: {
+            /**
+             * Allow Cross Phase
+             * @default false
+             */
+            allow_cross_phase: boolean;
+            /** Lap A Id */
+            lap_a_id: string;
+            /** Lap B Id */
+            lap_b_id: string;
+            /**
+             * Requested Tier
+             * @default aligned_delta
+             * @enum {string}
+             */
+            requested_tier: "telemetry_view" | "aligned_delta" | "analysis";
+            /** Session Id */
+            session_id: string;
+        };
+        /** ViewCompareResponse */
+        ViewCompareResponse: {
+            artifact: components["schemas"]["ViewArtifact"];
+            /** Swapped */
+            swapped: boolean;
+        };
+        /** ViewReference */
+        ViewReference: {
+            /** Geometry Available */
+            geometry_available: boolean;
+            /** Lap Id */
+            lap_id: string;
+            /** Length M */
+            length_m: number;
+            /** Markers Available */
+            markers_available: boolean;
+            /**
+             * Selection Basis
+             * @enum {string}
+             */
+            selection_basis: "legacy_v5" | "speed_only";
+            /** Sha256 */
+            sha256: string;
         };
     };
     responses: never;
@@ -1528,6 +1796,66 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    compare_view_api_v1_views_compare_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ViewCompareRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViewCompareResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

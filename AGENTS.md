@@ -7,13 +7,13 @@ Read `docs/10-handoff.md`, `docs/00-blueprint.md`, and the selected ticket in `d
 `docs/23-view-tiers.md` is the owner's explicit decision update. It supersedes
 the prohibitions on relaxing gates for coverage and redesigning alignment only
 for the approved Tier 0/Tier 1 scope. Tier 2 corner-observation gates remain
-byte-for-byte unchanged. The immediate work is **Step 0 measurement only**:
-produce `docs/23-gate-attribution.md` and the ledger, show the report, and stop
-before implementing Step 1. That checkpoint is complete for the 217-session
-baseline; do not repeat it unless inputs change or the owner requests it.
-This checkpoint takes precedence over the older
-ticket ordering below; do not continue to tiers without the owner's review and
-instruction to resume. All other boundaries remain in force.
+byte-for-byte unchanged. The owner accepted Step 0 and authorized **Steps 1–4**
+with linear bridging and the prescribed cumulative bound. Report Step 3b
+coverage and Step 4 geometry-independent reference recovery together, then
+**stop before selection/UI Steps 5–6**. Position progress is deferred to Step 7
+pending measurement/calibration. This decision takes precedence over older
+ticket ordering. Do not repeat Step 0 unless inputs change. All other boundaries
+remain in force.
 
 ## Execution
 

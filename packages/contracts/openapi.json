@@ -1,6 +1,201 @@
 {
   "components": {
     "schemas": {
+      "AlignedDelta": {
+        "additionalProperties": false,
+        "properties": {
+          "bound_model": {
+            "const": "linear_endpoint_speed_v1",
+            "default": "linear_endpoint_speed_v1",
+            "title": "Bound Model",
+            "type": "string"
+          },
+          "delta_lower_ms": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Delta Lower Ms",
+            "type": "array"
+          },
+          "delta_ms": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Delta Ms",
+            "type": "array"
+          },
+          "delta_upper_ms": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Delta Upper Ms",
+            "type": "array"
+          },
+          "distance_m": {
+            "items": {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "title": "Distance M",
+            "type": "array"
+          },
+          "elapsed_a_ms": {
+            "items": {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "title": "Elapsed A Ms",
+            "type": "array"
+          },
+          "elapsed_b_ms": {
+            "items": {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "title": "Elapsed B Ms",
+            "type": "array"
+          },
+          "lap_a": {
+            "$ref": "#/components/schemas/AlignedLap"
+          },
+          "lap_b": {
+            "$ref": "#/components/schemas/AlignedLap"
+          },
+          "quality_grade": {
+            "enum": [
+              "C",
+              "ungraded"
+            ],
+            "title": "Quality Grade",
+            "type": "string"
+          },
+          "recorded_lap_gap_ms": {
+            "title": "Recorded Lap Gap Ms",
+            "type": "number"
+          },
+          "reference": {
+            "$ref": "#/components/schemas/ViewReference"
+          },
+          "warnings": {
+            "items": {
+              "maxLength": 600,
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "reference",
+          "distance_m",
+          "elapsed_a_ms",
+          "elapsed_b_ms",
+          "delta_ms",
+          "delta_lower_ms",
+          "delta_upper_ms",
+          "lap_a",
+          "lap_b",
+          "recorded_lap_gap_ms",
+          "quality_grade",
+          "warnings"
+        ],
+        "title": "AlignedDelta",
+        "type": "object"
+      },
+      "AlignedLap": {
+        "additionalProperties": false,
+        "properties": {
+          "bridges": {
+            "items": {
+              "$ref": "#/components/schemas/SpeedBridge"
+            },
+            "title": "Bridges",
+            "type": "array"
+          },
+          "cumulative_bound_m": {
+            "items": {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "title": "Cumulative Bound M",
+            "type": "array"
+          },
+          "distance_lower_m": {
+            "items": {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "title": "Distance Lower M",
+            "type": "array"
+          },
+          "distance_m": {
+            "items": {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "title": "Distance M",
+            "type": "array"
+          },
+          "distance_upper_m": {
+            "items": {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "title": "Distance Upper M",
+            "type": "array"
+          },
+          "elapsed_ms": {
+            "items": {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            "title": "Elapsed Ms",
+            "type": "array"
+          },
+          "endpoint_residual_ms": {
+            "title": "Endpoint Residual Ms",
+            "type": "number"
+          },
+          "integrated_length_m": {
+            "exclusiveMinimum": 0.0,
+            "title": "Integrated Length M",
+            "type": "number"
+          },
+          "scale_factor": {
+            "exclusiveMinimum": 0.0,
+            "title": "Scale Factor",
+            "type": "number"
+          },
+          "sector_annotations": {
+            "items": {
+              "$ref": "#/components/schemas/SectorAnnotation"
+            },
+            "title": "Sector Annotations",
+            "type": "array"
+          },
+          "source_duration_ms": {
+            "exclusiveMinimum": 0.0,
+            "title": "Source Duration Ms",
+            "type": "number"
+          }
+        },
+        "required": [
+          "elapsed_ms",
+          "distance_m",
+          "cumulative_bound_m",
+          "distance_lower_m",
+          "distance_upper_m",
+          "integrated_length_m",
+          "scale_factor",
+          "source_duration_ms",
+          "endpoint_residual_ms",
+          "bridges",
+          "sector_annotations"
+        ],
+        "title": "AlignedLap",
+        "type": "object"
+      },
       "AnalysisSummary": {
         "additionalProperties": false,
         "properties": {
@@ -352,6 +547,65 @@
           "brake"
         ],
         "title": "ChannelProvenanceSet",
+        "type": "object"
+      },
+      "ChannelSpan": {
+        "additionalProperties": false,
+        "properties": {
+          "channel": {
+            "enum": [
+              "speed_kph",
+              "throttle_pct",
+              "rpm",
+              "gear",
+              "brake"
+            ],
+            "title": "Channel",
+            "type": "string"
+          },
+          "end_elapsed_ms": {
+            "minimum": 0.0,
+            "title": "End Elapsed Ms",
+            "type": "number"
+          },
+          "reason": {
+            "maxLength": 600,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          },
+          "render_hint": {
+            "enum": [
+              "dashed_connector",
+              "hatched_no_data",
+              "blank_gap"
+            ],
+            "title": "Render Hint",
+            "type": "string"
+          },
+          "start_elapsed_ms": {
+            "minimum": 0.0,
+            "title": "Start Elapsed Ms",
+            "type": "number"
+          },
+          "state": {
+            "enum": [
+              "bridged",
+              "gap"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel",
+          "start_elapsed_ms",
+          "end_elapsed_ms",
+          "state",
+          "render_hint",
+          "reason"
+        ],
+        "title": "ChannelSpan",
         "type": "object"
       },
       "ClassificationCoverage": {
@@ -2151,6 +2405,190 @@
         "title": "MetricEvidence",
         "type": "object"
       },
+      "NativeChannels": {
+        "additionalProperties": false,
+        "properties": {
+          "brake": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Brake",
+            "type": "array"
+          },
+          "gear": {
+            "items": {
+              "anyOf": [
+                {
+                  "maximum": 8.0,
+                  "minimum": 0.0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Gear",
+            "type": "array"
+          },
+          "rpm": {
+            "items": {
+              "anyOf": [
+                {
+                  "minimum": 0.0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Rpm",
+            "type": "array"
+          },
+          "speed_kph": {
+            "items": {
+              "anyOf": [
+                {
+                  "minimum": 0.0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Speed Kph",
+            "type": "array"
+          },
+          "throttle_pct": {
+            "items": {
+              "anyOf": [
+                {
+                  "maximum": 100.0,
+                  "minimum": 0.0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Throttle Pct",
+            "type": "array"
+          }
+        },
+        "required": [
+          "speed_kph",
+          "throttle_pct",
+          "rpm",
+          "gear",
+          "brake"
+        ],
+        "title": "NativeChannels",
+        "type": "object"
+      },
+      "NativeLapView": {
+        "additionalProperties": false,
+        "properties": {
+          "channels": {
+            "$ref": "#/components/schemas/NativeChannels"
+          },
+          "elapsed_ms": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Elapsed Ms",
+            "type": "array"
+          },
+          "interpolation": {
+            "additionalProperties": {
+              "enum": [
+                "linear_connector",
+                "none"
+              ],
+              "type": "string"
+            },
+            "propertyNames": {
+              "enum": [
+                "speed_kph",
+                "throttle_pct",
+                "rpm",
+                "gear",
+                "brake"
+              ]
+            },
+            "title": "Interpolation",
+            "type": "object"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/LapMetadata"
+          },
+          "sample_masks": {
+            "additionalProperties": {
+              "items": {
+                "enum": [
+                  "measured",
+                  "gap"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "propertyNames": {
+              "enum": [
+                "speed_kph",
+                "throttle_pct",
+                "rpm",
+                "gear",
+                "brake"
+              ]
+            },
+            "title": "Sample Masks",
+            "type": "object"
+          },
+          "source_duration_ms": {
+            "exclusiveMinimum": 0.0,
+            "title": "Source Duration Ms",
+            "type": "number"
+          },
+          "spans": {
+            "items": {
+              "$ref": "#/components/schemas/ChannelSpan"
+            },
+            "title": "Spans",
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "maxLength": 600,
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "metadata",
+          "source_duration_ms",
+          "elapsed_ms",
+          "channels",
+          "sample_masks",
+          "interpolation",
+          "spans",
+          "warnings"
+        ],
+        "title": "NativeLapView",
+        "type": "object"
+      },
       "Observation": {
         "additionalProperties": false,
         "properties": {
@@ -2531,6 +2969,59 @@
           "years"
         ],
         "title": "Seasons",
+        "type": "object"
+      },
+      "SectorAnnotation": {
+        "additionalProperties": false,
+        "properties": {
+          "basis": {
+            "enum": [
+              "reference_timing_constraint",
+              "shared_progress_estimate"
+            ],
+            "title": "Basis",
+            "type": "string"
+          },
+          "estimated_elapsed_ms": {
+            "minimum": 0.0,
+            "title": "Estimated Elapsed Ms",
+            "type": "number"
+          },
+          "grade": {
+            "enum": [
+              "C",
+              "ungraded"
+            ],
+            "title": "Grade",
+            "type": "string"
+          },
+          "official_elapsed_ms": {
+            "minimum": 0.0,
+            "title": "Official Elapsed Ms",
+            "type": "number"
+          },
+          "residual_ms": {
+            "title": "Residual Ms",
+            "type": "number"
+          },
+          "sector": {
+            "enum": [
+              1,
+              2
+            ],
+            "title": "Sector",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sector",
+          "official_elapsed_ms",
+          "estimated_elapsed_ms",
+          "residual_ms",
+          "grade",
+          "basis"
+        ],
+        "title": "SectorAnnotation",
         "type": "object"
       },
       "SectorComparisonArtifact": {
@@ -3046,6 +3537,63 @@
         "title": "SourceComponent",
         "type": "object"
       },
+      "SpeedBridge": {
+        "additionalProperties": false,
+        "properties": {
+          "end_elapsed_ms": {
+            "minimum": 0.0,
+            "title": "End Elapsed Ms",
+            "type": "number"
+          },
+          "excluded_from_analysis": {
+            "const": true,
+            "default": true,
+            "title": "Excluded From Analysis",
+            "type": "boolean"
+          },
+          "full_interval_bound_m": {
+            "minimum": 0.0,
+            "title": "Full Interval Bound M",
+            "type": "number"
+          },
+          "in_lap_bound_m": {
+            "minimum": 0.0,
+            "title": "In Lap Bound M",
+            "type": "number"
+          },
+          "native_interval_ms": {
+            "minimum": 0.0,
+            "title": "Native Interval Ms",
+            "type": "number"
+          },
+          "speed_after_kph": {
+            "minimum": 0.0,
+            "title": "Speed After Kph",
+            "type": "number"
+          },
+          "speed_before_kph": {
+            "minimum": 0.0,
+            "title": "Speed Before Kph",
+            "type": "number"
+          },
+          "start_elapsed_ms": {
+            "minimum": 0.0,
+            "title": "Start Elapsed Ms",
+            "type": "number"
+          }
+        },
+        "required": [
+          "start_elapsed_ms",
+          "end_elapsed_ms",
+          "native_interval_ms",
+          "speed_before_kph",
+          "speed_after_kph",
+          "full_interval_bound_m",
+          "in_lap_bound_m"
+        ],
+        "title": "SpeedBridge",
+        "type": "object"
+      },
       "TimingProvenance": {
         "additionalProperties": false,
         "properties": {
@@ -3211,6 +3759,229 @@
           "y"
         ],
         "title": "TrackGeometry",
+        "type": "object"
+      },
+      "ViewArtifact": {
+        "additionalProperties": false,
+        "properties": {
+          "alignment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AlignedDelta"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "comparison_id": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "title": "Comparison Id",
+            "type": "string"
+          },
+          "detail_level": {
+            "const": "telemetry",
+            "default": "telemetry",
+            "title": "Detail Level",
+            "type": "string"
+          },
+          "lap_a": {
+            "$ref": "#/components/schemas/NativeLapView"
+          },
+          "lap_b": {
+            "$ref": "#/components/schemas/NativeLapView"
+          },
+          "legacy_analysis": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ComparisonArtifact"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "methodology_version": {
+            "enum": [
+              "distance-v6-fastf1-native",
+              "distance-v6-openf1-native-composite"
+            ],
+            "title": "Methodology Version",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/TimingProvenance"
+          },
+          "requested_tier": {
+            "enum": [
+              "telemetry_view",
+              "aligned_delta",
+              "analysis"
+            ],
+            "title": "Requested Tier",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "2.0.0",
+            "default": "2.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session": {
+            "$ref": "#/components/schemas/SessionIdentity"
+          },
+          "unavailable_reasons": {
+            "additionalProperties": {
+              "items": {
+                "maxLength": 600,
+                "minLength": 1,
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Unavailable Reasons",
+            "type": "object"
+          },
+          "view_tier": {
+            "enum": [
+              "telemetry_view",
+              "aligned_delta",
+              "analysis"
+            ],
+            "title": "View Tier",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "maxLength": 600,
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "comparison_id",
+          "requested_tier",
+          "view_tier",
+          "methodology_version",
+          "session",
+          "provenance",
+          "lap_a",
+          "lap_b",
+          "alignment",
+          "legacy_analysis",
+          "unavailable_reasons",
+          "warnings"
+        ],
+        "title": "ViewArtifact",
+        "type": "object"
+      },
+      "ViewCompareRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "allow_cross_phase": {
+            "default": false,
+            "title": "Allow Cross Phase",
+            "type": "boolean"
+          },
+          "lap_a_id": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "title": "Lap A Id",
+            "type": "string"
+          },
+          "lap_b_id": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "title": "Lap B Id",
+            "type": "string"
+          },
+          "requested_tier": {
+            "default": "aligned_delta",
+            "enum": [
+              "telemetry_view",
+              "aligned_delta",
+              "analysis"
+            ],
+            "title": "Requested Tier",
+            "type": "string"
+          },
+          "session_id": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "lap_a_id",
+          "lap_b_id"
+        ],
+        "title": "ViewCompareRequest",
+        "type": "object"
+      },
+      "ViewCompareResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact": {
+            "$ref": "#/components/schemas/ViewArtifact"
+          },
+          "swapped": {
+            "title": "Swapped",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "artifact",
+          "swapped"
+        ],
+        "title": "ViewCompareResponse",
+        "type": "object"
+      },
+      "ViewReference": {
+        "additionalProperties": false,
+        "properties": {
+          "geometry_available": {
+            "title": "Geometry Available",
+            "type": "boolean"
+          },
+          "lap_id": {
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "title": "Lap Id",
+            "type": "string"
+          },
+          "length_m": {
+            "exclusiveMinimum": 0.0,
+            "title": "Length M",
+            "type": "number"
+          },
+          "markers_available": {
+            "title": "Markers Available",
+            "type": "boolean"
+          },
+          "selection_basis": {
+            "enum": [
+              "legacy_v5",
+              "speed_only"
+            ],
+            "title": "Selection Basis",
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lap_id",
+          "length_m",
+          "sha256",
+          "selection_basis",
+          "geometry_available",
+          "markers_available"
+        ],
+        "title": "ViewReference",
         "type": "object"
       }
     }
@@ -3655,6 +4426,74 @@
           }
         },
         "summary": "Session Laps"
+      }
+    },
+    "/api/v1/views/compare": {
+      "post": {
+        "operationId": "compare_view_api_v1_views_compare_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ViewCompareRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewCompareResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Compare View"
       }
     }
   }
