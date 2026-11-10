@@ -69,7 +69,7 @@ function options(v:TraceView, start:number, end:number, colors:ReturnType<typeof
     yAxis:rows.map(({original},i)=>({type:'value',gridIndex:i,name:axisNames[original],nameGap:8,nameLocation:'end',
       nameTextStyle:{align:'left',fontSize:9,color:INK,fontWeight:600},scale:original===0 || original===4,
       ...(original===1?{min:0,max:100,interval:50}:original===2?{min:0,max:8,interval:4}:original===3?{min:0,max:3,interval:1}:original===4?{min:-deltaExtent,max:deltaExtent}:{}),
-      splitNumber:2,axisLabel:{color:INK,fontSize:9,formatter:original===3?(n:number)=>['A off','A on','B off','B on'][n]:undefined},
+      splitNumber:2,axisLabel:{color:INK,fontSize:9,formatter:original===3?(n:number)=>['A off','A on','B off','B on'][n]:original===4?(n:number)=>signed(n*1000,2):undefined},
       axisLine:{show:false},axisTick:{show:false},splitLine:{lineStyle:{color:colors.grid,width:0.65}}})),
     series};
 }
