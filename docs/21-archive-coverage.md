@@ -1,25 +1,9 @@
 # Audited native archive coverage
 
-## Confirmed deployment — 10 November 2026
-
-The 198-session frozen batch is live at https://lapdna.vercel.app. Hosted checks
-passed at 10:43 UTC, including China 2026 Q1 Norris/Gasly distance telemetry,
-exact links, reverse orientation and source team colours. Source commit
-`cae68b47314049aff98a8890bc22526643bbb260`; deployment
-`dpl_zRyQdWynAzYEFDqYAuSfkpUzEjDR`. The catalogue digest is
-`c46d187083a2aa51f1d45ebe0de17079b4cc7013ad9a3d3ac58d3dd582ed1944`.
-The local operator receipt and browser proof are retained in the private release
-directory and `work/qa/2026-11-10-live-china-2026-graphs.png`.
-
-The 16 imported 2026 sessions include verified graph choices in China Q1,
-Miami SQ1, Canada Q1, Austria Q3, Britain SQ1/SQ3 and Belgium Q3. This does not
-imply that every lap or race has a usable distance comparison. More recent
-local imports are not included in this frozen deployment.
-
 This is the latest audited batch; deployment is complete only when the receipt below is confirmed.
 
-Source commit: `cae68b47314049aff98a8890bc22526643bbb260`. Frozen catalogue: `c46d187083a2aa51f1d45ebe0de17079b4cc7013ad9a3d3ac58d3dd582ed1944`.
-Audited sessions: **198**. Remaining source/publication failures: **19**.
+Source commit: `fb91de2468e1fb4d3f1fb8668dbca20994990269`. Frozen catalogue: `a6dd7043ee2ba38f46fcdf54e06f3f291afc27dce4b5ba1dcb6b099aa64c47d9`.
+Audited sessions: **217**. Remaining source/publication failures: **0**.
 
 A session with telemetry-capable laps still applies pairwise checks. Timing-only and excluded laps remain explicit. Future calendar sessions are not downloaded before they exist.
 
@@ -29,11 +13,11 @@ A session with telemetry-capable laps still applies pairwise checks. Timing-only
 | 2019 | 21 | 0 |
 | 2020 | 17 | 0 |
 | 2021 | 22 | 0 |
-| 2022 | 18 | 0 |
-| 2023 | 22 | 1 |
+| 2022 | 22 | 0 |
+| 2023 | 22 | 6 |
 | 2024 | 24 | 6 |
 | 2025 | 24 | 6 |
-| 2026 | 12 | 4 |
+| 2026 | 20 | 6 |
 
 | Session | Telemetry-capable laps | Timing-only laps |
 | --- | ---: | ---: |
@@ -128,7 +112,11 @@ A session with telemetry-capable laps still applies pairwise checks. Timing-only
 | 2022-16-monza-Q · Italian Grand Prix | 40 | 53 |
 | 2022-17-marina_bay-Q · Singapore Grand Prix | 19 | 105 |
 | 2022-18-suzuka-Q · Japanese Grand Prix | 29 | 57 |
+| 2022-19-americas-Q · United States Grand Prix | 22 | 65 |
 | 2022-2-jeddah-Q · Saudi Arabian Grand Prix | 44 | 102 |
+| 2022-20-rodriguez-Q · Mexico City Grand Prix | 19 | 91 |
+| 2022-21-interlagos-Q · São Paulo Grand Prix | 0 | 245 |
+| 2022-22-yas_marina-Q · Abu Dhabi Grand Prix | 20 | 74 |
 | 2022-3-albert_park-Q · Australian Grand Prix | 11 | 120 |
 | 2022-4-imola-Q · Emilia Romagna Grand Prix | 21 | 113 |
 | 2022-5-miami-Q · Miami Grand Prix | 36 | 115 |
@@ -140,15 +128,19 @@ A session with telemetry-capable laps still applies pairwise checks. Timing-only
 | 2023-10-silverstone-Q · British Grand Prix | 55 | 102 |
 | 2023-11-hungaroring-Q · Hungarian Grand Prix | 22 | 107 |
 | 2023-12-spa-Q · Belgian Grand Prix | 20 | 111 |
+| 2023-12-spa-SQ · Belgian Grand Prix | 4 | 79 |
 | 2023-13-zandvoort-Q · Dutch Grand Prix | 30 | 249 |
 | 2023-14-monza-Q · Italian Grand Prix | 0 | 129 |
 | 2023-15-marina_bay-Q · Singapore Grand Prix | 0 | 94 |
 | 2023-16-suzuka-Q · Japanese Grand Prix | 0 | 70 |
 | 2023-17-losail-Q · Qatar Grand Prix | 34 | 104 |
+| 2023-17-losail-SQ · Qatar Grand Prix | 65 | 44 |
 | 2023-18-americas-Q · United States Grand Prix | 20 | 79 |
+| 2023-18-americas-SQ · United States Grand Prix | 19 | 79 |
 | 2023-19-rodriguez-Q · Mexico City Grand Prix | 45 | 31 |
 | 2023-2-jeddah-Q · Saudi Arabian Grand Prix | 9 | 129 |
 | 2023-20-interlagos-Q · São Paulo Grand Prix | 52 | 46 |
+| 2023-20-interlagos-SQ · São Paulo Grand Prix | 33 | 46 |
 | 2023-21-vegas-Q · Las Vegas Grand Prix | 36 | 152 |
 | 2023-22-yas_marina-Q · Abu Dhabi Grand Prix | 26 | 51 |
 | 2023-3-albert_park-Q · Australian Grand Prix | 11 | 224 |
@@ -159,6 +151,7 @@ A session with telemetry-capable laps still applies pairwise checks. Timing-only
 | 2023-7-catalunya-Q · Spanish Grand Prix | 42 | 63 |
 | 2023-8-villeneuve-Q · Canadian Grand Prix | 82 | 114 |
 | 2023-9-red_bull_ring-Q · Austrian Grand Prix | 57 | 72 |
+| 2023-9-red_bull_ring-SQ · Austrian Grand Prix | 47 | 104 |
 | 2024-1-bahrain-Q · Bahrain Grand Prix | 44 | 39 |
 | 2024-10-catalunya-Q · Spanish Grand Prix | 41 | 38 |
 | 2024-11-red_bull_ring-Q · Austrian Grand Prix | 28 | 72 |
@@ -222,9 +215,19 @@ A session with telemetry-capable laps still applies pairwise checks. Timing-only
 | 2026-1-albert_park-Q · Australian Grand Prix | 1 | 162 |
 | 2026-10-spa-Q · Belgian Grand Prix | 7 | 82 |
 | 2026-11-hungaroring-Q · Hungarian Grand Prix | 1 | 79 |
+| 2026-12-zandvoort-Q · Dutch Grand Prix | 9 | 148 |
+| 2026-12-zandvoort-SQ · Dutch Grand Prix | 3 | 136 |
+| 2026-13-monza-Q · Italian Grand Prix | 4 | 99 |
+| 2026-14-madring-Q · Spanish Grand Prix | 0 | 108 |
+| 2026-15-baku-Q · Azerbaijan Grand Prix | 0 | 169 |
+| 2026-16-sepang-Q · Bahrain Grand Prix in Malaysia | 0 | 74 |
+| 2026-17-marina_bay-Q · Singapore Grand Prix | 6 | 121 |
+| 2026-17-marina_bay-SQ · Singapore Grand Prix | 3 | 116 |
+| 2026-18-americas-Q · United States Grand Prix | 8 | 86 |
 | 2026-19-rodriguez-Q · Mexico City Grand Prix | 0 | 134 |
 | 2026-2-shanghai-Q · Chinese Grand Prix | 3 | 114 |
 | 2026-2-shanghai-SQ · Chinese Grand Prix | 1 | 157 |
+| 2026-20-interlagos-Q · Brazilian Grand Prix | 1 | 140 |
 | 2026-3-suzuka-Q · Japanese Grand Prix | 0 | 126 |
 | 2026-4-miami-Q · Miami Grand Prix | 0 | 113 |
 | 2026-4-miami-SQ · Miami Grand Prix | 7 | 77 |
@@ -238,24 +241,6 @@ A session with telemetry-capable laps still applies pairwise checks. Timing-only
 
 ## Unresolved source/publication failures
 
-- 2022 R19 Q · United States Grand Prix: The shared historical import window is full; cached progress is retained until the source window resets
-- 2022 R20 Q · Mexico City Grand Prix: Authenticated timing source did not return a complete native resource
-- 2022 R21 Q · São Paulo Grand Prix: Authenticated timing source did not return a complete native resource
-- 2022 R22 Q · Abu Dhabi Grand Prix: Authenticated timing source did not return a complete native resource
-- 2023 R9 SQ · Austrian Grand Prix: FastF1 could not load the requested session; check local sign-in, upstream availability and the library cache
-- 2023 R12 SQ · Belgian Grand Prix: FastF1 could not load the requested session; check local sign-in, upstream availability and the library cache
-- 2023 R17 SQ · Qatar Grand Prix: FastF1 could not load the requested session; check local sign-in, upstream availability and the library cache
-- 2023 R18 SQ · United States Grand Prix: FastF1 could not load the requested session; check local sign-in, upstream availability and the library cache
-- 2023 R20 SQ · São Paulo Grand Prix: FastF1 could not load the requested session; check local sign-in, upstream availability and the library cache
-- 2026 R12 Q · Dutch Grand Prix: No audited native publication is active for this session
-- 2026 R12 SQ · Dutch Grand Prix: FastF1's source rate window is exhausted; keep cached progress and resume after the provider window resets
-- 2026 R13 Q · Italian Grand Prix: Detailed native import has not completed for this past-session candidate
-- 2026 R14 Q · Spanish Grand Prix: Detailed native import has not completed for this past-session candidate
-- 2026 R15 Q · Azerbaijan Grand Prix: Detailed native import has not completed for this past-session candidate
-- 2026 R16 Q · Bahrain Grand Prix in Malaysia: Detailed native import has not completed for this past-session candidate
-- 2026 R17 Q · Singapore Grand Prix: Detailed native import has not completed for this past-session candidate
-- 2026 R17 SQ · Singapore Grand Prix: Detailed native import has not completed for this past-session candidate
-- 2026 R18 Q · United States Grand Prix: Detailed native import has not completed for this past-session candidate
-- 2026 R20 Q · Brazilian Grand Prix: Detailed native import has not completed for this past-session candidate
+None among the actual attempted past-session candidates.
 
 The detailed ledger records exact source hashes, methods and phase-best pair checks. Source agreement is not physical corner ground truth. Brake is on/off, not pressure; no missing control input is inferred from speed.

@@ -5,17 +5,17 @@
     2018,
     2026
   ],
-  "session_count": 198,
+  "session_count": 217,
   "sessions_by_year": {
     "2018": 21,
     "2019": 21,
     "2020": 17,
     "2021": 22,
-    "2022": 18,
-    "2023": 23,
+    "2022": 22,
+    "2023": 28,
     "2024": 30,
     "2025": 30,
-    "2026": 16
+    "2026": 26
   },
   "sessions": [
     {
@@ -4364,6 +4364,56 @@
       "method": "distance-v5-fastf1-native"
     },
     {
+      "session_id": "2022-19-americas-Q",
+      "year": 2022,
+      "round": 19,
+      "event_name": "United States Grand Prix",
+      "source": "fastf1",
+      "drivers": 20,
+      "lap_records": 258,
+      "capabilities": {
+        "unavailable": 171,
+        "sector_only": 65,
+        "telemetry": 22
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 316,
+        "telemetry": 24
+      },
+      "telemetry_discovery_choices": [
+        {
+          "phase": "Q1",
+          "a": "fastf1_2022_19_Q_1_2",
+          "b": "fastf1_2022_19_Q_44_2",
+          "comparison_id": "cmp_dbdbf4a5_1c643f3e65d3ab2f6c0277ed",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        },
+        {
+          "phase": "Q2",
+          "a": "fastf1_2022_19_Q_44_11",
+          "b": "fastf1_2022_19_Q_63_11",
+          "comparison_id": "cmp_dbdbf4a5_62db6de1fb22d9e79cb71df3",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        },
+        {
+          "phase": "Q3",
+          "a": "fastf1_2022_19_Q_1_13",
+          "b": "fastf1_2022_19_Q_63_18",
+          "comparison_id": "cmp_dbdbf4a5_70761db6abbfac3bb4d005be",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        }
+      ],
+      "source_snapshot_sha256": "b7be9b55dd96841ae811226cb6a4eef71b83b0d1fde9b5a99208ecdae5a7e870",
+      "publication_sha256": "70afa605c5df2ef887f1eb35897bf7ebe25b260ef4ae8df4e07425bb665da7d7",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
       "session_id": "2022-2-jeddah-Q",
       "year": 2022,
       "round": 2,
@@ -4411,6 +4461,117 @@
       ],
       "source_snapshot_sha256": "43e20d93c186d5bda3c6e3c3f3468ea0715bd89cc892c58241f09f1d91c9e660",
       "publication_sha256": "83f3d395a52e869f43c4d64b81d8b1e532a3cc349b71087edd606e46c6527a52",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
+      "session_id": "2022-20-rodriguez-Q",
+      "year": 2022,
+      "round": 20,
+      "event_name": "Mexico City Grand Prix",
+      "source": "fastf1",
+      "drivers": 20,
+      "lap_records": 298,
+      "capabilities": {
+        "unavailable": 188,
+        "sector_only": 91,
+        "telemetry": 19
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 333,
+        "telemetry": 7
+      },
+      "telemetry_discovery_choices": [
+        {
+          "phase": "Q1",
+          "a": "fastf1_2022_20_Q_77_2",
+          "b": "fastf1_2022_20_Q_31_2",
+          "comparison_id": "cmp_e5fb46fa_d57fc6aea21ed1dd7d5c4115",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        },
+        {
+          "phase": "Q2",
+          "a": "fastf1_2022_20_Q_55_10",
+          "b": "fastf1_2022_20_Q_1_9",
+          "comparison_id": "cmp_e5fb46fa_05a8b3600007308b75abd8d5",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        },
+        {
+          "phase": "Q3",
+          "a": "fastf1_2022_20_Q_1_12",
+          "b": "fastf1_2022_20_Q_63_14",
+          "comparison_id": "cmp_e5fb46fa_692a531b13dcc44f0aad0631",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        }
+      ],
+      "source_snapshot_sha256": "6b64a515c782884172dd2042c473db5a351e13a70ad3f2b5dc1235cc95fadbc0",
+      "publication_sha256": "643e19727724c79462b001cb6bd56a20e0ac24fd8c5c93e383f6ae6c553828da",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
+      "session_id": "2022-21-interlagos-Q",
+      "year": 2022,
+      "round": 21,
+      "event_name": "S\u00e3o Paulo Grand Prix",
+      "source": "fastf1",
+      "drivers": 20,
+      "lap_records": 416,
+      "capabilities": {
+        "unavailable": 171,
+        "sector_only": 245
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 331
+      },
+      "telemetry_discovery_choices": [],
+      "source_snapshot_sha256": "0e518e00627441066cb53354b183084d352ad91b2828a52ed3b0d336728fde8f",
+      "publication_sha256": "0b67f971c1130bb465c8648dc57c1912e8a53e35583673b6abf06aa070529f6b",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
+      "session_id": "2022-22-yas_marina-Q",
+      "year": 2022,
+      "round": 22,
+      "event_name": "Abu Dhabi Grand Prix",
+      "source": "fastf1",
+      "drivers": 20,
+      "lap_records": 287,
+      "capabilities": {
+        "unavailable": 193,
+        "sector_only": 74,
+        "telemetry": 20
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 301,
+        "telemetry": 20
+      },
+      "telemetry_discovery_choices": [
+        {
+          "phase": "Q1",
+          "a": "fastf1_2022_22_Q_11_5",
+          "b": "fastf1_2022_22_Q_16_2",
+          "comparison_id": "cmp_38ddb8e0_d9eb1039705bc8334360f6a6",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        },
+        {
+          "phase": "Q3",
+          "a": "fastf1_2022_22_Q_1_16",
+          "b": "fastf1_2022_22_Q_16_16",
+          "comparison_id": "cmp_38ddb8e0_02b75cca460636acc435788d",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        }
+      ],
+      "source_snapshot_sha256": "07a78eed3c0db3dbeab1e0184d7b8b5a4446d541197892500948cba1cd28000f",
+      "publication_sha256": "388e4fa4777e4f72d88ca87f7a32d67828f1029d5424278c0b74dbb6c209900d",
       "method": "distance-v5-fastf1-native"
     },
     {
@@ -4900,6 +5061,37 @@
       "method": "distance-v5-fastf1-native"
     },
     {
+      "session_id": "2023-12-spa-SQ",
+      "year": 2023,
+      "round": 12,
+      "event_name": "Belgian Grand Prix",
+      "source": "fastf1",
+      "drivers": 20,
+      "lap_records": 218,
+      "capabilities": {
+        "unavailable": 135,
+        "sector_only": 79,
+        "telemetry": 4
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 217
+      },
+      "telemetry_discovery_choices": [
+        {
+          "phase": "SQ1",
+          "a": "fastf1_2023_12_SQ_44_2",
+          "b": "fastf1_2023_12_SQ_4_2",
+          "comparison_id": "cmp_51bcb238_a8fc7e82040105a5be5fdfdf",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        }
+      ],
+      "source_snapshot_sha256": "3dad5f9f7480b8aed7ed4b2f22a57279db05ac0e532938c842cb0301cfa8c4e9",
+      "publication_sha256": "a2570406d87fa006fa6056b7389bfd1811c26de3d2dd308e96a50a4306514168",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
       "session_id": "2023-13-zandvoort-Q",
       "year": 2023,
       "round": 13,
@@ -5051,6 +5243,56 @@
       "method": "distance-v5-fastf1-native"
     },
     {
+      "session_id": "2023-17-losail-SQ",
+      "year": 2023,
+      "round": 17,
+      "event_name": "Qatar Grand Prix",
+      "source": "fastf1",
+      "drivers": 20,
+      "lap_records": 226,
+      "capabilities": {
+        "telemetry": 65,
+        "sector_only": 44,
+        "unavailable": 117
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 115,
+        "telemetry": 189
+      },
+      "telemetry_discovery_choices": [
+        {
+          "phase": "SQ1",
+          "a": "fastf1_2023_17_SQ_1_3",
+          "b": "fastf1_2023_17_SQ_4_4",
+          "comparison_id": "cmp_b12baad2_3f0a997afa747bd31b988c72",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        },
+        {
+          "phase": "SQ2",
+          "a": "fastf1_2023_17_SQ_4_8",
+          "b": "fastf1_2023_17_SQ_63_13",
+          "comparison_id": "cmp_b12baad2_5e61354134aa311dbf84e7b4",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        },
+        {
+          "phase": "SQ3",
+          "a": "fastf1_2023_17_SQ_81_17",
+          "b": "fastf1_2023_17_SQ_55_19",
+          "comparison_id": "cmp_b12baad2_ee7e6fe902807d5c2a6685ec",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        }
+      ],
+      "source_snapshot_sha256": "e16d509d4179dd57485569b2e5a5a1440755f818ce03d6211447e40f2bf61edd",
+      "publication_sha256": "e5e78e584fe7251b9bbe025d7e26ffc3a7ebe3d24c5200715f342c19c15b5275",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
       "session_id": "2023-18-americas-Q",
       "year": 2023,
       "round": 18,
@@ -5098,6 +5340,56 @@
       ],
       "source_snapshot_sha256": "e4e794bd060bae65ae725b1c48323cd9221ac4b7e23f7495c111608c0005ddb9",
       "publication_sha256": "b0d36c84a4927b86f9b76b15642ea8c4a5882fef83875a20dca628e9c9b33e75",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
+      "session_id": "2023-18-americas-SQ",
+      "year": 2023,
+      "round": 18,
+      "event_name": "United States Grand Prix",
+      "source": "fastf1",
+      "drivers": 20,
+      "lap_records": 209,
+      "capabilities": {
+        "unavailable": 111,
+        "telemetry": 19,
+        "sector_only": 79
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 311,
+        "telemetry": 29
+      },
+      "telemetry_discovery_choices": [
+        {
+          "phase": "SQ1",
+          "a": "fastf1_2023_18_SQ_1_2",
+          "b": "fastf1_2023_18_SQ_63_2",
+          "comparison_id": "cmp_88cc71ba_d3f57d38fcc382f5973dfe2a",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        },
+        {
+          "phase": "SQ2",
+          "a": "fastf1_2023_18_SQ_63_8",
+          "b": "fastf1_2023_18_SQ_1_7",
+          "comparison_id": "cmp_88cc71ba_1ef6e3dc77b009474c6ec326",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        },
+        {
+          "phase": "SQ3",
+          "a": "fastf1_2023_18_SQ_4_14",
+          "b": "fastf1_2023_18_SQ_81_14",
+          "comparison_id": "cmp_88cc71ba_3a3e91501646b71ef6e2f712",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        }
+      ],
+      "source_snapshot_sha256": "18dad2ef41ad155634989a7820685aa0b36a5f5623cdcbc3fa652f666cef9134",
+      "publication_sha256": "fdf52e70a3ae59a3ddb32d06770e2fa726d384cbbaeb6357fde35e788ade62ae",
       "method": "distance-v5-fastf1-native"
     },
     {
@@ -5238,6 +5530,56 @@
       ],
       "source_snapshot_sha256": "e2f87963a8bf3640b27b6ddb5b50d5ffab44614adb083d234c618f4c60d5ad93",
       "publication_sha256": "92a59b3cab8873f634c4f9f2e8b4ab904ca6d4d9a5841e938b73462c43fc42f0",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
+      "session_id": "2023-20-interlagos-SQ",
+      "year": 2023,
+      "round": 20,
+      "event_name": "S\u00e3o Paulo Grand Prix",
+      "source": "fastf1",
+      "drivers": 20,
+      "lap_records": 209,
+      "capabilities": {
+        "unavailable": 130,
+        "sector_only": 46,
+        "telemetry": 33
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 282,
+        "telemetry": 44
+      },
+      "telemetry_discovery_choices": [
+        {
+          "phase": "SQ1",
+          "a": "fastf1_2023_20_SQ_55_2",
+          "b": "fastf1_2023_20_SQ_63_2",
+          "comparison_id": "cmp_13103b4b_3457b05ddca328bf77216e79",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        },
+        {
+          "phase": "SQ2",
+          "a": "fastf1_2023_20_SQ_55_6",
+          "b": "fastf1_2023_20_SQ_16_8",
+          "comparison_id": "cmp_13103b4b_e4519abbf12ba1c01741922f",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        },
+        {
+          "phase": "SQ3",
+          "a": "fastf1_2023_20_SQ_4_14",
+          "b": "fastf1_2023_20_SQ_1_15",
+          "comparison_id": "cmp_13103b4b_bceafb63d04b1c1f1bac05ad",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        }
+      ],
+      "source_snapshot_sha256": "76459adcce21188f88177804c71b088be3a82a0057267cb47aedfa23183a08d4",
+      "publication_sha256": "55562c0135138f6ae5dfa17d3aee9dd4c9cba1f77825605e1e85b55777837eef",
       "method": "distance-v5-fastf1-native"
     },
     {
@@ -5662,6 +6004,47 @@
       ],
       "source_snapshot_sha256": "9e26ab55f1f6d8cdcc02ce7f71c6412a72ce3cc6d8e815db1b93629fcdcb82a4",
       "publication_sha256": "ef009fd046874701a8b468ec251293abc5a02c564c6c6730937bd6ca9202feb9",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
+      "session_id": "2023-9-red_bull_ring-SQ",
+      "year": 2023,
+      "round": 9,
+      "event_name": "Austrian Grand Prix",
+      "source": "fastf1",
+      "drivers": 20,
+      "lap_records": 355,
+      "capabilities": {
+        "unavailable": 204,
+        "sector_only": 104,
+        "telemetry": 47
+      },
+      "verified_fastest_phase_pairs": {
+        "telemetry": 126,
+        "sector_only": 200
+      },
+      "telemetry_discovery_choices": [
+        {
+          "phase": "SQ1",
+          "a": "fastf1_2023_9_SQ_55_4",
+          "b": "fastf1_2023_9_SQ_1_8",
+          "comparison_id": "cmp_a64a0895_acb41abe08d98b68ef028e6b",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        },
+        {
+          "phase": "SQ2",
+          "a": "fastf1_2023_9_SQ_1_16",
+          "b": "fastf1_2023_9_SQ_4_16",
+          "comparison_id": "cmp_a64a0895_303da1e59b3872854933f5cf",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        }
+      ],
+      "source_snapshot_sha256": "f846b39165c159db36108864eda128d8ea806729f1dcbb7d041f034f37de8384",
+      "publication_sha256": "0d26a65b1d1ff54190acb761a1bbe8df7e0332d9adb7e1a684882cae1571f794",
       "method": "distance-v5-fastf1-native"
     },
     {
@@ -8023,6 +8406,274 @@
       "method": "distance-v5-fastf1-native"
     },
     {
+      "session_id": "2026-12-zandvoort-Q",
+      "year": 2026,
+      "round": 12,
+      "event_name": "Dutch Grand Prix",
+      "source": "fastf1",
+      "drivers": 22,
+      "lap_records": 377,
+      "capabilities": {
+        "unavailable": 220,
+        "sector_only": 148,
+        "telemetry": 9
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 389,
+        "telemetry": 7
+      },
+      "telemetry_discovery_choices": [
+        {
+          "phase": "Q1",
+          "a": "fastf1_2026_12_Q_12_6",
+          "b": "fastf1_2026_12_Q_3_3",
+          "comparison_id": "cmp_7ebb7596_766c850fcb926335756c4afc",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        },
+        {
+          "phase": "Q3",
+          "a": "fastf1_2026_12_Q_44_24",
+          "b": "fastf1_2026_12_Q_3_21",
+          "comparison_id": "cmp_7ebb7596_0f8a91a4a61ab097833deb7b",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        }
+      ],
+      "source_snapshot_sha256": "e05dacc03dbcbdf000eaee6b7dd3b4c975c2ad5059729756ed43c6d2a025a707",
+      "publication_sha256": "9d72e9aaf4ea28cd5ea5987077ee2970fe2f9f63b55e19d5fbb6828aef3c5b3e",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
+      "session_id": "2026-12-zandvoort-SQ",
+      "year": 2026,
+      "round": 12,
+      "event_name": "Dutch Grand Prix",
+      "source": "fastf1",
+      "drivers": 22,
+      "lap_records": 254,
+      "capabilities": {
+        "unavailable": 115,
+        "sector_only": 136,
+        "telemetry": 3
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 396
+      },
+      "telemetry_discovery_choices": [
+        {
+          "phase": "SQ2",
+          "a": "fastf1_2026_12_SQ_1_9",
+          "b": "fastf1_2026_12_SQ_30_11",
+          "comparison_id": "cmp_fa5a245c_bbee5b3ebf15656b0461e5ea",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        }
+      ],
+      "source_snapshot_sha256": "643f24cebe8b1ac8ba2408f858824387ffdde23b46629aaae4a7682174a11ad9",
+      "publication_sha256": "a9f6513a7662fc15b68fc4f3239f95824a506fcbde12d6875bb0fbd1e76c9938",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
+      "session_id": "2026-13-monza-Q",
+      "year": 2026,
+      "round": 13,
+      "event_name": "Italian Grand Prix",
+      "source": "fastf1",
+      "drivers": 22,
+      "lap_records": 307,
+      "capabilities": {
+        "unavailable": 204,
+        "sector_only": 99,
+        "telemetry": 4
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 396
+      },
+      "telemetry_discovery_choices": [
+        {
+          "phase": "Q2",
+          "a": "fastf1_2026_13_Q_3_5",
+          "b": "fastf1_2026_13_Q_30_11",
+          "comparison_id": "cmp_bee78a6a_ca4d5b4c1af847d862162068",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        }
+      ],
+      "source_snapshot_sha256": "d673a551d20d1389c6b3505bd423886d1e193d2a55fa867b6bfd968911d04b0b",
+      "publication_sha256": "375e2e32308cc4921ce564ca29d801ee794cdf78ee53500dca0116ec11abe1af",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
+      "session_id": "2026-14-madring-Q",
+      "year": 2026,
+      "round": 14,
+      "event_name": "Spanish Grand Prix",
+      "source": "fastf1",
+      "drivers": 22,
+      "lap_records": 312,
+      "capabilities": {
+        "unavailable": 204,
+        "sector_only": 108
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 340
+      },
+      "telemetry_discovery_choices": [],
+      "source_snapshot_sha256": "84407aefec5677ac598a08178a2390826f8307b2505b25d5501b43c19be0af9b",
+      "publication_sha256": "1f3ff5e245463f1d7eaf4e462f560ff67f574d32f08521d1b60b904fc5c2310c",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
+      "session_id": "2026-15-baku-Q",
+      "year": 2026,
+      "round": 15,
+      "event_name": "Azerbaijan Grand Prix",
+      "source": "fastf1",
+      "drivers": 22,
+      "lap_records": 373,
+      "capabilities": {
+        "unavailable": 204,
+        "sector_only": 169
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 381
+      },
+      "telemetry_discovery_choices": [],
+      "source_snapshot_sha256": "afc186fcf1440580980825136f075eb49a4ddb69c155d9a4565b351e160ebdcf",
+      "publication_sha256": "1682630026781d855a3b71174aea891738f9bc306768be6f98cf8b081d91ebea",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
+      "session_id": "2026-16-sepang-Q",
+      "year": 2026,
+      "round": 16,
+      "event_name": "Bahrain Grand Prix in Malaysia",
+      "source": "fastf1",
+      "drivers": 22,
+      "lap_records": 239,
+      "capabilities": {
+        "unavailable": 165,
+        "sector_only": 74
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 367
+      },
+      "telemetry_discovery_choices": [],
+      "source_snapshot_sha256": "b95e9bf1fccf6ac53261dd43da5f474dbbdd6dcceba3e8ddee8d5b8ea5103dd7",
+      "publication_sha256": "66d38005cefc60758483cdd17e23641b1fecc9bc82900490997048011ad5e038",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
+      "session_id": "2026-17-marina_bay-Q",
+      "year": 2026,
+      "round": 17,
+      "event_name": "Singapore Grand Prix",
+      "source": "fastf1",
+      "drivers": 22,
+      "lap_records": 363,
+      "capabilities": {
+        "unavailable": 236,
+        "sector_only": 121,
+        "telemetry": 6
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 354,
+        "telemetry": 1
+      },
+      "telemetry_discovery_choices": [
+        {
+          "phase": "Q1",
+          "a": "fastf1_2026_17_Q_27_9",
+          "b": "fastf1_2026_17_Q_11_7",
+          "comparison_id": "cmp_89c31b76_dd24e6297f32668d0c96550c",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        }
+      ],
+      "source_snapshot_sha256": "bb799035fe8f191df306b97df498ee8c11b8a94e0046a3af9347ca4297bee35c",
+      "publication_sha256": "f7c72bbaaaafa1b7df96c9ce7cff872a242937ad7f2f4fa7ea3b540b3c83ad72",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
+      "session_id": "2026-17-marina_bay-SQ",
+      "year": 2026,
+      "round": 17,
+      "event_name": "Singapore Grand Prix",
+      "source": "fastf1",
+      "drivers": 22,
+      "lap_records": 286,
+      "capabilities": {
+        "unavailable": 167,
+        "sector_only": 116,
+        "telemetry": 3
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 378,
+        "telemetry": 1
+      },
+      "telemetry_discovery_choices": [
+        {
+          "phase": "SQ3",
+          "a": "fastf1_2026_17_SQ_3_14",
+          "b": "fastf1_2026_17_SQ_16_18",
+          "comparison_id": "cmp_720f88cd_932000b9b5cd1af1aa3ef95d",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        }
+      ],
+      "source_snapshot_sha256": "9a5a122c55ba5d42ac2a6e5e3da85ab06cce7b12e61e9eac7176341cad80fb52",
+      "publication_sha256": "ba3122b5135448460a56cea5e738c13b8b2bff4a9ddf6eb9736f5b92ae333c31",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
+      "session_id": "2026-18-americas-Q",
+      "year": 2026,
+      "round": 18,
+      "event_name": "United States Grand Prix",
+      "source": "fastf1",
+      "drivers": 22,
+      "lap_records": 280,
+      "capabilities": {
+        "unavailable": 186,
+        "sector_only": 86,
+        "telemetry": 8
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 386,
+        "telemetry": 1
+      },
+      "telemetry_discovery_choices": [
+        {
+          "phase": "Q2",
+          "a": "fastf1_2026_18_Q_1_8",
+          "b": "fastf1_2026_18_Q_12_8",
+          "comparison_id": "cmp_a7794ec2_e0182dc2c008546c83539e45",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        },
+        {
+          "phase": "Q3",
+          "a": "fastf1_2026_18_Q_16_14",
+          "b": "fastf1_2026_18_Q_44_13",
+          "comparison_id": "cmp_a7794ec2_b6f2b89809c8d86a6cb21f9a",
+          "tier": "telemetry",
+          "observations": 3,
+          "fallback_reason": null
+        }
+      ],
+      "source_snapshot_sha256": "9ed7a1a702e184ff852758141f236670e97cfc4d07d04f534ab2bae6971937c0",
+      "publication_sha256": "2acd47e538ab1507adfba5f194f39a66d88a8ec6e5e575b925b061c53584ebf5",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
       "session_id": "2026-19-rodriguez-Q",
       "year": 2026,
       "round": 19,
@@ -8092,6 +8743,27 @@
       "telemetry_discovery_choices": [],
       "source_snapshot_sha256": "50e67dd68051d80066c1dfa2b655518dafe696576cd0f025d377bec51026ca4d",
       "publication_sha256": "fc3f9fce52e66ab68a9417e5b42d3f2d5f41a81f44787db19ffbb8e2773ba487",
+      "method": "distance-v5-fastf1-native"
+    },
+    {
+      "session_id": "2026-20-interlagos-Q",
+      "year": 2026,
+      "round": 20,
+      "event_name": "Brazilian Grand Prix",
+      "source": "fastf1",
+      "drivers": 22,
+      "lap_records": 391,
+      "capabilities": {
+        "unavailable": 250,
+        "sector_only": 140,
+        "telemetry": 1
+      },
+      "verified_fastest_phase_pairs": {
+        "sector_only": 381
+      },
+      "telemetry_discovery_choices": [],
+      "source_snapshot_sha256": "6c7f99d813490d40ddf5bb7d43553697527296052159172cbe00e5cb8c597b41",
+      "publication_sha256": "f08d5a1cfb60daa66b1bd4f19889288f799394c4ebba5b52b7236c99f6ab6e54",
       "method": "distance-v5-fastf1-native"
     },
     {
