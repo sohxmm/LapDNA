@@ -46,6 +46,7 @@ def write_publication(directory, publication):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sessions", nargs="+")
+    parser.add_argument("--reference-mode", choices=("legacy_v5", "speed_only"), default="speed_only")
     parser.add_argument("--output", type=Path, default=ROOT / "services/api/src/lapdna/view_data")
     args = parser.parse_args()
     ledger = json.loads((ROOT / "config/telemetry-coverage.json").read_bytes())
@@ -58,7 +59,11 @@ def main():
         snapshot = json.loads(snapshots[entry["source_snapshot_sha256"]].read_bytes())
         if canonical_hash(snapshot) != entry["source_snapshot_sha256"]:
             raise ValueError("Source snapshot digest changed")
-        publication = prepare_views(snapshot, store.load(entry["session_id"]))
+        legacy = store.load(entry["session_id"])
+        publication = prepare_views(snapshot, legacy)
+        if args.reference_mode == "speed_only":
+            from lapdna.alignment.view_reference import select_speed_reference
+            publication = select_speed_reference(publication, legacy)
         write_publication(args.output, publication)
         print(f"{entry['session_id']}: {len(publication['laps'])} native views, {len(publication['failures'])} unavailable", flush=True)
 

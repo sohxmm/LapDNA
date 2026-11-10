@@ -8,7 +8,7 @@ The gates for Tier 2 corner observations remain byte-for-byte unchanged.
 
 ## Current stop point
 
-**Step 0 was accepted. Steps 1–4 are now authorized; stop before Step 5.**
+**Steps 1-4 are complete. Checkpoint stopped before Step 5.**
 The owner clarified that Step 3b and Step 4 measurements should be reported
 together. The live application remains v5 until a separately reviewed rollout;
 this checkpoint implements backend/contracts and measures the new tiers.
@@ -57,7 +57,7 @@ selection update; visibility does not make them eligible for Tier 2 claims.
 | 1 | Add `telemetry_view`, `aligned_delta`, `analysis` tiers to Pydantic-owned contracts; keep the v5 `detail_level` API unchanged; regenerate contracts; introduce separate `distance-v6-*` results | Complete: separate opt-in v6 contracts; legacy schemas unchanged |
 | 2 | Tier 0: when native car samples bracket both timing edges, publish actual available measured channels with null gaps and explicit `bridged`/`gap` masks; no claims or observations | Complete: independent native stream, explicit null/masks, opt-in API |
 | 3 / 3b | Linear speed bridging up to 2.0 s, prescribed accumulated distance bound and delta band; grade-C interior annotations; year coverage/bound distributions and threshold proposals using existing references | Complete measurement: 25,271 Tier 0; 22,706 Tier 1 using original references; proposal reported together with Step 4 |
-| 4 | Reference selection independent of geometry/markers; report reference-less-session recovery, then stop | Pending |
+| 4 | Reference selection independent of geometry/markers; report reference-less-session recovery, then stop | Complete: 22/22 sessions recovered; Tier 1 25,173/25,271; stopped before Step 5 |
 | 5 | Same-driver pairs; list flagged recorded laps and per-lap reasons without the current capability filter | Not authorized before checkpoint review |
 | 6 | Existing ECharts tier badge, masks, delta band, distance/elapsed toggle and source RPM | Not authorized before checkpoint review |
 | 7 | Only if a substantial residual remains: measure position-stream gaps and calibrate progress against passing laps before use | Deferred |
@@ -100,7 +100,15 @@ the compressed per-lap diagnostic ledger. The denominator stays 25,271.
 There are 2,467 speed-ready laps blocked only by the old reference dependency;
 64 exceed the 2 s speed-gap limit and 34 have non-increasing native progress.
 The unchanged-code proof and 464 real passing-pair byte comparisons are in
-`config/v5-view-compatibility.json`. Step 4 measurements/proposals follow.
+`config/v5-view-compatibility.json`. The combined Step 3b/4 report and quality
+proposal are in [25-v6-reference-recovery.md](25-v6-reference-recovery.md).
+Step 4's speed-only reference recovers 22/22 sessions and 2,467 additional
+aligned laps. Tier 0 is 100% in every year/session; Tier 1 is 25,173/25,271.
+Remaining Tier 1 blockers are 64 gaps over 2 s and 34 non-increasing progress
+records, all retaining Tier 0. No position estimator is warranted by this
+0.39% residual at this checkpoint. A/B/C distribution-based thresholds are
+proposed only; the existing authorized >150 ms interior C annotation is the
+only runtime grade, and other aligned results remain ungraded. No UI rollout.
 
 The audit keeps the actual first failure separate from conditional downstream
 probes. It uses unchanged v5 integration equations on the recorded samples to

@@ -122,12 +122,22 @@ distances come from that lap's source timing constraints. Geometry/markers from
 a different reference frame are never claimed to belong to the new reference.
 Legacy Tier 2 analysis retains its original, independently frozen reference.
 
+For the future renderer: Tier 0 has no distance estimate, so use elapsed time
+and disable the distance toggle with its supplied reason. Tier 1 plots the v6
+alignment frame and its bands. When rendering Tier 2 observations/maps, use
+the nested legacy artifact's own grid, geometry, delta and evidence together.
+Never place legacy corner boundaries or observations directly on a different
+v6 reference axis. The wrapper carries both explicitly; it does not certify a
+new projection between them. Existing accepted pairs retain the complete old
+artifact, including its original analysis/map frame.
+
 Commands and receipts:
 
 ```text
 .venv/Scripts/python scripts/attribute_telemetry_gates.py --method v6
 .venv/Scripts/python scripts/verify_v5_view_compatibility.py
 .venv/Scripts/python scripts/recover_view_references.py
+.venv/Scripts/python scripts/prepare_view_publications.py --sessions SESSION_ID
 ```
 
 The first command is the Step 3b audit and can be expensive. It writes isolated
@@ -137,3 +147,7 @@ publishing speed-only references. Committed coverage ledgers contain only derive
 diagnostics and hashes, never native arrays or authentication data. Resume a
 Step 3b measurement from its unchanged implementation/source cache; do not run it
 over the Step 4 catalogue without deliberately restoring the old view checkpoint.
+The normal preparation command defaults to `--reference-mode speed_only` after
+Step 4; `legacy_v5` is an explicit diagnostic option. Source rainfall/tyre/phase
+warnings are retained independently of reference eligibility; absent rainfall
+context is unknown and is never interpreted as a dry track.

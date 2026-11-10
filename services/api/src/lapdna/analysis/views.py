@@ -4,7 +4,7 @@ import json
 from lapdna.alignment.native import utc_seconds
 from lapdna.alignment.view import CarStream, ViewUnavailable
 from lapdna.alignment.view_delta import prepare_progress, align_pair
-from lapdna.analysis.engine import canonical_hash
+from lapdna.analysis.engine import canonical_hash, pairing
 from lapdna.models import TimingProvenance
 from lapdna.view_models import NativeLapView, ViewArtifact
 
@@ -74,5 +74,6 @@ def build_view(publication, a_id, b_id, requested_tier="aligned_delta", legacy_a
         "alignment": alignment.model_dump(mode="json") if alignment is not None else None,
         "legacy_analysis": analysis.model_dump(mode="json") if analysis is not None else None,
         "unavailable_reasons": reasons,
-        "warnings": ["Cross-phase comparison: conditions may differ."] if publication["laps"][a_id]["metadata"]["phase"] != publication["laps"][b_id]["metadata"]["phase"] else [],
+        "warnings": pairing(*(publication["laps"][identifier]["metadata"] for identifier in (a_id, b_id)),
+            records=[publication.get("conditions", {}).get(identifier, {}) for identifier in (a_id, b_id)])["warnings"],
     }))

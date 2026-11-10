@@ -1,3 +1,46 @@
+## Steps 1-4 checkpoint complete - stop before selection/UI
+
+The owner explicitly chose to receive Step 3b and Step 4 together. That work
+is complete. **Do not continue to Step 5 or deploy the new views without the
+next instruction.** The studio still uses the unchanged v5 API. New views are
+served locally by the opt-in `/api/v1/views/compare` endpoint and isolated,
+ignored `view_data` publications; no production fake data or raw caches enter Git.
+
+Full report: [25-v6-reference-recovery.md](25-v6-reference-recovery.md).
+Original-reference measurement: [24-v6-view-coverage-legacy-reference.md](24-v6-view-coverage-legacy-reference.md).
+Across 217 imported sessions / 25,271 timing-eligible laps, Tier 0 reaches
+100% in every year/session. Tier 1 rises from 22,706 with existing references
+to 25,173 (99.61%) after recovering all 22 reference-less sessions:
+2020 2/2, 2022 1/1, 2023 4/4, 2025 6/6, 2026 9/9. The remaining 98 laps
+(64 speed intervals >2 s, 34 non-increasing source progress) keep Tier 0.
+The fixed denominator, per-session counts, bounds and first blockers are in
+the two `config/view-coverage-*.json` receipts and compressed per-lap ledgers.
+
+Proposed grades, **not enabled**: A needs no speed bridges, <=50 ms interior
+residual and <=3% scale deviation; B allows <=15 m accumulated bound,
+<=150 ms interior residual and <=3% scale deviation; C flags larger values.
+The 15 m ceiling rounds up the 2022-2025 pooled P90 of 12.120 m. Current
+runtime only assigns the authorized interior-residual C annotation; other
+results remain ungraded. Bounds describe the endpoint-speed model, not
+calibrated accuracy or physical guarantees. Equal endpoint speeds may yield
+zero bound and always retain bridge flags. No position estimator was added.
+
+Native API smoke checks: Mexico 2026 HAM/LEC Q3 returns Tier 1 with the
+119 ms recorded gap (source-clock endpoint 118.999720 ms, no time fitting);
+a passing Monza 2024 NOR/RUS Q3 pair returns the exact original Tier 2 payload;
+Spa 2024 >2 s source gaps return Tier 0 with explicit reasons. Source wet-tyre,
+rainfall/unknown, phase and tyre-age warnings are preserved separately from
+reference choice. Different legacy/v6 reference frames are documented for the
+future renderer; do not overlay old corner evidence on a new v6 grid.
+
+Checks: **267 Python passes, one existing Windows symlink skip; 31 web tests;
+contracts:check, typecheck and build pass.** Existing TestClient deprecation
+and ECharts size advisories remain non-fatal. All ten Tier 2 function bodies
+and pre-existing v5 runtime code/inputs remain unchanged; 464 real passing-pair
+payloads are byte-identical against Step 0. Normal publication preparation
+defaults to `speed_only`; the legacy-reference audit is an explicit diagnostic.
+The full API/publication workflow is [26-view-api.md](26-view-api.md).
+
 ## Step 3 / 3b receipt - linear bridges and measured bounds
 
 Completed the v6 linear native-speed estimator using unchanged v5 integration

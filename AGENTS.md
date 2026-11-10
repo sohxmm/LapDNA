@@ -15,6 +15,14 @@ pending measurement/calibration. This decision takes precedence over older
 ticket ordering. Do not repeat Step 0 unless inputs change. All other boundaries
 remain in force.
 
+**Steps 1-4 are complete; stop before Step 5.** The combined checkpoint is
+`docs/25-v6-reference-recovery.md`; Step 3b's original-reference measurement is
+retained in `docs/24-v6-view-coverage-legacy-reference.md`. All 25,271 eligible
+laps have Tier 0; 25,173 have Tier 1. All 22 reference-less sessions recovered.
+The opt-in backend is prepared locally; the studio still uses v5. Selection,
+UI and rollout are not part of this completed checkpoint. The 15 m grade-B
+ceiling is a proposal, not an enabled gate or calibrated accuracy claim.
+
 ## Execution
 
 1. Implement the first uncompleted ticket whose dependencies are complete. Work on one bounded feature at a time.

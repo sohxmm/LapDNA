@@ -43,3 +43,19 @@ def test_frozen_v5_compatibility_receipt_still_matches_source_bytes():
     assert len(receipt["sessions"]) == 217
     for name, expected in receipt["unchanged_file_sha256"].items():
         assert sha256((ROOT / name).read_bytes()).hexdigest() == expected, name
+
+
+def test_speed_reference_recovery_preserves_cohort_and_protected_gates():
+    after = verify_coverage("speed-reference")
+    before = json.loads((ROOT / "config/view-coverage-legacy-reference.json").read_bytes())
+    assert after["step3b_ledger_sha256"] == sha256((ROOT / "config/view-coverage-legacy-reference.json").read_bytes()).hexdigest()
+    assert after["totals"]["tier0"] == before["totals"]["tier0"] == 25271
+    assert after["totals"]["bound_distribution"] == before["totals"]["bound_distribution"]
+    assert after["totals"]["tier1"] == before["totals"]["speed_candidates"]
+    assert after["totals"]["tier1"] - before["totals"]["tier1"] == 2467
+    recovered = after["reference_recovery"]
+    assert len(recovered) == 22 and all(r["recovered_reference"] for r in recovered)
+    assert dict(Counter(r["year"] for r in recovered)) == {2020: 2, 2022: 1, 2023: 4, 2025: 6, 2026: 9}
+    assert after["totals"]["first_failure"] == {"speed_gap_over_2s": 64, "progress": 34}
+    for name, expected in after["step4_file_sha256"].items():
+        assert sha256((ROOT / name).read_bytes()).hexdigest() == expected, name
