@@ -49,3 +49,17 @@ choice renders all five graph rows, the source orange/blue team colours and turn
 labels. At 390 × 844 in light mode, keyboard activation moves focus to the
 result and the page has no horizontal overflow. This is local QA, not a hosted
 deployment receipt.
+
+Mexico was additionally reimported into an isolated review publication using
+the pinned OpenF1/TracingInsights composite. All 22 drivers and 366 actual laps
+were retained; it produced 130 eligible timing-only laps and zero telemetry
+laps. This alternative was not activated over the existing primary timing
+publication. Both source attempts remain private; neither justifies relaxing
+the distance-analysis gates.
+
+The first deployment attempt passed its 198-session audit, then Windows denied
+an atomic upload-receipt replacement. Operator JSON writes now use closed,
+unique sibling files and bounded retries for a transient destination lock.
+Tests check recovery, a permanent failure preserving the previous receipt, and
+invalid numeric JSON never replacing it. This changes file publication only;
+the analytical method and all numerical gates are unchanged.

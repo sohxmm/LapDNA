@@ -13,6 +13,7 @@ import json
 import math
 from pathlib import Path
 import re
+import tempfile
 import time
 from typing import Any, Callable
 from urllib.error import HTTPError, URLError
@@ -56,12 +57,27 @@ def milliseconds(value: Any) -> int | None:
 
 def atomic_json(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary = None
     try:
-        temporary.write_text(json.dumps(value, separators=(",", ":"), allow_nan=False), encoding="utf-8")
-        temporary.replace(path)
+        # Close before replacement on Windows. A unique sibling avoids two
+        # writers sharing a temporary name; the final replacement stays atomic.
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
+                                         prefix=path.name + ".", suffix=".tmp", delete=False) as stream:
+            temporary = Path(stream.name)
+            json.dump(value, stream, separators=(",", ":"), allow_nan=False)
+        for attempt in range(7):
+            try:
+                temporary.replace(path)
+                break
+            except PermissionError:
+                # Sync clients/virus scanners can briefly hold the destination.
+                # Preserve its old contents and fail after a bounded retry.
+                if attempt == 6:
+                    raise
+                time.sleep(min(.05 * 2 ** attempt, 1.))
     finally:
-        temporary.unlink(missing_ok=True)
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
 class OpenF1Client:
